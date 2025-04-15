@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>축제 및 관광 정보</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header .auth-buttons button {
+            background: none;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .header .auth-buttons button:hover {
+            text-decoration: underline;
+        }
+
+        .search-bar {
+            background-color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        .search-bar input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 70%;
+            max-width: 600px;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .search-bar button:hover {
+            background-color: #0056b3;
+        }
+
+        .category-section {
+            padding: 20px;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding-left: 10px;
+        }
+
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 30px; /* 화살표 공간 확보 */
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .card {
+            flex: 0 0 auto;
+            width: 300px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card img {
+            width: 100%;
+            height: auto;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .info {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .info h3 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 1.2em;
+        }
+
+        .info p {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .slider-controls {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0;
+            z-index: 10;
+        }
+
+        .slider-controls button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100; /* 화살표보다 높은 z-index */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px 0;
+        }
+
+        .auth-form input[type="text"],
+        .auth-form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .auth-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .auth-form button:hover {
+            background-color: #0056b3;
+        }
+
+        .auth-form h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        /* 회원가입/로그인 버튼 */
+        .auth-buttons {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.75rem; /* 버튼 사이 간격 */
+            z-index: 10; /* 다른 요소 위에 오도록 */
+        }
+
+        .auth-button {
+            padding: 0.5rem 1rem;
+            background-color: #4a5568; /* 회색 배경 */
+            color: white;
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+            text-decoration: none; /* 링크 밑줄 제거 */
+            transition: background-color 0.2s ease;
+            cursor: pointer; /* 버튼임을 명확히 */
+        }
+
+        .auth-button:hover {
+            background-color: #2d3748; /* 더 어두운 회색 */
+        }
+
+        /* --- 모달 스타일 --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            max-height: 80vh; /* 내용 많을 시 스크롤 */
+            overflow-y: auto; /* 내용 많을 시 스크롤 */
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #9ca3af;
+            cursor: pointer;
+            border: none;
+            background: none;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #1f2937;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* 로그인/회원가입 폼 스타일 */
+        .modal-form label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .modal-form input {
+            display: block;
+            width: 95%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .modal-form input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+        }
+
+        .modal-form button[type="submit"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .modal-form button[type="submit"]:hover {
+            background-color: #2d3748;
+        }
+
+        .pink-screen {
+            width: 100%;
+            height: 350px; /* 이미지와 비슷하게 높이 조정 */
+            background-color: #FBE2D5;
+            margin-top: 1rem;      /* 검색창과의 간격 */
+            margin-bottom: 1rem;   /* 슬라이더와의 간격 (예시) */
+            padding: 2rem;         /* 안쪽 여백 추가 */
+            box-sizing: border-box;/* 패딩을 포함하여 크기 계산 */
+            display: flex;         /* Flexbox 사용 */
+            flex-direction: column;/* 세로 방향 정렬 */
+            justify-content: center;/* 세로 중앙 정렬 (선택 사항) */
+        }
+
+        .blue {
+            color: #257ab0; /* 이미지의 색상과 비슷하게 조정 (파란색보다는 회색 계열) */
+            font-size: 1.1rem; /* 글자 크기 조정 */
+            line-height: 1.6;  /* 줄 간격 조정 */
+            margin-bottom: 1rem; /* 아래쪽 큰 글씨와의 간격 */
+            text-align: center;
+        }
+
+        .big {
+            font-weight: bold;
+            font-size: 2.5rem; /* 글자 크기 조정 */
+            line-height: 1.3;  /* 줄 간격 조정 (여러 줄일 경우) */
+            color: #333;       /* 글자 색상 (기본 검정색 또는 진한 회색) */
+            text-align: center;
+        }
+
+        /* p 태그 사용 시 기본 마진 제거 */
+        .blue p, .big p {
+             margin: 0;
+        }
+
+        .sumteuyeo {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <img src class="sumteuyeo" alt="숨트여 로고">
+    <div class="auth-buttons">
+        <a href="#" class="auth-button" data-modal-target="signupModal">회원가입</a>
+        <a href="#" class="auth-button" data-modal-target="loginModal">로그인</a>
+    </div>
+    
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="닫기">&times;</button>
+            <h2 class="modal-title">회원가입</h2>
+            <form class="modal-form" id="signupForm">
+                <div><label for="signupId">아이디</label><input type="text" id="signupId" name="signupId" required></div>
+                <div><label for="signupPassword">비밀번호</label><input type="password" id="signupPassword" name="signupPassword" required></div>
+                <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
+                <div><label for="signupEmail">이메일</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+                <button type="submit">가입하기</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="닫기">&times;</button>
+            <h2 class="modal-title">로그인</h2>
+            <form class="modal-form" id="loginForm">
+                <div><label for="loginId">아이디</label><input type="text" id="loginId" name="loginId" required></div>
+                <div><label for="loginPassword">비밀번호</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+                <button type="submit">로그인</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" placeholder="축제 또는 관광지를 검색하세요">
+        <button>검색</button>
+    </div>
+
+    <div class="pink-screen">
+        <div class="blue">
+            주말에 어디 가지?<br>
+            다음주 남구에서 열리는 축제는?
+        </div>
+        <div class="big">
+            대충 검색해도 나오는<br>
+            정확한 축제 정보
+        </div>
+    </div>
+
+    <div class="category-section">
+        
+        <div class="slider-container">
+            <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
+            <div class="slider" id="festivalSlider">
+                
+                <div class="card" data-modal="festivalModal1">
+                    <img src="bul.png" alt="봄꽃 축제">
+                    <div class="info">
+                        <h3>봄꽃 축제</h3>
+                        <p>아름다운 봄꽃을 만끽하세요!</p>
+                        <p>기간: 2025.04.20 - 2025.04.30</p>
+                        <p>위치: [임의의 장소 1]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="festivalModal2">
+                    <img src="bul.png" alt="[신나는 여름 축제]">
+                    <div class="info">
+                        <h3>[신나는 여름 축제]</h3>
+                        <p>더위를 잊게 해줄 시원한 축제!</p>
+                        <p>기간: 2025.07.15 - 2025.07.20</p>
+                        <p>위치: [임의의 장소 2]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="festivalModal3">
+                    <img src="bul.png" alt="가을 단풍 축제">
+                    <div class="info">
+                        <h3>가을 단풍 축제</h3>
+                        <p>붉게 물든 단풍을 감상하세요.</p>
+                        <p>기간: 2025.10.25 - 2025.11.05</p>
+                        <p>위치: [임의의 장소 3]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="festivalModal4">
+                    <img src="bul.png" alt="겨울 빛 축제">
+                    <div class="info">
+                        <h3>겨울 빛 축제</h3>
+                        <p>화려한 불빛으로 가득한 밤!</p>
+                        <p>기간: 2025.12.20 - 2026.01.05</p>
+                        <p>위치: [임의의 장소 4]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="festivalModal5">
+                    <img src="bul.png" alt="[지역 특산물 축제]">
+                    <div class="info">
+                        <h3>[지역 특산물 축제]</h3>
+                        <p>싱싱한 특산물을 맛보세요!</p>
+                        <p>기간: 2025.05.10 - 2025.05.15</p>
+                        <p>위치: [임의의 장소 5]</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-controls">
+                <button onclick="prevSlide('festivalSlider')">&#10094;</button>
+                <button onclick="nextSlide('festivalSlider')">&#10095;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-section">
+        
+        <div class="slider-container">
+            <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
+            <div class="slider" id="touristSlider">
+                <div class="card" data-modal="touristModal1">
+                    <img src="bul.png" alt="[멋진 자연 경관]">
+                    <div class="info">
+                        <h3>[멋진 자연 경관]</h3>
+                        <p>숨 막히는 자연의 아름다움.</p>
+                        <p>추천 방문 시기: 봄, 여름</p>
+                        <p>위치: [임의의 장소 A]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="touristModal2">
+                    <img src="bul.png" alt="[유명한 역사 유적지]">
+                    <div class="info">
+                        <h3>[유명한 역사 유적지]</h3>
+                        <p>역사의 숨결을 느껴보세요.</p>
+                        <p>추천 방문 시기: 가을</p>
+                        <p>위치: [임의의 장소 B]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="touristModal3">
+                    <img src="bul.png" alt="[활기 넘치는 도시 명소]">
+                    <div class="info">
+                        <h3>[활기 넘치는 도시 명소]</h3>
+                        <p>다양한 즐길 거리가 있는 곳.</p>
+                        <p>추천 방문 시기: 연중</p>
+                        <p>위치: [임의의 장소 C]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="touristModal4">
+                    <img src="bul.png" alt="[아름다운 해변]">
+                    <div class="info">
+                        <h3>[아름다운 해변]</h3>
+                        <p>푸른 바다와 하얀 백사장.</p>
+                        <p>추천 방문 시기: 여름</p>
+                        <p>위치: [임의의 장소 D]</p>
+                    </div>
+                </div>
+                <div class="card" data-modal="touristModal5">
+                    <img src="bul.png" alt="[조용한 휴식 공간]">
+                    <div class="info">
+                        <h3>[조용한 휴식 공간]</h3>
+                        <p>일상에서 벗어나 편안한 시간을.</p>
+                        <p>추천 방문 시기: 봄, 가을</p>
+                        <p>위치: [임의의 장소 E]</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-controls">
+                <button onclick="prevSlide('touristSlider')">&#10094;</button>
+                <button onclick="nextSlide('touristSlider')">&#10095;</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <form class="auth-form">
+                <h2>회원가입</h2>
+                <input type="text" placeholder="이름">
+                <input type="text" placeholder="이메일">
+                <input type="password" placeholder="비밀번호">
+                <input type="password" placeholder="비밀번호 확인">
+                <button type="submit">가입하기</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <form class="auth-form">
+                <h2>로그인</h2>
+                <input type="text" placeholder="이메일">
+                <input type="password" placeholder="비밀번호">
+                <button type="submit">로그인</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="festivalModal1" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>봄꽃 축제 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="봄꽃 축제 크게 보기" style="width: 100%;">
+                <p>아름다운 봄꽃 축제에 오신 것을 환영합니다!</p>
+                <p>다양한 종류의 봄꽃을 감상하고, 맛있는 음식과 즐거운 공연을 즐기세요.</p>
+                <p><b>기간:</b> 2025년 4월 20일 - 4월 30일</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>문의:</b> [연락처 정보]</p>
+                </div>
+        </div>
+    </div>
+
+    <div id="festivalModal2" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[신나는 여름 축제] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[신나는 여름 축제] 크게 보기" style="width: 100%;">
+                <p>시원한 여름을 만끽할 수 있는 신나는 축제!</p>
+                <p>물놀이, 공연, 먹거리 등 다양한 즐길 거리가 준비되어 있습니다.</p>
+                <p><b>기간:</b> 2025년 7월 15일 - 7월 20일</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>문의:</b> [연락처 정보]</p>
+                </div>
+        </div>
+    </div>
+
+    <div id="festivalModal3" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>가을 단풍 축제 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="가을 단풍 축제 크게 보기" style="width: 100%;">
+                <p>붉게 물든 단풍의 아름다움을 느껴보세요.</p>
+                <p>단풍길 걷기, 사진 촬영 대회 등 다양한 프로그램이 준비되어 있습니다.</p>
+                <p><b>기간:</b> 2025년 10월 25일 - 11월 5일</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>문의:</b> [연락처 정보]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="festivalModal4" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>겨울 빛 축제 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="겨울 빛 축제 크게 보기" style="width: 100%;">
+                <p>화려한 불빛들이 만들어내는 환상적인 겨울 축제!</p>
+                <p>아름다운 조명과 다양한 겨울 액티비티를 즐겨보세요.</p>
+                <p><b>기간:</b> 2025년 12월 20일 - 2026년 1월 5일</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>문의:</b> [연락처 정보]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="festivalModal5" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[지역 특산물 축제] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[지역 특산물 축제] 크게 보기" style="width: 100%;">
+                <p>지역의 신선하고 맛있는 특산물을 맛볼 수 있는 기회!</p>
+                <p>특산물 판매, 요리 시연, 체험 행사 등 다채로운 프로그램이 준비되어 있습니다.</p>
+                <p><b>기간:</b> 2025년 5월 10일 - 5월 15일</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>문의:</b> [연락처 정보]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="touristModal1" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[멋진 자연 경관] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[멋진 자연 경관] 크게 보기" style="width: 100%;">
+                <p>숨 막히는 자연의 아름다움을 만끽하세요.</p>
+                <p>울창한 숲, 맑은 계곡, 멋진 산봉우리 등 잊을 수 없는 풍경이 여러분을 기다립니다.</p>
+                <p><b>추천 방문 시기:</b> 봄, 여름</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>정보:</b> [추가 정보 링크]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="touristModal2" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[유명한 역사 유적지] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[유명한 역사 유적지] 크게 보기" style="width: 100%;">
+                <p>오랜 역사와 문화를 간직한 유적지를 탐방하며 과거로의 시간 여행을 떠나보세요.</p>
+                <p>웅장한 건축물과 흥미로운 이야기를 통해 역사의 발자취를 느껴볼 수 있습니다.</p>
+                <p><b>추천 방문 시기:</b> 가을</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>정보:</b> [추가 정보 링크]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="touristModal3" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[활기 넘치는 도시 명소] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[활기 넘치는 도시 명소] 크게 보기" style="width: 100%;">
+                <p>다양한 볼거리, 먹거리, 즐길 거리가 가득한 도시 명소에서 활기찬 에너지를 느껴보세요.</p>
+                <p>쇼핑, 맛집 탐방, 문화 체험 등 다채로운 활동을 즐길 수 있습니다.</p>
+                <p><b>추천 방문 시기:</b> 연중</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>정보:</b> [추가 정보 링크]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="touristModal4" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[아름다운 해변] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[아름다운 해변] 크게 보기" style="width: 100%;">
+                <p>푸른 바다와 넓은 백사장에서 여유로운 휴식을 즐겨보세요.</p>
+                <p>해수욕, 해양 스포츠, 해변 산책 등 다양한 활동을 즐길 수 있습니다.</p>
+                <p><b>추천 방문 시기:</b> 여름</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>정보:</b> [추가 정보 링크]</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="touristModal5" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>[조용한 휴식 공간] 상세 정보</h2>
+            <div class="modal-body">
+                <img src="bul.png" alt="[조용한 휴식 공간] 크게 보기" style="width: 100%;">
+                <p>일상의 번잡함에서 벗어나 조용하고 평화로운 시간을 보내세요.</p>
+                <p>아늑한 분위기 속에서 책을 읽거나 명상을 하며 심신의 안정을 찾을 수 있습니다.</p>
+                <p><b>추천 방문 시기:</b> 봄, 가을</p>
+                <p><b>위치:</b> [상세 위치 정보]</p>
+                <p><b>정보:</b> [추가 정보 링크]</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setupSlider(sliderId) {
+            const slider = document.getElementById(sliderId);
+            const cards = slider.querySelectorAll('.card');
+            let currentIndex = 0;
+            const cardWidth = cards[0].offsetWidth + 20;
+            const visibleCount = 3;
+
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+            }
+
+            function nextSlide() {
+                if (currentIndex < cards.length - visibleCount) {
+                    currentIndex++;
+                    updateSlider();
+                }
+            }
+
+            function prevSlide() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            }
+
+            updateSlider();
+
+            return { nextSlide, prevSlide };
+        }
+
+        const festivalSliderControls = setupSlider('festivalSlider');
+        const touristSliderControls = setupSlider('touristSlider');
+
+        function nextSlide(sliderId) {
+            if (sliderId === 'festivalSlider') {
+                festivalSliderControls.nextSlide();
+            } else if (sliderId === 'touristSlider') {
+                touristSliderControls.nextSlide();
+            }
+        }
+
+        function prevSlide(sliderId) {
+            if (sliderId === 'festivalSlider') {
+                festivalSliderControls.prevSlide();
+            } else if (sliderId === 'touristSlider') {
+                touristSliderControls.prevSlide();
+            }
+        }
+
+        // 모달창 관련 JavaScript
+        const cardModals = document.querySelectorAll('.card');
+        const modals = document.querySelectorAll('.modal');
+        const closeButtons = document.querySelectorAll('.close-button');
+        const authButtons = document.querySelectorAll('.auth-buttons button'); // 회원가입/로그인 버튼 추가
+
+        // 축제/관광지 카드 클릭 이벤트 (기존과 동일)
+        cardModals.forEach(card => {
+            card.addEventListener('click', () => {
+                const modalId = card.dataset.modal;
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            });
+        });
+
+        // 회원가입/로그인 버튼 클릭 이벤트
+        authButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modalId = button.dataset.modal;
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            });
+        });
+
+        // 닫기 버튼 클릭 이벤트 (기존과 동일)
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // 창 외부 클릭 이벤트 (기존과 동일)
+        window.addEventListener('click', (event) => {
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // --- 모달 제어 함수 ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('open');
+            else console.error(`모달 ID '${modalId}'를 찾을 수 없습니다.`);
+        }
+
+        function closeModal(modalElement) {
+            if (modalElement) {
+                const inputsToClear = modalElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+                inputsToClear.forEach(input => { input.value = ''; });
+                modalElement.classList.remove('open');
+            }
+        }
+
+        // --- 페이지 로드 완료 후 실행 ---
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // DOM 요소 참조 할당
+            const authButtons = document.querySelectorAll('.auth-button[data-modal-target]');
+            const modals = document.querySelectorAll('.modal-overlay');
+            const closeButtons = document.querySelectorAll('.modal-close');
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
+
+            // 모달 관련 리스너
+            authButtons.forEach(button => { button.addEventListener('click', (e) => { e.preventDefault(); openModal(button.getAttribute('data-modal-target')); }); });
+            closeButtons.forEach(button => { button.addEventListener('click', () => { closeModal(button.closest('.modal-overlay')); }); });
+            modals.forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); });
+
+            // 폼 제출 리스너
+            if (signupForm) {
+                signupForm.addEventListener('submit', (e) => { /* ... (회원가입 처리 로직) ... */
+                    e.preventDefault();
+                    const signupId = document.getElementById('signupId').value;
+                    const signupPassword = document.getElementById('signupPassword').value;
+                    const signupPasswordConfirm = document.getElementById('signupPasswordConfirm').value;
+                    const signupEmail = document.getElementById('signupEmail').value;
+                    if (signupPassword !== signupPasswordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
+                    console.log('회원가입 시도:', { id: signupId, email: signupEmail });
+                    alert('회원가입 로직 실행 (DB 연결 없음)');
+                    closeModal(signupForm.closest('.modal-overlay'));
+                });
+            }
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => { /* ... (로그인 처리 로직) ... */
+                    e.preventDefault();
+                    const loginId = document.getElementById('loginId').value;
+                    console.log('로그인 시도:', { id: loginId });
+                    alert('로그인 로직 실행 (DB 연결 없음)');
+                    closeModal(loginForm.closest('.modal-overlay'));
+                });
+            }
+        });
+        
+    </script>
+</body>
+</html>
