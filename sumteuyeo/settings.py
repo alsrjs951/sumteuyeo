@@ -129,3 +129,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#APi인증키값
+TOUR_API_KEY = "J5TNN0B9phXMA/zAGuF1qEtzOkgo3AblWOwf9NQVl7gdC2eC4Ui3URBA9BXc58J89XFhfNGkJGyBNGgnACTIhw=="
