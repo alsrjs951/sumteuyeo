@@ -1,141 +1,866 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>주변 관광지 정보 불러오기</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>축제 및 관광 정보</title>
     <style>
-        /* 간단한 상태 메시지 스타일 */
-        #statusMessage {
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #eee;
-            background-color: #f9f9f9;
+	.search-bar {
+            	background-color: white;
+            	padding: 15px 20px;
+            	text-align: center;
+        	}
+	.search-bar input[type="text"] {
+            	padding: 10px;
+            	border: 1px solid #ccc;
+            	border-radius: 5px;
+            	width: 70%;
+            	max-width: 600px;
+            	font-size: 16px;
+       	}
+        	.search-bar button {
+            	padding: 10px 15px;
+            	background-color: #007bff;
+            	color: white;
+            	border: none;
+            	border-radius: 5px;
+            	cursor: pointer;
+            	font-size: 16px;
+            	margin-left: 10px;
+        	}
+
+        	.search-bar button:hover {
+            	background-color: #0056b3;
+        	}
+        	.pink-screen {
+            	width: 100%;
+            	height: 350px; /* 이미지와 비슷하게 높이 조정 */
+            	background-color: #FBE2D5;
+            	margin-top: 1rem;      /* 검색창과의 간격 */
+            	margin-bottom: 1rem;   /* 슬라이더와의 간격 (예시) */
+            	padding: 2rem;         /* 안쪽 여백 추가 */
+            	box-sizing: border-box;/* 패딩을 포함하여 크기 계산 */
+            	display: flex;         /* Flexbox 사용 */
+            	flex-direction: column;/* 세로 방향 정렬 */
+            	justify-content: center;/* 세로 중앙 정렬 (선택 사항) */
+        	}
+       	.blue {
+            	color: #257ab0; /* 이미지의 색상과 비슷하게 조정 (파란색보다는 회색 계열) */
+            	font-size: 1.1rem; /* 글자 크기 조정 */
+            	line-height: 1.6;  /* 줄 간격 조정 */
+            	margin-bottom: 1rem; /* 아래쪽 큰 글씨와의 간격 */
+            	text-align: center;
+        	}
+        	.big {
+            	font-weight: bold;
+            	font-size: 2.5rem; /* 글자 크기 조정 */
+            	line-height: 1.3;  /* 줄 간격 조정 (여러 줄일 경우) */
+            	color: #333;       /* 글자 색상 (기본 검정색 또는 진한 회색) */
+            	text-align: center;
+        	}
+        	.category-section {
+           		padding: 20px;
+       	}
+        	.slider-container {
+            	position: relative;
+            	overflow: hidden;
+            	max-width: 900px;
+            	margin: 0 auto;
+            	padding: 0 30px; /* 화살표 공간 확보 */
+        	}
+        	.category-title {
+            	font-size: 1.3em;
+            	margin-bottom: 15px;
+            	padding-left: 10px;
+        	}
+        	.slider {
+            	display: flex;
+            	transition: transform 0.5s ease-in-out;
+        	}
+        	.card {
+            	flex: 0 0 auto;
+            	width: 300px;
+            	margin: 10px;
+            	border: 1px solid #ddd;
+            	border-radius: 8px;
+            	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            	background-color: white;
+            	transition: transform 0.3s ease-in-out;
+            	cursor: pointer;
+        	}
+	    .card:hover {
+		    transform: scale(1.15);
+
+	    }
+        	.info {
+           		padding: 15px;
+            	text-align: left;
+        	}
+        	.info h3 {
+            	margin-top: 0;
+            	margin-bottom: 5px;
+            	font-size: 1.2em;
+        	}
+
+        	.info p {
+            	margin-bottom: 8px;
+            	font-size: 0.9em;
+            	color: #555;
+       	}
+        	.slider-controls {
+            	position: absolute;
+            	top: 50%;
+            	left: 0;
+            	right: 0;
+            	transform: translateY(-50%);
+            	display: flex;
+            	justify-content: space-between;
+            	padding: 0;
+            	z-index: 10;
+        	}
+        	.modal {
+            	display: none;
+            	position: fixed;
+            	z-index: 100; /* 화살표보다 높은 z-index */
+            	left: 0;
+            	top: 0;
+            	width: 100%;
+            	height: 100%;
+            	overflow: hidden;
+            	background-color: rgba(0, 0, 0, 0.4);
+        	}
+	        .modal_body {
+            	background-color: white;
+            	border-radius: 0.5rem;
+            	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            	max-width: 500px;
+            	width: 90%;
+            	max-height: auto; /* 내용 많을 시 스크롤 */
+           		background-color: #fefefe;
+            	margin: 15% auto;
+            	padding: 20px;
+            	border: 1px solid #888;
+            	width: 30%;
+            	border-radius: 8px;
+            	position: relative;
+		        line-height: 40px;
+                bottom: 160px;
+        	}
+	/* 회원가입/로그인 버튼 */
+        	.auth-buttons {
+            	position: absolute;
+            	top: 1.5rem;
+            	right: 1.5rem;
+            	display: flex;
+            	gap: 0.75rem; /* 버튼 사이 간격 */
+            	z-index: 10; /* 다른 요소 위에 오도록 */
+        	}
+
+        	.auth-button {
+            	padding: 0.5rem 1rem;
+            	background-color: #4a5568; /* 회색 배경 */
+            	color: white;
+            	border-radius: 0.375rem; /* rounded-md */
+            	font-size: 0.875rem; /* text-sm */
+            	text-decoration: none; /* 링크 밑줄 제거 */
+            	transition: background-color 0.2s ease;
+            	cursor: pointer; /* 버튼임을 명확히 */
+       	    }
+
+        	.auth-button:hover {
+            	background-color: #2d3748; /* 더 어두운 회색 */
+        	}
+            .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
             text-align: center;
-            font-family: sans-serif;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
+            }
+            a {
+                text-decoration: none;
+            }
+
+
+            /* 로그인/회원가입 폼 스타일 */
+            .modal-form label {
+                display: block;
+                margin-bottom: 0.25rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #374151;
+            }
+
+            .modal-form input {
+                display: block;
+                width: 95%;
+                padding: 0.75rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.375rem;
+                margin-bottom: 1rem;
+                font-size: 0.95rem;
+            }
+
+            .modal-form input:focus {
+                outline: none;
+                border-color: #60a5fa;
+                box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+            }
+
+            .modal-form button[type="submit"] {
+                width: 100%;
+                padding: 0.75rem;
+                background-color: #4a5568;
+                color: white;
+                border: none;
+                border-radius: 0.375rem;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                margin-top: 0.5rem;
+            }
+
+            .modal-form button[type="submit"]:hover {
+                background-color: #2d3748;
+            }
+
+            .error-message {
+                color: red;
+                font-size: 0.8em;
+                display: block;
+                min-height: 1.2em;
+                margin-bottom: 10px;
+            }
+
+            .gpsbtn {
+                position: absolute;
+                left: 605px;
+                top: 30px;
+            }
+
+            .placebtn {
+                position: absolute;
+                left: 770px;
+                top: 30px;
+            }
     </style>
 </head>
 <body>
-    <h1>주변 관광지 정보 로딩</h1>
+    <img src class="sumteuyeo" alt="숨트여 로고">
+    <p id="mylocation"></p>
+    <button onclick="getLocation()" class="gpsbtn" id="gpsbtn">GPS 접근 권한 다시 요청</button>
+    <button id="place" class="placebtn">지명검색</button>
+    <div class="auth-buttons">
+        <button id="signup" class="auth-button">회원가입</button>
+        <button id="login" class="auth-button">로그인</button>
+    </div>
+
+    <div id="placemodal" class="modal">
+        <div class="modal_body">
+            <h2 class="modal-title">지명 검색</h2>
+            <form class="modal-form" id="placeform">
+                <div><label for="placename">지명</label><input type="text" id="placename" name="placename" required></div>
+                <button type="submit">검색하기</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="signupmodal" class="modal">
+        <div class="modal_body">
+            <h2 class="modal-title">회원가입</h2>
+            <form class="modal-form" id="signupForm">
+                <div><label for="signupId">아이디</label><input type="text" id="signupId" name="signupId" required></div>
+                <span id="usernameError" class="error-message"></span>
+                <div><label for="signupPassword">비밀번호</label><input type="password" id="signupPassword" name="signupPassword" required></div>
+                <span id="PasswordError" class="error-message"></span>
+                <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
+                <span id="PasswordConfirmError" class="error-message"></span>
+                <div><label for="signupEmail">이메일</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+                <span id="EmailError" class="error-message"></span>
+                <button type="submit">가입하기</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loginmodal" class="modal">
+        <div class="modal_body">
+            <h2 class="modal-title">로그인</h2>
+            <form class="modal-form" id="loginForm">
+                <div><label for="loginId">아이디</label><input type="text" id="loginId" name="loginId" required></div>
+                <div><label for="loginPassword">비밀번호</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+                <button type="submit">로그인</button>
+            </form>
+        </div>
+    </div>
 
     {% csrf_token %}
 
-    <div id="statusMessage">페이지 로드 완료. 위치 정보를 가져옵니다...</div>
+    <div class="search-bar">
+        <input type="text" placeholder="축제 또는 관광지를 검색하세요">
+        <button>검색</button>
+    </div>
+
+    <div class="pink-screen">
+        <div class="blue">
+            주말에 어디 가지?<br>
+            다음주 남구에서 열리는 축제는?
+        </div>
+        <div class="big">
+            대충 검색해도 나오는<br>
+            정확한 축제 정보
+        </div>
+    </div>
+
+    <div id="modal1" class="modal">
+        <div class="modal_body">
+            <h2>봄꽃 축제 상세 정보</h2>
+            <p>아름다운 봄꽃 축제에 오신 것을 환영합니다!<br>
+	다양한 종류의 봄꽃을 감상하고, 맛있는 음식과 즐거운 공연을 즐기세요.<br>
+	기간: 2025년 4월 20일 - 4월 30일<br>
+	위치: [상세 위치 정보]<br>
+	문의: [연락처 정보]<br>
+        </div>
+    </div>
+
+    <div class="category-section">
+
+        <div class="slider-container">
+            <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
+            <div class="slider" id="festivalSlider">
+                <a class="open-modal">
+                <div id="festival1" class="card">
+                    <img src="bul.png" alt="봄꽃 축제">
+                    <div class="info">
+                        <h3>봄꽃 축제</h3>
+                        <p>아름다운 봄꽃을 만끽하세요!</p>
+                        <p>기간: 2025.04.20 - 2025.04.30</p>
+                        <p>위치: [임의의 장소 1]</p>
+                    </div>
+                </div>
+	        </a>
+                <div class="card">
+                    <img src="bul.png" alt="[신나는 여름 축제]">
+                    <div class="info">
+                        <h3>[신나는 여름 축제]</h3>
+                        <p>더위를 잊게 해줄 시원한 축제!</p>
+                        <p>기간: 2025.07.15 - 2025.07.20</p>
+                        <p>위치: [임의의 장소 2]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="가을 단풍 축제">
+                    <div class="info">
+                        <h3>가을 단풍 축제</h3>
+                        <p>붉게 물든 단풍을 감상하세요.</p>
+                        <p>기간: 2025.10.25 - 2025.11.05</p>
+                        <p>위치: [임의의 장소 3]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="겨울 빛 축제">
+                    <div class="info">
+                        <h3>겨울 빛 축제</h3>
+                        <p>화려한 불빛으로 가득한 밤!</p>
+                        <p>기간: 2025.12.20 - 2026.01.05</p>
+                        <p>위치: [임의의 장소 4]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="[지역 특산물 축제]">
+                    <div class="info">
+                        <h3>[지역 특산물 축제]</h3>
+                        <p>싱싱한 특산물을 맛보세요!</p>
+                        <p>기간: 2025.05.10 - 2025.05.15</p>
+                        <p>위치: [임의의 장소 5]</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-controls">
+                <button onclick="prevSlide('festivalSlider')">&#10094;</button>
+                <button onclick="nextSlide('festivalSlider')">&#10095;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-section">
+
+        <div class="slider-container">
+            <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
+            <div class="slider" id="touristSlider">
+                <div class="card">
+                    <img src="bul.png" alt="[멋진 자연 경관]">
+                    <div class="info">
+                        <h3>[멋진 자연 경관]</h3>
+                        <p>숨 막히는 자연의 아름다움.</p>
+                        <p>추천 방문 시기: 봄, 여름</p>
+                        <p>위치: [임의의 장소 A]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="[유명한 역사 유적지]">
+                    <div class="info">
+                        <h3>[유명한 역사 유적지]</h3>
+                        <p>역사의 숨결을 느껴보세요.</p>
+                        <p>추천 방문 시기: 가을</p>
+                        <p>위치: [임의의 장소 B]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="[활기 넘치는 도시 명소]">
+                    <div class="info">
+                        <h3>[활기 넘치는 도시 명소]</h3>
+                        <p>다양한 즐길 거리가 있는 곳.</p>
+                        <p>추천 방문 시기: 연중</p>
+                        <p>위치: [임의의 장소 C]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="[아름다운 해변]">
+                    <div class="info">
+                        <h3>[아름다운 해변]</h3>
+                        <p>푸른 바다와 하얀 백사장.</p>
+                        <p>추천 방문 시기: 여름</p>
+                        <p>위치: [임의의 장소 D]</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="bul.png" alt="[조용한 휴식 공간]">
+                    <div class="info">
+                        <h3>[조용한 휴식 공간]</h3>
+                        <p>일상에서 벗어나 편안한 시간을.</p>
+                        <p>추천 방문 시기: 봄, 가을</p>
+                        <p>위치: [임의의 장소 E]</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-controls">
+                <button onclick="prevSlide('touristSlider')">&#10094;</button>
+                <button onclick="nextSlide('touristSlider')">&#10095;</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // --- DOM 요소 ---
-        const statusMessageDiv = document.getElementById('statusMessage');
-        // CSRF 토큰 값 가져오기
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        function setupSlider(sliderId) {
+            const slider = document.getElementById(sliderId);
+            const cards = slider.querySelectorAll('.card');
+            let currentIndex = 0;
+            const cardWidth = cards[0].offsetWidth + 20;
+            const visibleCount = 3;
 
-        // --- 페이지 로드 완료 시 실행 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. 사용자 위치 정보 얻기 시작
-            if (!navigator.geolocation) {
-                updateStatus('브라우저가 위치 정보를 지원하지 않습니다.', true);
-                return;
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
             }
 
-            updateStatus('위치 정보 권한을 요청합니다...');
-            // getCurrentPosition(성공 콜백, 실패 콜백, 옵션)
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    // 위치 정보 얻기 성공
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    updateStatus(`위치 확인 완료 (위도: ${latitude.toFixed(5)}, 경도: ${longitude.toFixed(5)}). 주변 관광지 정보를 요청합니다...`);
-
-                    // 2. 백엔드 API 호출 함수 실행 (위치 정보 전달)
-                    fetchNearbyPlacesData(latitude, longitude);
-                },
-                (error) => {
-                    // 위치 정보 얻기 실패
-                    handleLocationError(error);
-                },
-                {
-                    enableHighAccuracy: false,
-                    timeout: 10000, // 최대 대기 시간 (10초)
-                    maximumAge: 0
+            function nextSlide() {
+                if (currentIndex < cards.length - visibleCount) {
+                    currentIndex++;
+                    updateSlider();
                 }
-            );
+            }
+
+            function prevSlide() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            }
+
+            updateSlider();
+
+            return { nextSlide, prevSlide };
+        }
+
+        const festivalSliderControls = setupSlider('festivalSlider');
+        const touristSliderControls = setupSlider('touristSlider');
+
+        function nextSlide(sliderId) {
+            if (sliderId === 'festivalSlider') {
+                festivalSliderControls.nextSlide();
+            } else if (sliderId === 'touristSlider') {
+                touristSliderControls.nextSlide();
+            }
+        }
+
+        function prevSlide(sliderId) {
+            if (sliderId === 'festivalSlider') {
+                festivalSliderControls.prevSlide();
+            } else if (sliderId === 'touristSlider') {
+                touristSliderControls.prevSlide();
+            }
+        }
+        function setupSlider(sliderId) {
+            const slider = document.getElementById(sliderId);
+            const cards = slider.querySelectorAll('.card');
+            let currentIndex = 0;
+            const cardWidth = cards[0].offsetWidth + 20;
+            const visibleCount = 3;
+
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+            }
+
+            function nextSlide() {
+                if (currentIndex < cards.length - visibleCount) {
+                    currentIndex++;
+                    updateSlider();
+                }
+            }
+
+            function prevSlide() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            }
+
+            updateSlider();
+
+            return { nextSlide, prevSlide };
+        }
+
+	    /*모달창*/
+        var signup1 = document.getElementById("signup");
+        var login1 = document.getElementById("login");
+
+        var signupmodal1 = document.getElementById("signupmodal");
+        var loginmodal1 = document.getElementById("loginmodal");
+
+        // 모달 열기 함수 (공통)
+        function openModal(modal) {
+            modal.style.display = "block";
+        }
+
+        // 모달 닫기 함수 (공통)
+        function closeModal(modal) {
+            modal.style.display = "none";
+            modal.reset();
+        }
+
+        //회원가입 모달 열기
+        signup1.onclick = function() {
+            openModal(signupmodal1);
+        }
+
+        //로그인 모달 열기
+        login1.onclick = function () {
+            openModal(loginmodal1);
+        }
+
+        //축제 및 관광지 모달 열기
+        var festival1 = document.getElementById("festival1");
+
+        var modal1 = document.getElementById("modal1");
+
+        festival1.onclick = function () {
+            openModal(modal1);
+        }
+
+        //지명 모달 열기
+        var place = document.getElementById("place");
+        var placemodal = document.getElementById("placemodal");
+
+        place.onclick = function () {
+            openModal(placemodal);
+        }
+
+        // 모달 외부 클릭 시 모달 닫기
+        window.onclick = function(event) {
+            if (event.target == signupmodal1) {
+                closeModal(signupmodal1);
+            }
+            if (event.target == loginmodal1) {
+                closeModal(loginmodal1);
+            }
+            if (event.target == modal1) {
+                closeModal(modal1);
+            }
+            if (event.target == placemodal) {
+                closeModal(placemodal);
+            }
+        }
+        // HTML 요소들을 DOMContentLoaded 내에서 안전하게 가져옵니다.
+        let locationStatus, latitudeDisplay, longitudeDisplay, gpsbtn;
+
+        // 최초 접속 여부 확인 (현재 코드에서는 사용되지 않음)
+        var hasRequestedFirstTime = localStorage.getItem('hasRequestedFirstTime');
+
+        /**
+         * GPS 위치 정보를 요청하는 메인 함수
+         */
+        function getLocation() {
+            console.log("getLocation 함수 호출됨");
+            // 요청 시작 시 상태 메시지 업데이트
+            if (locationStatus) {
+                locationStatus.textContent = '위치 정보 요청 중...';
+                latitudeDisplay.textContent = ''; // 이전 좌표 숨기기
+                longitudeDisplay.textContent = ''; // 이전 좌표 숨기기
+            }
+
+            // Geolocation API 지원 여부 확인 (선택 사항이지만 추가하면 좋음)
+            if (!navigator.geolocation) {
+                if (locationStatus) {
+                    locationStatus.textContent = '이 브라우저에서는 위치 정보 기능을 지원하지 않습니다.';
+                }
+                console.error("Geolocation API를 지원하지 않습니다.");
+                return; // 함수 종료
+            }
+
+            // 위치 정보 요청
+            navigator.geolocation.getCurrentPosition(showPosition, handleLocationError, {
+                enableHighAccuracy: true, // 높은 정확도 옵션 추가 (선택 사항)
+                timeout: 10000,         // 타임아웃 옵션 추가 (선택 사항)
+                maximumAge: 0           // 캐시 사용 안 함 옵션 추가 (선택 사항)
+            });
+        }
+
+        /**
+         * 위치 정보 요청 성공 시 실행되는 콜백 함수
+         * @param {GeolocationPosition} position - 위치 정보 객체
+         */
+        function showPosition(position) {
+            console.log("showPosition 실행됨", position);
+            if (locationStatus && latitudeDisplay && longitudeDisplay) {
+                locationStatus.textContent = "GPS 접근 허용됨:";
+                latitudeDisplay.textContent = "위도: " + position.coords.latitude.toFixed(6); // 소수점 6자리까지 표시
+                longitudeDisplay.textContent = "경도: " + position.coords.longitude.toFixed(6); // 소수점 6자리까지 표시
+            }
+            // 성공 시에는 gpsbtn 상태를 변경할 필요가 특별히 없습니다 (항상 보이도록).
+            // requestLocationBtn 관련 코드는 제거되었습니다.
+        }
+
+        /**
+         * 위치 정보 요청 실패 시 실행되는 콜백 함수
+         * @param {GeolocationPositionError} error - 오류 정보 객체
+         */
+        function handleLocationError(error) {
+            console.error("handleLocationError 실행됨", error);
+            if (locationStatus) {
+                let message = "";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = "GPS 접근이 거부되었습니다. 브라우저 설정을 확인하거나 버튼을 눌러 다시 요청해 보세요.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = "현재 위치 정보를 사용할 수 없습니다.";
+                        break;
+                    case error.TIMEOUT:
+                        message = "위치 정보 요청 시간이 초과되었습니다.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        message = "알 수 없는 오류가 발생했습니다.";
+                        break;
+                }
+                locationStatus.textContent = message;
+            }
+        }
+
+        // HTML 문서 로딩이 완료된 후 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOMContentLoaded 이벤트 발생");
+
+            // 필요한 HTML 요소 가져오기
+            locationStatus = document.getElementById('locationStatus');
+            latitudeDisplay = document.getElementById('latitude');
+            longitudeDisplay = document.getElementById('longitude');
+            gpsbtn = document.getElementById('gpsbtn'); // 이 ID가 HTML 버튼에 있는지 확인하세요!
+
+            // gpsbtn 요소가 존재하는지 확인 후 이벤트 리스너 추가
+            if (gpsbtn) {
+                // 버튼 클릭 시 getLocation 함수 호출
+                gpsbtn.addEventListener('click', getLocation);
+                console.log("gpsbtn에 클릭 이벤트 리스너 추가됨");
+            } else {
+                console.error("ID가 'gpsbtn'인 버튼을 찾을 수 없습니다.");
+                // gpsbtn이 없으면 페이지 로드 시 자동 실행도 의미가 없을 수 있으므로,
+                // 사용자에게 알리는 메시지를 locationStatus에 표시할 수도 있습니다.
+                if(locationStatus) {
+                    locationStatus.textContent = "오류: 위치 요청 버튼을 찾을 수 없습니다.";
+                }
+                return; // 버튼이 없으면 더 이상 진행하지 않음
+            }
+
+            // 페이지 로드 시 자동으로 GPS 요청 함수 호출
+            getLocation();
         });
 
-        // --- 백엔드 API 호출 함수 (주변 관광지 정보) ---
-        async function fetchNearbyPlacesData(lat, lon) {
-            // urls.py에 정의된, views.receive_location과 연결된 경로
-            const apiUrl = 'api/receive-location/';
 
-            updateStatus('서버에 주변 관광지 정보 요청 중...', false);
+        // 백엔드로 위치정보 전송
+        async function sendLocation(latitude, longitude) {
+            const url = '/api/receive-location/';
+            const data = {
+                latitude: latitude,
+                longitude: longitude
+            };
 
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST', // @require_POST 이므로 POST 방식
+                const response = await fetch(url, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken // CSRF 토큰 헤더에 추가
+                        'X-CSRFToken': csrfToken
                     },
-                    body: JSON.stringify({ // 요청 본문에 위도, 경도 포함
-                        latitude: lat,
-                        longitude: lon
-                    })
+                    body: JSON.stringify(data)
                 });
 
-                // HTTP 응답 상태 확인
+                // 응답 상태 확인
                 if (!response.ok) {
+                    // 서버에서 오류 응답일경우
                     const errorData = await response.json().catch(() => null);
-                    const message = errorData?.message || `서버 요청 실패 (상태 코드: ${response.status})`;
+                    const message = errorData?.message || '서버 오류가 발생했습니다 (상태 코드: ${response.status})';
                     throw new Error(message);
                 }
 
-                // 성공 응답 처리
+                // 성공적으로 응답받으면 JSON으로 파싱
                 const result = await response.json();
+                console.log('백엔드 응답:', result);
 
-                // 백엔드 응답 status 확인
+                // 결과 처리
                 if (result.status === 'success') {
-                    updateStatus('주변 관광지 정보를 성공적으로 가져왔습니다. 콘솔을 확인하세요.', false);
-                    // --- 중요: 받은 관광지 데이터를 콘솔에 출력 ---
-                    console.log('성공! 주변 관광지 데이터:', result.places);
-                    // 다음 단계: 여기서 result.places 데이터를 사용하여 화면에 표시할 수 있습니다.
+                    displayPlaces(result.places);
                 } else {
-                    throw new Error(result.message || '백엔드 처리 중 오류 발생');
+                    //백엔드에서 status: 'error'를 보낸경우
+                    resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
                 }
 
             } catch (error) {
-                // 네트워크 오류 또는 기타 오류 처리
-                console.error('데이터 로딩 실패:', error);
-                updateStatus(`오류 발생: ${error.message}`, true);
-            }
+                    //네트워크 오류 또는 위에서 throw된 오류 처리
+                    console.error('백엔드 요청 실패:', error);
+                    resultsDiv.innerHTML = `<p style="color: red;">데이터를 가져오는 데 실패했습니다: ${error.message}</p>`;
+                }
         }
 
-        // --- 유틸리티 함수 ---
+            //회원가입 로직 실행
+            document.addEventListener('DOMContentLoaded', () => {
+            //필요한 요소들 선택
+            const signupForm = document.getElementById('signupForm');
+            const signupId = document.getElementById('signupId');
+            const signupPassword = document.getElementById('signupPassword');
+            const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
+            const signupEmail = document.getElementById('signupEmail');
 
-        // 상태 메시지 업데이트 함수
-        function updateStatus(message, isError = false) {
-            statusMessageDiv.textContent = message;
-            if (isError) {
-                statusMessageDiv.classList.add('error');
+            //오류 메시지를 표시할 span 요소들 선택
+            const usernameError = document.getElementById('usernameError');
+            const PasswordError = document.getElementById('PasswordError');
+            const PasswordConfirmError = document.getElementById('PasswordConfirmError');
+            const EmailError = document.getElementById('EmailError');
+
+            //폼 제출 이벤트 리스너 추가
+            signupForm.addEventListener('submit', (event) => {
+                //기본 폼 제출 동작 막기 (유효성 검사 후 직접 제출 제어)
+                event.preventDefault();
+
+                //오류 초기화
+                clearErrors();
+
+                let isValid = true; //전체 유효성 상태
+
+                // 1. 아이디 검사 (여기서는 비어있는지만 확인)
+                if (signupId.value.trim() === "") {
+                    showError(usernameError, '아이디를 입력해주세요.');
+                    isValid = false;
+                }
+
+                // 2. 비밀번호 검사
+                const passwordValue = signupPassword.value;
+                if (passwordValue.length < 8) {
+                    showError(PasswordError, '비밀번호는 8자 이상이어야 합니다.');
+                    isValid = false;
+                }
+
+                // 3. 비밀번호 확인 검사
+                if (signupPasswordConfirm.value !== passwordValue) {
+                    showError(PasswordConfirmError, '비밀번호가 일치하지 않습니다.');
+                    isValid = false;
+                } else if (signupPasswordConfirm.value.trim() === "") {
+                    showError(PasswordConfirmError, '비밀번호 확인을 입력해주세요.');
+                    isValid = false;
+                }
+
+                // 4. 이메일 검사 (간단한 정규식 사용)
+                const emailValue = signupEmail.value.trim();
+                // 이메일 형식 검사를 위한 정규 표현식
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailValue === "") {
+                    showError(EmailError, '이메일을 입력해주세요.');
+                    isValid = false;
+                } else if (!emailRegex.test(emailValue)) {
+                    showError(EmailError, '올바른 이메일 형식이 아닙니다.')
+                    isValid = false;
+                }
+
+                //모든 유효성 검사를 통과하면 폼 제출
+                if (isValid) {
+                    //실제 서버로 폼 데이터 전송
+                    alert('유효성 검사 통과! 폼을 제출합니다.'); //테스트용 알림
+                    signupForm.submit();
+                    signupForm.reset();
+                }
+            });
+
+            //오류 메시지 표시 함수
+            function showError(errorElement, message) {
+                errorElement.textContent = message;
+            }
+
+            //모든 오류 메시지 초기화 함수
+            function clearErrors() {
+                usernameError.textContent = "";
+                PasswordError.textContent = "";
+                PasswordConfirmError.textContent = "";
+                EmailError.textContent = "";
+            }
+        });
+
+        // 로그인 로직 실행
+        const loginForm = document.getElementById('loginForm');
+        const loginIdInput = document.getElementById('loginId');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const modalBody = loginForm.parentElement; // 폼의 부모 요소 (modal_body)
+
+        // 폼 제출(submit) 이벤트 리스너를 추가합니다.
+        loginForm.addEventListener('submit', (event) => {
+            // 기본 폼 제출 동작(페이지 새로고침 등)을 막습니다.
+            event.preventDefault();
+
+
+            const username = loginIdInput.value;
+            const password = loginPasswordInput.value;
+            const existingError = modalBody.querySelector('.error-message');
+
+            //오류 메시지를 표시할 span 요소들 선택
+            const Erroruser = document.getElementById('Erroruser');
+                // --- 나중에 DB 연동 로직을 추가할 부분 ---
+                // 여기서는 임시로 아이디와 비밀번호를 확인합니다.
+                // 실제로는 서버에 username과 password를 보내서
+                // DB에서 사용자 정보를 확인하고 결과를 받아와야 합니다.
+
+            // 임시 로직 시작
+            if (username === 'testuser' && password === 'password123') {
+                alert('로그인 성공');
+                clearErrors();
+                // 로그인 성공 후 모달을 닫는 과정
+                loginForm.reset();
+
+                document.getElementById('loginmodal').style.display = 'none';
+
             } else {
-                statusMessageDiv.classList.remove('error');
+                alert('존재하지 않는 아이디이거나, 비밀번호가 일치하지 않습니다.');
+                loginForm.reset();
             }
-        }
 
-        // 위치 정보 오류 처리 함수
-        function handleLocationError(error) {
-            let errorMessage = '위치 정보를 가져오는 데 실패했습니다.';
-            // (오류 코드별 메시지 처리)
-            switch(error.code) {
-                case error.PERMISSION_DENIED: errorMessage = '위치 정보 접근 권한이 거부되었습니다.'; break;
-                case error.POSITION_UNAVAILABLE: errorMessage = '현재 위치 정보를 사용할 수 없습니다.'; break;
-                case error.TIMEOUT: errorMessage = '위치 정보를 가져오는 데 시간이 초과되었습니다.'; break;
-                default: errorMessage = `알 수 없는 오류 (코드: ${error.code})`;
+            //오류 메시지 표시 함수
+            function showError(errorElement, message) {
+                errorElement.textContent = message;
             }
-            console.error('위치 오류:', error.message);
-            updateStatus(errorMessage, true);
-        }
+
+            //모든 오류 메시지 초기화 함수
+            function clearErrors() {
+                usernameError.textContent = "";
+                PasswordError.textContent = "";
+                PasswordConfirmError.textContent = "";
+                EmailError.textContent = "";
+            }
+        });
 
     </script>
-</body>
-</html>
