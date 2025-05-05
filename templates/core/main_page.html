@@ -90,7 +90,7 @@
         	}
 	    .card:hover {
 		    transform: scale(1.15);
-		
+
 	    }
         	.info {
            		padding: 15px;
@@ -117,7 +117,7 @@
             	justify-content: space-between;
             	padding: 0;
             	z-index: 10;
-        	}        
+        	}
         	.modal {
             	display: none;
             	position: fixed;
@@ -145,7 +145,7 @@
             	position: relative;
 		        line-height: 40px;
                 bottom: 160px;
-        	}        
+        	}
 	/* 회원가입/로그인 버튼 */
         	.auth-buttons {
             	position: absolute;
@@ -291,7 +291,9 @@
                 <button type="submit">로그인</button>
             </form>
         </div>
-    </div>    
+    </div>
+
+    {% csrf_token %}
 
     <div class="search-bar">
         <input type="text" placeholder="축제 또는 관광지를 검색하세요">
@@ -319,9 +321,9 @@
 	문의: [연락처 정보]<br>
         </div>
     </div>
-	
+
     <div class="category-section">
-        
+
         <div class="slider-container">
             <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
             <div class="slider" id="festivalSlider">
@@ -381,7 +383,7 @@
     </div>
 
     <div class="category-section">
-        
+
         <div class="slider-container">
             <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
             <div class="slider" id="touristSlider">
@@ -544,7 +546,7 @@
         login1.onclick = function () {
             openModal(loginmodal1);
         }
-        
+
         //축제 및 관광지 모달 열기
         var festival1 = document.getElementById("festival1");
 
@@ -683,6 +685,51 @@
         });
 
 
+        // 백엔드로 위치정보 전송
+        async function sendLocation(latitude, longitude) {
+            const url = '/api/receive-location/';
+            const data = {
+                latitude: latitude,
+                longitude: longitude
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // 응답 상태 확인
+                if (!response.ok) {
+                    // 서버에서 오류 응답일경우
+                    const errorData = await response.json().catch(() => null);
+                    const message = errorData?.message || '서버 오류가 발생했습니다 (상태 코드: ${response.status})';
+                    throw new Error(message);
+                }
+
+                // 성공적으로 응답받으면 JSON으로 파싱
+                const result = await response.json();
+                console.log('백엔드 응답:', result);
+
+                // 결과 처리
+                if (result.status === 'success') {
+                    displayPlaces(result.places);
+                } else {
+                    //백엔드에서 status: 'error'를 보낸경우
+                    resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
+                }
+
+            } catch (error) {
+                    //네트워크 오류 또는 위에서 throw된 오류 처리
+                    console.error('백엔드 요청 실패:', error);
+                    resultsDiv.innerHTML = `<p style="color: red;">데이터를 가져오는 데 실패했습니다: ${error.message}</p>`;
+                }
+        }
+
             //회원가입 로직 실행
             document.addEventListener('DOMContentLoaded', () => {
             //필요한 요소들 선택
@@ -776,7 +823,7 @@
             // 기본 폼 제출 동작(페이지 새로고침 등)을 막습니다.
             event.preventDefault();
 
-            
+
             const username = loginIdInput.value;
             const password = loginPasswordInput.value;
             const existingError = modalBody.querySelector('.error-message');
@@ -794,7 +841,7 @@
                 clearErrors();
                 // 로그인 성공 후 모달을 닫는 과정
                 loginForm.reset();
-                
+
                 document.getElementById('loginmodal').style.display = 'none';
 
             } else {
@@ -815,5 +862,5 @@
                 EmailError.textContent = "";
             }
         });
-        
+
     </script>
