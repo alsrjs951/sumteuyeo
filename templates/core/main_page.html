@@ -243,26 +243,40 @@
                 left: 770px;
                 top: 30px;
             }
+
+            #currentStatus, #resultOutput { display: none; margin-top: 15px; padding: 15px; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 5px; min-height: 60px; line-height: 1.6; }
+            #currentStatus { background-color: #d1ecf1; border-color: #bee5eb;}
+            #currentStatus .status-title, #resultOutput .status-title { font-weight: bold; color: #004085; display: block; margin-bottom: 5px; font-size: 1.1em; }
+            .value { color: #0056b3; font-weight: bold; }
+            .place-name .value { font-size: 1.1em; }
     </style>
 </head>
 <body>
+
+    <div id="currentStatus">
+        <span class="status-title">현재 기준 위치</span>
+        <span id="statusText">지도 서비스 로딩 중...</span> </div>
+
+    <div id="placemodal" class="modal">
+        <div class="modal_body">
+            <div class="modal-form">
+                지명:<input type="text" id="placeInput" placeholder="기준 위치를 변경하려면 검색 (예: 강남역)">
+                <button type="submit" onclick="searchPlace()" class="primary">기준 위치 변경</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="resultOutput">
+        검색 결과가 여기에 표시됩니다.
+    </div>
+
     <img src class="sumteuyeo" alt="숨트여 로고">
     <p id="mylocation"></p>
-    <button onclick="getLocation()" class="gpsbtn" id="gpsbtn">GPS 접근 권한 다시 요청</button>
+    <button onclick="requestCurrentLocation()" class="gpsbtn" id="gpsbtn">GPS 접근 권한 다시 요청</button>
     <button id="place" class="placebtn">지명검색</button>
     <div class="auth-buttons">
         <button id="signup" class="auth-button">회원가입</button>
         <button id="login" class="auth-button">로그인</button>
-    </div>
-
-    <div id="placemodal" class="modal">
-        <div class="modal_body">
-            <h2 class="modal-title">지명 검색</h2>
-            <form class="modal-form" id="placeform">
-                <div><label for="placename">지명</label><input type="text" id="placename" name="placename" required></div>
-                <button type="submit">검색하기</button>
-            </form>
-        </div>
     </div>
 
     <div id="signupmodal" class="modal">
@@ -296,7 +310,7 @@
     {% csrf_token %}
 
     <div class="search-bar">
-        <input type="text" placeholder="축제 또는 관광지를 검색하세요">
+        <input id="userplace" type="text" placeholder="축제 또는 관광지를 검색하세요">
         <button>검색</button>
     </div>
 
@@ -439,7 +453,7 @@
             </div>
         </div>
     </div>
-
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
         function setupSlider(sliderId) {
             const slider = document.getElementById(sliderId);
@@ -579,111 +593,286 @@
                 closeModal(placemodal);
             }
         }
-        // HTML 요소들을 DOMContentLoaded 내에서 안전하게 가져옵니다.
-        let locationStatus, latitudeDisplay, longitudeDisplay, gpsbtn;
 
-        // 최초 접속 여부 확인 (현재 코드에서는 사용되지 않음)
-        var hasRequestedFirstTime = localStorage.getItem('hasRequestedFirstTime');
+    // --- 전역 변수 선언 ---
+    var ps = null;
+    var resultOutputDiv = null;
+    var statusTextSpan = null;
+    var targetLat = null;
+    var targetLon = null;
+    var targetPlaceName = "알 수 없음";
+    var isInitialLoadAttempt = true;
 
-        /**
-         * GPS 위치 정보를 요청하는 메인 함수
-         */
-        function getLocation() {
-            console.log("getLocation 함수 호출됨");
-            // 요청 시작 시 상태 메시지 업데이트
-            if (locationStatus) {
-                locationStatus.textContent = '위치 정보 요청 중...';
-                latitudeDisplay.textContent = ''; // 이전 좌표 숨기기
-                longitudeDisplay.textContent = ''; // 이전 좌표 숨기기
+    // 현재 시간 기준, 부산 위치 기본값 사용
+    const DEFAULT_LATITUDE = 35.1795543;
+    const DEFAULT_LONGITUDE = 129.0756416;
+    const DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
+
+    // --- 초기화 ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM 요소 참조는 여기서 먼저 가져옵니다.
+        resultOutputDiv = document.getElementById('resultOutput');
+        statusTextSpan = document.getElementById('statusText');
+
+        // 엔터키 리스너 추가
+        const placeInput = document.getElementById('placeInput');
+        placeInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                searchPlace();
             }
-
-            // Geolocation API 지원 여부 확인 (선택 사항이지만 추가하면 좋음)
-            if (!navigator.geolocation) {
-                if (locationStatus) {
-                    locationStatus.textContent = '이 브라우저에서는 위치 정보 기능을 지원하지 않습니다.';
-                }
-                console.error("Geolocation API를 지원하지 않습니다.");
-                return; // 함수 종료
-            }
-
-            // 위치 정보 요청
-            navigator.geolocation.getCurrentPosition(showPosition, handleLocationError, {
-                enableHighAccuracy: true, // 높은 정확도 옵션 추가 (선택 사항)
-                timeout: 10000,         // 타임아웃 옵션 추가 (선택 사항)
-                maximumAge: 0           // 캐시 사용 안 함 옵션 추가 (선택 사항)
-            });
-        }
-
-        /**
-         * 위치 정보 요청 성공 시 실행되는 콜백 함수
-         * @param {GeolocationPosition} position - 위치 정보 객체
-         */
-        function showPosition(position) {
-            console.log("showPosition 실행됨", position);
-            if (locationStatus && latitudeDisplay && longitudeDisplay) {
-                locationStatus.textContent = "GPS 접근 허용됨:";
-                latitudeDisplay.textContent = "위도: " + position.coords.latitude.toFixed(6); // 소수점 6자리까지 표시
-                longitudeDisplay.textContent = "경도: " + position.coords.longitude.toFixed(6); // 소수점 6자리까지 표시
-            }
-            // 성공 시에는 gpsbtn 상태를 변경할 필요가 특별히 없습니다 (항상 보이도록).
-            // requestLocationBtn 관련 코드는 제거되었습니다.
-        }
-
-        /**
-         * 위치 정보 요청 실패 시 실행되는 콜백 함수
-         * @param {GeolocationPositionError} error - 오류 정보 객체
-         */
-        function handleLocationError(error) {
-            console.error("handleLocationError 실행됨", error);
-            if (locationStatus) {
-                let message = "";
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = "GPS 접근이 거부되었습니다. 브라우저 설정을 확인하거나 버튼을 눌러 다시 요청해 보세요.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = "현재 위치 정보를 사용할 수 없습니다.";
-                        break;
-                    case error.TIMEOUT:
-                        message = "위치 정보 요청 시간이 초과되었습니다.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        message = "알 수 없는 오류가 발생했습니다.";
-                        break;
-                }
-                locationStatus.textContent = message;
-            }
-        }
-
-        // HTML 문서 로딩이 완료된 후 실행
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOMContentLoaded 이벤트 발생");
-
-            // 필요한 HTML 요소 가져오기
-            locationStatus = document.getElementById('locationStatus');
-            latitudeDisplay = document.getElementById('latitude');
-            longitudeDisplay = document.getElementById('longitude');
-            gpsbtn = document.getElementById('gpsbtn'); // 이 ID가 HTML 버튼에 있는지 확인하세요!
-
-            // gpsbtn 요소가 존재하는지 확인 후 이벤트 리스너 추가
-            if (gpsbtn) {
-                // 버튼 클릭 시 getLocation 함수 호출
-                gpsbtn.addEventListener('click', getLocation);
-                console.log("gpsbtn에 클릭 이벤트 리스너 추가됨");
-            } else {
-                console.error("ID가 'gpsbtn'인 버튼을 찾을 수 없습니다.");
-                // gpsbtn이 없으면 페이지 로드 시 자동 실행도 의미가 없을 수 있으므로,
-                // 사용자에게 알리는 메시지를 locationStatus에 표시할 수도 있습니다.
-                if(locationStatus) {
-                    locationStatus.textContent = "오류: 위치 요청 버튼을 찾을 수 없습니다.";
-                }
-                return; // 버튼이 없으면 더 이상 진행하지 않음
-            }
-
-            // 페이지 로드 시 자동으로 GPS 요청 함수 호출
-            getLocation();
         });
 
+        // *** kakao.maps.load() 사용 ***
+        // 카카오맵 SDK 로드가 완료된 후 initialize 함수를 실행하도록 합니다.
+        if (typeof kakao !== 'undefined' && kakao.maps) {
+            kakao.maps.load(initialize); // 로드 후 initialize 함수 호출
+        } else {
+            // kakao 객체 자체가 없는 경우 (스크립트 로드 실패)
+            console.error("카카오맵 SDK 기본 객체를 로드할 수 없습니다.");
+            alert("카카오맵 SDK를 로드할 수 없습니다. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
+            statusTextSpan.textContent = "오류: 지도 서비스 로드 실패.";
+        }
+    });
+
+    // *** SDK 로드 후 실행될 초기화 함수 ***
+    function initialize() {
+        console.log("카카오맵 서비스 로드 완료.");
+        statusTextSpan.textContent = "GPS 위치 확인 중..."; // 상태 메시지 업데이트
+
+        try {
+            // Places 서비스 객체 생성 (이제 안전하게 생성 가능)
+            ps = new kakao.maps.services.Places();
+            console.log("카카오 장소 검색 서비스 준비 완료.");
+
+            // 초기 GPS 위치 요청 시작
+            requestCurrentLocation();
+
+        } catch (error) {
+            // 혹시 Places 객체 생성 중 다른 오류 발생 시
+            console.error("서비스 초기화 중 오류:", error);
+            alert("지도 서비스를 초기화할 수 없습니다. (오류 발생)");
+            setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
+            isInitialLoadAttempt = false;
+        }
+    }
+
+    // 1. GPS 위치 요청 함수 (이전과 동일)
+    function requestCurrentLocation() {
+        if (navigator.geolocation) {
+            console.log("GPS 위치 요청 중 (새로고침 시도)...");
+            const currentStatusDiv = document.getElementById('currentStatus');
+            statusTextSpan = currentStatusDiv.querySelector('#statusText'); // 동적으로 생성될 수 있으므로 다시 찾기
+             if (!statusTextSpan) { // 만약 span이 없다면 새로 만들거나 구조를 가정
+                 currentStatusDiv.innerHTML = `<span class="status-title">현재 기준 위치</span><span id="statusText">현재 GPS 위치를 확인 중입니다...</span>`;
+                 statusTextSpan = document.getElementById('statusText');
+             } else {
+                statusTextSpan.textContent = "현재 GPS 위치를 확인 중입니다...";
+             }
+
+
+            navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+                enableHighAccuracy: false,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        } else {
+            console.warn("이 브라우저에서는 Geolocation이 지원되지 않습니다.");
+            alert("GPS를 지원하지 않는 환경입니다.");
+             if (isInitialLoadAttempt) {
+                 setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
+                 isInitialLoadAttempt = false;
+             } else if (statusTextSpan) { // statusTextSpan이 있을 때만 업데이트
+                 statusTextSpan.textContent = "오류: GPS를 지원하지 않는 환경입니다.";
+             }
+        }
+    }
+
+    // Geolocation 성공 콜백 (이전과 동일)
+    function onGeoSuccess(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const source = isInitialLoadAttempt ? "초기 로드" : "사용자 요청";
+        console.log(`GPS 위치 확인 성공 (${source}): 위도(${lat}), 경도(${lon})`);
+        setTargetLocation(lat, lon, "현재 내 위치 (GPS)", true);
+        resultOutputDiv.innerHTML = `GPS 위치로 기준 위치를 업데이트했습니다. (${source})`;
+        isInitialLoadAttempt = false;
+    }
+
+    // Geolocation 실패 콜백 (이전과 동일, statusTextSpan 확인 추가)
+    function onGeoError(error) {
+        console.error("GPS 위치 확인 실패:", error.message);
+        let message = "GPS 위치를 가져올 수 없습니다. ";
+        switch(error.code) { /* ... (오류 메시지 생성) ... */
+             case error.PERMISSION_DENIED: message += "사용자 권한이 거부되었습니다."; break;
+             case error.POSITION_UNAVAILABLE: message += "위치 정보를 사용할 수 없습니다."; break;
+             case error.TIMEOUT: message += "요청 시간이 초과되었습니다."; break;
+             default: message += "알 수 없는 오류가 발생했습니다."; break;
+         }
+
+        statusTextSpan = document.getElementById('statusText'); // 다시 찾아봄
+
+        if (isInitialLoadAttempt) {
+            console.log("초기 로드 시 GPS 실패, 기본값으로 설정합니다.");
+             if(statusTextSpan) statusTextSpan.textContent = message + " 기본 위치(부산 시청)를 사용합니다.";
+            setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
+        } else {
+            console.log("버튼 클릭 후 GPS 실패, 이전 위치를 유지합니다.");
+            if(statusTextSpan) statusTextSpan.textContent = `오류: ${message} 이전 기준 위치(${targetPlaceName})를 유지합니다.`;
+            alert(message);
+        }
+        isInitialLoadAttempt = false;
+    }
+
+    // 2. 타겟(기준) 위치 설정 및 상태 업데이트 함수 (이전과 동일, statusTextSpan 확인 추가)
+    function setTargetLocation(lat, lon, name, sendToBackend) {
+        targetLat = lat;
+        targetLon = lon;
+        targetPlaceName = name;
+        console.log(`기준 위치 업데이트됨: ${name} (위도: ${lat}, 경도: ${lon})`);
+
+        const currentStatusDiv = document.getElementById('currentStatus');
+        currentStatusDiv.innerHTML = `
+            <span class="status-title">현재 기준 위치</span>
+            <span id="statusText">
+                <span class="label">위치명:</span> <span class="value">${targetPlaceName}</span><br>
+                <span class="label">위도:</span> <span class="value">${targetLat}</span><br>
+                <span class="label">경도:</span> <span class="value">${targetLon}</span>
+            </span>`;
+        statusTextSpan = document.getElementById('statusText'); // 참조 갱신
+
+        if (sendToBackend) {
+            sendLocationToBackend(targetLat, targetLon, targetPlaceName);
+        }
+    }
+
+    // 3. 장소 검색 실행 함수 (이전과 동일)
+    function searchPlace() {
+        if (!ps) { // ps 객체가 초기화되었는지 확인
+             alert("장소 검색 서비스가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
+             console.error("Places 서비스 객체(ps)가 초기화되지 않았습니다.");
+             return;
+         }
+        var keyword = document.getElementById('placeInput').value.trim();
+        if (!keyword) { alert('검색할 장소 이름을 입력해주세요!'); return; }
+        console.log(`"${keyword}" 검색 시작 (기준 위치 변경 시도)...`);
+        resultOutputDiv.innerHTML = `"${keyword}" 검색 중...`;
+        ps.keywordSearch(keyword, placeSearchCallback);
+    }
+
+    // 4. 장소 검색 콜백 함수 (이전과 동일)
+        // 4. 장소 검색 콜백 함수
+        function placeSearchCallback(data, status, pagination) {
+            console.log("placeSearchCallback status:", status); // 상태 확인용 로그 (디버깅 시 유용)
+
+            if (status === kakao.maps.services.Status.OK) {
+                // 검색 성공 시 (이전 코드와 동일)
+                if (data.length > 0) {
+                    var place = data[0];
+                    var searchedName = place.place_name;
+                    var searchedLat = place.y;
+                    var searchedLon = place.x;
+
+                    // 결과 영역 업데이트 (성공 메시지 포함)
+                    resultOutputDiv.innerHTML = `
+                        <span class="status-title">검색 결과</span>
+                        <div class="place-name"><span class="label">장소:</span> <span class="value">${searchedName}</span></div>
+                        <div><span class="label">위도:</span> <span class="value">${searchedLat}</span></div>
+                        <div><span class="label">경도:</span> <span class="value">${searchedLon}</span></div>
+                        <div><em>이 위치를 새로운 기준 위치로 설정합니다.</em></div>`;
+
+                    // 타겟 위치 업데이트 및 백엔드 전송 호출
+                    setTargetLocation(searchedLat, searchedLon, searchedName, true);
+                    isInitialLoadAttempt = false;
+                } else {
+                    // Status는 OK지만 data 배열이 비어있는 경우 (거의 발생하지 않음)
+                    console.log("장소 검색 데이터 없음 (Status: OK, Data Length: 0)");
+                    resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과 데이터가 비어 있습니다. 기준 위치는 변경되지 않습니다.`;
+                }
+
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                // 검색 결과가 없는 경우
+                console.log("장소 검색 결과 없음 (ZERO_RESULT)");
+                resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`;
+                // targetLocation은 변경하지 않음
+
+            } else if (status === kakao.maps.services.Status.ERROR) {
+                // 검색 중 서버 오류가 발생한 경우
+                console.error("장소 검색 중 서버 오류 발생 (ERROR):", status);
+                resultOutputDiv.textContent = '장소 검색 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 기준 위치는 변경되지 않습니다.';
+                alert('장소 검색 중 서버 오류가 발생했습니다.'); // 사용자에게 명시적으로 알림
+                // targetLocation은 변경하지 않음
+
+            } else {
+                // 그 외 다른 상태 코드 (예: INVALID_REQUEST - 요청 파라미터 오류 등)
+                console.warn("장소 검색 기타 상태:", status);
+                resultOutputDiv.textContent = `장소 검색 중 예상치 못한 상태가 발생했습니다 (상태 코드: ${status}). 기준 위치는 변경되지 않습니다.`;
+                // targetLocation은 변경하지 않음
+            }
+        }
+         if (status === kakao.maps.services.Status.OK && data.length > 0) {
+            var place = data[0];
+            resultOutputDiv.innerHTML = `
+                <span class="status-title">검색 결과</span>
+                <div class="place-name"><span class="label">장소:</span> <span class="value">${place.place_name}</span></div>
+                <div><span class="label">위도:</span> <span class="value">${place.y}</span></div>
+                <div><span class="label">경도:</span> <span class="value">${place.x}</span></div>
+                <div><em>이 위치를 새로운 기준 위치로 설정합니다.</em></div>`;
+            setTargetLocation(place.y, place.x, place.place_name, true);
+            isInitialLoadAttempt = false;
+         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+             resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`;
+         } else if (status === kakao.maps.services.Status.ERROR) {
+             resultOutputDiv.textContent = '장소 검색 중 오류가 발생했습니다. 기준 위치는 변경되지 않습니다.';
+             alert('장소 검색 중 오류가 발생했습니다.');
+         } else {
+             resultOutputDiv.textContent = `장소 검색 중 예상치 못한 상태(${status}). 기준 위치는 변경되지 않습니다.`;
+         }
+
+        // 백엔드로 위치정보 전송
+        async function sendLocationToBackend(latitude, longitude, targetPlaceName) {
+            const url = '/api/receive-location/';
+            const data = {
+                latitude: latitude,
+                longitude: longitude,
+                targetPlaceName: targetPlaceName
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                // 응답 상태 확인
+                if (!response.ok) {
+                    // 서버에서 오류 응답일경우
+                    const errorData = await response.json().catch(() => null);
+                    const message = errorData?.message || '서버 오류가 발생했습니다 (상태 코드: ${response.status})';
+                    throw new Error(message);
+                }
+
+                // 성공적으로 응답받으면 JSON으로 파싱
+                const result = await response.json();
+                console.log('백엔드 응답:', result);
+
+                // 결과 처리
+                if (result.status === 'success') {
+                    displayPlaces(result.places);
+                } else {
+                    //백엔드에서 status: 'error'를 보낸경우
+                    resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
+                }
+                
+            } catch (error) {
+                    //네트워크 오류 또는 위에서 throw된 오류 처리
+                    console.error('백엔드 요청 실패:', error);
+                    resultsDiv.innerHTML = `<p style="color: red;">데이터를 가져오는 데 실패했습니다: ${error.message}</p>`;
+                }
+        }
 
         // 백엔드로 위치정보 전송
         async function sendLocation(latitude, longitude) {
