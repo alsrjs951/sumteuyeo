@@ -84,7 +84,8 @@ def get_nearby_places(latitude, longitude, api_key):
                     'serviceKey': api_key, 'MobileOS': 'ETC', 'MobileApp': 'Sumteuyeo',
                     'contentId': content_id, '_type': 'json', 'defaultYN': 'Y',
                     'firstImageYN': 'N', 'areacodeYN': 'N', 'catcodeYN': 'N',
-                    'addrinfoYN': 'N', 'mapinfoYN': 'N', 'overviewYN': 'Y', 'homepageYN': 'Y'
+                    'addrinfoYN': 'N', 'mapinfoYN': 'N', 'overviewYN': 'Y',
+                    #'homepageYN': 'N'
                 }
 
                 overview = ''
