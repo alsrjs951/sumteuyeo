@@ -265,7 +265,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="resultOutput">
         검색 결과가 여기에 표시됩니다.
     </div>
@@ -846,7 +846,7 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 // 응답 상태 확인
                 if (!response.ok) {
                     // 서버에서 오류 응답일경우
@@ -866,7 +866,7 @@
                     //백엔드에서 status: 'error'를 보낸경우
                     resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
                 }
-                
+
             } catch (error) {
                     //네트워크 오류 또는 위에서 throw된 오류 처리
                     console.error('백엔드 요청 실패:', error);
