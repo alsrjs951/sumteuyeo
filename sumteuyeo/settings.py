@@ -34,9 +34,10 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
+print(f"--- Loaded DEBUG: {DEBUG} ---") # DEBUG 값 확인용 출력 추가
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-
+print(f"--- Loaded ALLOWED_HOSTS: {ALLOWED_HOSTS} ---") # ALLOWED_HOSTS 값 확인용 출력 추가
 
 # Application definition
 
