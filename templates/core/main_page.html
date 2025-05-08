@@ -3,294 +3,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>축제 및 관광 정보</title>
+    <title>숨은 트렌디한 여행지</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
-	.search-bar {
-            	background-color: white;
-            	padding: 15px 20px;
-            	text-align: center;
-        	}
-	.search-bar input[type="text"] {
-            	padding: 10px;
-            	border: 1px solid #ccc;
-            	border-radius: 5px;
-            	width: 70%;
-            	max-width: 600px;
-            	font-size: 16px;
-       	}
-        	.search-bar button {
-            	padding: 10px 15px;
-            	background-color: #007bff;
-            	color: white;
-            	border: none;
-            	border-radius: 5px;
-            	cursor: pointer;
-            	font-size: 16px;
-            	margin-left: 10px;
-        	}
+        /* 기본 스타일 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+        }
 
-        	.search-bar button:hover {
-            	background-color: #0056b3;
-        	}
-        	.pink-screen {
-            	width: 100%;
-            	height: 350px; /* 이미지와 비슷하게 높이 조정 */
-            	background-color: #FBE2D5;
-            	margin-top: 1rem;      /* 검색창과의 간격 */
-            	margin-bottom: 1rem;   /* 슬라이더와의 간격 (예시) */
-            	padding: 2rem;         /* 안쪽 여백 추가 */
-            	box-sizing: border-box;/* 패딩을 포함하여 크기 계산 */
-            	display: flex;         /* Flexbox 사용 */
-            	flex-direction: column;/* 세로 방향 정렬 */
-            	justify-content: center;/* 세로 중앙 정렬 (선택 사항) */
-        	}
-       	.blue {
-            	color: #257ab0; /* 이미지의 색상과 비슷하게 조정 (파란색보다는 회색 계열) */
-            	font-size: 1.1rem; /* 글자 크기 조정 */
-            	line-height: 1.6;  /* 줄 간격 조정 */
-            	margin-bottom: 1rem; /* 아래쪽 큰 글씨와의 간격 */
-            	text-align: center;
-        	}
-        	.big {
-            	font-weight: bold;
-            	font-size: 2.5rem; /* 글자 크기 조정 */
-            	line-height: 1.3;  /* 줄 간격 조정 (여러 줄일 경우) */
-            	color: #333;       /* 글자 색상 (기본 검정색 또는 진한 회색) */
-            	text-align: center;
-        	}
-        	.category-section {
-           		padding: 20px;
-       	}
-        	.slider-container {
-            	position: relative;
-            	overflow: hidden;
-            	max-width: 900px;
-            	margin: 0 auto;
-            	padding: 0 30px; /* 화살표 공간 확보 */
-        	}
-        	.category-title {
-            	font-size: 1.3em;
-            	margin-bottom: 15px;
-            	padding-left: 10px;
-        	}
-        	.slider {
-            	display: flex;
-            	transition: transform 0.5s ease-in-out;
-        	}
-        	.card {
-            	flex: 0 0 auto;
-            	width: 300px;
-            	margin: 10px;
-            	border: 1px solid #ddd;
-            	border-radius: 8px;
-            	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-            	background-color: white;
-            	transition: transform 0.3s ease-in-out;
-            	cursor: pointer;
-        	}
-	    .card:hover {
-		    transform: scale(1.15);
+        /* 헤더 */
+        .app-header {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .app-header .logo-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .auth-button {
+            padding: 0.5rem 1rem;
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        .auth-button:hover {
+            background-color: #2d3748;
+        }
 
-	    }
-        	.info {
-           		padding: 15px;
-            	text-align: left;
-        	}
-        	.info h3 {
-            	margin-top: 0;
-            	margin-bottom: 5px;
-            	font-size: 1.2em;
-        	}
+        /* 검색창 스타일 */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 12px 15px;
+        }
+        .search-bar input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 700px;
+            min-width: 200px;
+            font-size: 16px;
+            height: 20px;
+            box-sizing: content-box;
+        }
+        .search-bar .text-search-btn {
+            padding: 0 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            white-space: nowrap;
+            height: 42px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-bar .text-search-btn:hover {
+            background-color: #0056b3;
+        }
 
-        	.info p {
-            	margin-bottom: 8px;
-            	font-size: 0.9em;
-            	color: #555;
-       	}
-        	.slider-controls {
-            	position: absolute;
-            	top: 50%;
-            	left: 0;
-            	right: 0;
-            	transform: translateY(-50%);
-            	display: flex;
-            	justify-content: space-between;
-            	padding: 0;
-            	z-index: 10;
-        	}
-        	.modal {
-            	display: none;
-            	position: fixed;
-            	z-index: 100; /* 화살표보다 높은 z-index */
-            	left: 0;
-            	top: 0;
-            	width: 100%;
-            	height: 100%;
-            	overflow: hidden;
-            	background-color: rgba(0, 0, 0, 0.4);
-        	}
-	        .modal_body {
-            	background-color: white;
-            	border-radius: 0.5rem;
-            	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            	max-width: 500px;
-            	width: 90%;
-            	max-height: auto; /* 내용 많을 시 스크롤 */
-           		background-color: #fefefe;
-            	margin: 15% auto;
-            	padding: 20px;
-            	border: 1px solid #888;
-            	width: 30%;
-            	border-radius: 8px;
-            	position: relative;
-		        line-height: 40px;
-                bottom: 160px;
-        	}
-	/* 회원가입/로그인 버튼 */
-        	.auth-buttons {
-            	position: absolute;
-            	top: 1.5rem;
-            	right: 1.5rem;
-            	display: flex;
-            	gap: 0.75rem; /* 버튼 사이 간격 */
-            	z-index: 10; /* 다른 요소 위에 오도록 */
-        	}
+        .gpsbtn, .placebtn {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 19px;
+            background-color: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .gpsbtn:hover, .placebtn:hover {
+            background-color: #007bff;
+            color: #ffffff;
+        }
 
-        	.auth-button {
-            	padding: 0.5rem 1rem;
-            	background-color: #4a5568; /* 회색 배경 */
-            	color: white;
-            	border-radius: 0.375rem; /* rounded-md */
-            	font-size: 0.875rem; /* text-sm */
-            	text-decoration: none; /* 링크 밑줄 제거 */
-            	transition: background-color 0.2s ease;
-            	cursor: pointer; /* 버튼임을 명확히 */
-       	    }
+        /* Pink Screen */
+        .pink-screen {
+            width: 100%;
+            min-height: 250px;
+            background-color: #FBE2D5;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        .blue {
+            color: #257ab0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .big {
+            font-weight: bold;
+            font-size: 2.5rem;
+            line-height: 1.3;
+            color: #333;
+        }
 
-        	.auth-button:hover {
-            	background-color: #2d3748; /* 더 어두운 회색 */
-        	}
-            .modal-title {
-            font-size: 1.25rem;
+        /* 상태 표시줄 - 항상 숨김 처리 */
+        #currentStatus, #resultOutput {
+            display: none !important; /* JS로도 보이지 않도록 !important 추가 */
+            /* 아래는 display: block 일 때 적용될 스타일 (참고용) */
+            margin: 15px auto;
+            padding: 15px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            min-height: 40px;
+            line-height: 1.6;
+            max-width: 900px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        /* #currentStatus 관련 스타일은 더 이상 화면에 보이지 않으므로 유지 또는 제거 가능 */
+        /* #resultOutput 관련 스타일도 더 이상 화면에 보이지 않으므로 유지 또는 제거 가능 */
+
+
+        /* 카테고리 섹션 및 슬라이더 */
+        .category-section {
+            padding: 10px 20px 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            margin: 20px auto;
+            padding: 0 30px;
+        }
+        .category-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: left;
+            color: #333;
+        }
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .card {
+            flex: 0 0 auto;
+            width: calc(33.333% - 20px);
+            min-width: 280px;
+            max-width: 300px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 4px 8px 15px rgba(0,0,0,0.15);
+        }
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .info {
+            padding: 15px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 100px;
+        }
+        .info h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+            color: #333;
+            line-height: 1.3;
+            height: calc(1.2em * 1.3 * 2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+        .info p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .info p.description {
+            flex-grow: 1;
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        .info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-controls {
+            position: absolute;
+            top: 50%;
+            left: -10px;
+            right: -10px;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .slider-controls button {
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .slider-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .slider-controls button:disabled {
+            background-color: rgba(0,0,0,0.1);
+            border-color: rgba(0,0,0,0.05);
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 모달 공통 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.open {
+            display: flex;
+        }
+        .modal_body {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 550px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px 30px;
+            border: none;
+            position: relative;
+            box-sizing: border-box;
+        }
+        #placemodal .modal_body {
+            max-width: 600px;
+        }
+        .modal-close-btn-custom {
+            position:absolute;
+            top:15px;
+            right:20px;
+            font-size:28px;
+            font-weight: lighter;
+            cursor:pointer;
+            color: #888;
+            line-height: 1;
+            padding: 5px;
+        }
+        .modal-close-btn-custom:hover {
+            color: #333;
+        }
+
+        /* 상세 정보 모달 (#modal1) 내부 요소 */
+        #modal1 .modal_body h2#itemDetailTitle {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.2rem;
+            color: #333;
+            text-align: left;
+            line-height: 1.4;
+        }
+        #modal1 .modal_body img#itemDetailImage {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 0.375rem;
+            margin-bottom: 1.2rem;
+        }
+        #modal1 .modal_body p {
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #555;
+            text-align: left;
+        }
+        #modal1 .modal_body p strong {
+            color: #333;
+            margin-right: 8px;
+        }
+        #modal1 .modal_body p#itemDetailOverview {
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        #modal1 .modal_body div#itemDetailHomepage.homepage-link a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        #modal1 .modal_body div#itemDetailHomepage.homepage-link a:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+        }
+
+        /* 회원가입/로그인 모달 제목 및 폼 스타일 */
+        .modal-title {
+            font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
+            margin-top: 0;
             text-align: center;
-            }
-            a {
-                text-decoration: none;
-            }
+            color: #333;
+        }
+        #placemodal .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+        .modal-form label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            text-align: left;
+        }
+        .modal-form input {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-bottom: 1.2rem;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            line-height: 1.5;
+        }
+        #placemodal .modal-form input#placeInput {
+             width: 100%;
+             margin-bottom: 15px;
+             padding: 12px;
+             font-size: 1rem;
+        }
+        .modal-form input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+        }
+        .modal-form button[type="submit"],
+        #placemodal .modal-form button[type="button"] {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+        #placemodal .modal-form button[type="button"] {
+            width: auto;
+            padding: 10px 25px;
+            font-size: 0.95rem;
+        }
 
+        .modal-form button[type="submit"]:hover,
+        #placemodal .modal-form button[type="button"]:hover {
+            background-color: #2d3748;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85em;
+            text-align: left;
+            display: block;
+            min-height: 1.3em;
+            margin-top: -0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .hidden {
+            display: none !important;
+        }
 
-            /* 로그인/회원가입 폼 스타일 */
-            .modal-form label {
-                display: block;
-                margin-bottom: 0.25rem;
-                font-size: 0.875rem;
-                font-weight: 500;
-                color: #374151;
-            }
+        /* 모달 내 지도 스타일 */
+        #modal_map_container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
 
-            .modal-form input {
-                display: block;
-                width: 95%;
-                padding: 0.75rem;
-                border: 1px solid #d1d5db;
-                border-radius: 0.375rem;
-                margin-bottom: 1rem;
-                font-size: 0.95rem;
-            }
-
-            .modal-form input:focus {
-                outline: none;
-                border-color: #60a5fa;
-                box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
-            }
-
-            .modal-form button[type="submit"] {
-                width: 100%;
-                padding: 0.75rem;
-                background-color: #4a5568;
-                color: white;
-                border: none;
-                border-radius: 0.375rem;
-                font-size: 1rem;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-                margin-top: 0.5rem;
-            }
-
-            .modal-form button[type="submit"]:hover {
-                background-color: #2d3748;
-            }
-
-            .error-message {
-                color: red;
-                font-size: 0.8em;
-                display: block;
-                min-height: 1.2em;
-                margin-bottom: 10px;
-            }
-
-            .gpsbtn {
-                position: absolute;
-                left: 605px;
-                top: 30px;
-            }
-
-            .placebtn {
-                position: absolute;
-                left: 770px;
-                top: 30px;
-            }
-
-            #currentStatus, #resultOutput { display: none; margin-top: 15px; padding: 15px; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 5px; min-height: 60px; line-height: 1.6; }
-            #currentStatus { background-color: #d1ecf1; border-color: #bee5eb;}
-            #currentStatus .status-title, #resultOutput .status-title { font-weight: bold; color: #004085; display: block; margin-bottom: 5px; font-size: 1.1em; }
-            .value { color: #0056b3; font-weight: bold; }
-            .place-name .value { font-size: 1.1em; }
     </style>
 </head>
 <body>
+    <header class="app-header">
+        <div class="logo-title">축제&관광 정보</div>
+        <div class="auth-buttons">
+            <button id="signupButton" class="auth-button">회원가입</button>
+            <button id="loginButton" class="auth-button">로그인</button>
+            <button id="logoutButton" class="auth-button hidden">로그아웃</button>
+        </div>
+    </header>
 
     <div id="currentStatus">
         <span class="status-title">현재 기준 위치</span>
-        <span id="statusText">지도 서비스 로딩 중...</span> </div>
+        <span id="statusText">지도 서비스 로딩 중...</span>
+    </div>
+    <div id="resultOutput">
+        </div>
+
 
     <div id="placemodal" class="modal">
         <div class="modal_body">
-            <div class="modal-form">
-                지명:<input type="text" id="placeInput" placeholder="기준 위치를 변경하려면 검색 (예: 강남역)">
-                <button type="submit" onclick="searchPlace()" class="primary">기준 위치 변경</button>
+            <span class="modal-close-btn-custom" onclick="closeModal(placeSearchModal)">&times;</span>
+            <h2 class="modal-title">기준 위치 변경</h2>
+            <div id="modal_map_container"></div>
+            <div class="modal-form" style="text-align:center;">
+                <input type="text" id="placeInput" placeholder="장소 검색 또는 지도에서 우클릭">
+                <button type="button" id="setPlaceFromModalButton" class="auth-button">선택한 위치로 설정</button>
             </div>
         </div>
     </div>
 
-    <div id="resultOutput">
-        검색 결과가 여기에 표시됩니다.
-    </div>
-
-    <img src class="sumteuyeo" alt="숨트여 로고">
-    <p id="mylocation"></p>
-    <button onclick="requestCurrentLocation()" class="gpsbtn" id="gpsbtn">GPS 접근 권한 다시 요청</button>
-    <button id="place" class="placebtn">지명검색</button>
-    <div class="auth-buttons">
-        <button id="signup" class="auth-button">회원가입</button>
-        <button id="login" class="auth-button">로그인</button>
-    </div>
-
     <div id="signupmodal" class="modal">
         <div class="modal_body">
+            <span class="modal-close-btn-custom" onclick="closeModal(signupModal)">&times;</span>
             <h2 class="modal-title">회원가입</h2>
             <form class="modal-form" id="signupForm">
                 <div><label for="signupId">아이디</label><input type="text" id="signupId" name="signupId" required></div>
                 <span id="usernameError" class="error-message"></span>
                 <div><label for="signupPassword">비밀번호</label><input type="password" id="signupPassword" name="signupPassword" required></div>
-                <span id="PasswordError" class="error-message"></span>
+                <span id="passwordError" class="error-message"></span>
                 <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
-                <span id="PasswordConfirmError" class="error-message"></span>
+                <span id="passwordConfirmError" class="error-message"></span>
                 <div><label for="signupEmail">이메일</label><input type="email" id="signupEmail" name="signupEmail" required></div>
-                <span id="EmailError" class="error-message"></span>
+                <span id="emailError" class="error-message"></span>
                 <button type="submit">가입하기</button>
             </form>
         </div>
@@ -298,10 +523,13 @@
 
     <div id="loginmodal" class="modal">
         <div class="modal_body">
+            <span class="modal-close-btn-custom" onclick="closeModal(loginModal)">&times;</span>
             <h2 class="modal-title">로그인</h2>
             <form class="modal-form" id="loginForm">
                 <div><label for="loginId">아이디</label><input type="text" id="loginId" name="loginId" required></div>
+                <span id="loginIdError" class="error-message"></span>
                 <div><label for="loginPassword">비밀번호</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+                <span id="loginPasswordError" class="error-message"></span>
                 <button type="submit">로그인</button>
             </form>
         </div>
@@ -310,8 +538,14 @@
     {% csrf_token %}
 
     <div class="search-bar">
-        <input id="userplace" type="text" placeholder="축제 또는 관광지를 검색하세요">
-        <button>검색</button>
+        <button onclick="requestCurrentLocation()" class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정">
+            <i class="fas fa-map-marker-alt"></i>
+        </button>
+        <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정">
+            <i class="fas fa-map"></i>
+        </button>
+        <input id="userSearchInput" type="text" placeholder="축제 또는 관광지를 검색하세요">
+        <button class="text-search-btn" id="mainSearchButton">검색</button>
     </div>
 
     <div class="pink-screen">
@@ -327,729 +561,660 @@
 
     <div id="modal1" class="modal">
         <div class="modal_body">
-            <h2>봄꽃 축제 상세 정보</h2>
-            <p>아름다운 봄꽃 축제에 오신 것을 환영합니다!<br>
-	다양한 종류의 봄꽃을 감상하고, 맛있는 음식과 즐거운 공연을 즐기세요.<br>
-	기간: 2025년 4월 20일 - 4월 30일<br>
-	위치: [상세 위치 정보]<br>
-	문의: [연락처 정보]<br>
+            <span class="modal-close-btn-custom" onclick="closeModal(itemDetailModal)">&times;</span>
+            <h2 id="itemDetailTitle">상세 정보</h2>
+            <img id="itemDetailImage" src="" alt="상세 이미지">
+            <p id="itemDetailOverview"></p>
+            <p id="itemDetailPeriod"></p>
+            <p id="itemDetailLocation"></p>
+            <div id="itemDetailHomepage" class="homepage-link"></div>
         </div>
     </div>
 
     <div class="category-section">
-
         <div class="slider-container">
             <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
             <div class="slider" id="festivalSlider">
-                <a class="open-modal">
-                <div id="festival1" class="card">
-                    <img src="bul.png" alt="봄꽃 축제">
-                    <div class="info">
-                        <h3>봄꽃 축제</h3>
-                        <p>아름다운 봄꽃을 만끽하세요!</p>
-                        <p>기간: 2025.04.20 - 2025.04.30</p>
-                        <p>위치: [임의의 장소 1]</p>
-                    </div>
-                </div>
-	        </a>
-                <div class="card">
-                    <img src="bul.png" alt="[신나는 여름 축제]">
-                    <div class="info">
-                        <h3>[신나는 여름 축제]</h3>
-                        <p>더위를 잊게 해줄 시원한 축제!</p>
-                        <p>기간: 2025.07.15 - 2025.07.20</p>
-                        <p>위치: [임의의 장소 2]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="가을 단풍 축제">
-                    <div class="info">
-                        <h3>가을 단풍 축제</h3>
-                        <p>붉게 물든 단풍을 감상하세요.</p>
-                        <p>기간: 2025.10.25 - 2025.11.05</p>
-                        <p>위치: [임의의 장소 3]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="겨울 빛 축제">
-                    <div class="info">
-                        <h3>겨울 빛 축제</h3>
-                        <p>화려한 불빛으로 가득한 밤!</p>
-                        <p>기간: 2025.12.20 - 2026.01.05</p>
-                        <p>위치: [임의의 장소 4]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="[지역 특산물 축제]">
-                    <div class="info">
-                        <h3>[지역 특산물 축제]</h3>
-                        <p>싱싱한 특산물을 맛보세요!</p>
-                        <p>기간: 2025.05.10 - 2025.05.15</p>
-                        <p>위치: [임의의 장소 5]</p>
-                    </div>
-                </div>
             </div>
             <div class="slider-controls">
-                <button onclick="prevSlide('festivalSlider')">&#10094;</button>
-                <button onclick="nextSlide('festivalSlider')">&#10095;</button>
+                <button id="festivalPrevBtn" aria-label="이전 축제 보기">&#10094;</button>
+                <button id="festivalNextBtn" aria-label="다음 축제 보기">&#10095;</button>
             </div>
         </div>
     </div>
 
     <div class="category-section">
-
         <div class="slider-container">
             <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
             <div class="slider" id="touristSlider">
-                <div class="card">
-                    <img src="bul.png" alt="[멋진 자연 경관]">
-                    <div class="info">
-                        <h3>[멋진 자연 경관]</h3>
-                        <p>숨 막히는 자연의 아름다움.</p>
-                        <p>추천 방문 시기: 봄, 여름</p>
-                        <p>위치: [임의의 장소 A]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="[유명한 역사 유적지]">
-                    <div class="info">
-                        <h3>[유명한 역사 유적지]</h3>
-                        <p>역사의 숨결을 느껴보세요.</p>
-                        <p>추천 방문 시기: 가을</p>
-                        <p>위치: [임의의 장소 B]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="[활기 넘치는 도시 명소]">
-                    <div class="info">
-                        <h3>[활기 넘치는 도시 명소]</h3>
-                        <p>다양한 즐길 거리가 있는 곳.</p>
-                        <p>추천 방문 시기: 연중</p>
-                        <p>위치: [임의의 장소 C]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="[아름다운 해변]">
-                    <div class="info">
-                        <h3>[아름다운 해변]</h3>
-                        <p>푸른 바다와 하얀 백사장.</p>
-                        <p>추천 방문 시기: 여름</p>
-                        <p>위치: [임의의 장소 D]</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <img src="bul.png" alt="[조용한 휴식 공간]">
-                    <div class="info">
-                        <h3>[조용한 휴식 공간]</h3>
-                        <p>일상에서 벗어나 편안한 시간을.</p>
-                        <p>추천 방문 시기: 봄, 가을</p>
-                        <p>위치: [임의의 장소 E]</p>
-                    </div>
-                </div>
             </div>
             <div class="slider-controls">
-                <button onclick="prevSlide('touristSlider')">&#10094;</button>
-                <button onclick="nextSlide('touristSlider')">&#10095;</button>
+                <button id="touristPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
+                <button id="touristNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
             </div>
         </div>
     </div>
+
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
-        function setupSlider(sliderId) {
-            const slider = document.getElementById(sliderId);
-            const cards = slider.querySelectorAll('.card');
-            let currentIndex = 0;
-            const cardWidth = cards[0].offsetWidth + 20;
-            const visibleCount = 3;
+        // --- 전역 변수 및 DOM 요소 참조 ---
+        let ps = null;
+        let targetLat = null;
+        let targetLon = null;
+        let targetPlaceName = "알 수 없음";
+        let isInitialLoadAttempt = true;
+        const DEFAULT_LATITUDE = 35.1795543;
+        const DEFAULT_LONGITUDE = 129.0756416;
+        const DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
 
-            function updateSlider() {
-                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        let allPlaces = [];
+        let festivalSliderControls = null;
+        let touristSliderControls = null;
+
+        let modalMap = null;
+        let modalMapMarker = null;
+        let modalClickedLatLng = null;
+
+        let placeInput, userSearchInput;
+        let signupModal, loginModal, itemDetailModal, placeSearchModal;
+        let signupForm, loginForm;
+        let usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl;
+        let loginIdErrorEl, loginPasswordErrorEl;
+        let csrfToken;
+        // let resultOutputDiv; // 더 이상 화면에 메시지를 직접 표시하지 않으므로, 변수 사용 최소화
+        let mainSearchButton;
+
+
+        // --- 슬라이더 설정 함수 ---
+        function setupSlider(sliderId, prevBtnId, nextBtnId) {
+            const slider = document.getElementById(sliderId);
+            const prevButtonElement = document.getElementById(prevBtnId);
+            const nextButtonElement = document.getElementById(nextBtnId);
+
+            if (!slider || !prevButtonElement || !nextButtonElement) {
+                console.error("Slider or control buttons not found for:", sliderId);
+                if(prevButtonElement) prevButtonElement.classList.add('hidden');
+                if(nextButtonElement) nextButtonElement.classList.add('hidden');
+                return null;
             }
 
-            function nextSlide() {
-                if (currentIndex < cards.length - visibleCount) {
-                    currentIndex++;
-                    updateSlider();
+            let cards = slider.querySelectorAll('.card');
+            if (cards.length === 0) {
+                prevButtonElement.classList.add('hidden');
+                nextButtonElement.classList.add('hidden');
+                return { reinit: function() { const currentCards = slider.querySelectorAll('.card'); if(currentCards.length === 0) {prevButtonElement.classList.add('hidden'); nextButtonElement.classList.add('hidden');}} };
+            }
+
+            let currentIndex = 0;
+            const cardMargin = cards.length > 0 ? (parseFloat(window.getComputedStyle(cards[0]).marginLeft) + parseFloat(window.getComputedStyle(cards[0]).marginRight)) : 20;
+            let effectiveCardWidthForTranslation = cards.length > 0 ? cards[0].offsetWidth + cardMargin : 0;
+            
+            let visibleCount = 3; 
+
+            function calculateVisibleCount() {
+                 if (cards.length === 0 || !effectiveCardWidthForTranslation) return 1;
+                 const sliderContainerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
+                 return Math.max(1, Math.floor(sliderContainerWidth / effectiveCardWidthForTranslation));
+            }
+
+            function updateSliderUI() {
+                if (cards.length === 0) {
+                    slider.style.transform = `translateX(0px)`;
+                    prevButtonElement.classList.add('hidden');
+                    nextButtonElement.classList.add('hidden');
+                    return;
+                }
+                effectiveCardWidthForTranslation = cards[0].offsetWidth + cardMargin;
+                visibleCount = calculateVisibleCount(); 
+                slider.style.transform = `translateX(-${currentIndex * effectiveCardWidthForTranslation}px)`;
+
+                if (cards.length <= visibleCount) {
+                    prevButtonElement.classList.add('hidden');
+                    nextButtonElement.classList.add('hidden');
+                } else {
+                    prevButtonElement.classList.remove('hidden');
+                    nextButtonElement.classList.remove('hidden');
+                    prevButtonElement.disabled = currentIndex === 0;
+                    nextButtonElement.disabled = currentIndex >= cards.length - visibleCount;
                 }
             }
 
-            function prevSlide() {
+            prevButtonElement.onclick = () => {
                 if (currentIndex > 0) {
                     currentIndex--;
-                    updateSlider();
+                    updateSliderUI();
                 }
-            }
-
-            updateSlider();
-
-            return { nextSlide, prevSlide };
-        }
-
-        const festivalSliderControls = setupSlider('festivalSlider');
-        const touristSliderControls = setupSlider('touristSlider');
-
-        function nextSlide(sliderId) {
-            if (sliderId === 'festivalSlider') {
-                festivalSliderControls.nextSlide();
-            } else if (sliderId === 'touristSlider') {
-                touristSliderControls.nextSlide();
-            }
-        }
-
-        function prevSlide(sliderId) {
-            if (sliderId === 'festivalSlider') {
-                festivalSliderControls.prevSlide();
-            } else if (sliderId === 'touristSlider') {
-                touristSliderControls.prevSlide();
-            }
-        }
-        function setupSlider(sliderId) {
-            const slider = document.getElementById(sliderId);
-            const cards = slider.querySelectorAll('.card');
-            let currentIndex = 0;
-            const cardWidth = cards[0].offsetWidth + 20;
-            const visibleCount = 3;
-
-            function updateSlider() {
-                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-            }
-
-            function nextSlide() {
+            };
+            nextButtonElement.onclick = () => {
+                 visibleCount = calculateVisibleCount(); 
                 if (currentIndex < cards.length - visibleCount) {
                     currentIndex++;
-                    updateSlider();
+                    updateSliderUI();
+                }
+            };
+            
+            window.addEventListener('resize', debounce(updateSliderUI, 250));
+            updateSliderUI();
+            return {
+                reinit: function() {
+                    cards = slider.querySelectorAll('.card');
+                    currentIndex = 0;
+                    updateSliderUI();
+                }
+            };
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function openModal(modalElement) {
+            if (modalElement) {
+                modalElement.style.display = "flex";
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalElement) {
+            if (modalElement) {
+                modalElement.style.display = "none";
+                const form = modalElement.querySelector('form');
+                if (form) {
+                    form.reset();
+                    const errorMessages = form.querySelectorAll('.error-message');
+                    errorMessages.forEach(span => span.textContent = '');
+                }
+                const openModals = document.querySelectorAll('.modal.open');
+                if (openModals.length === 0 || (openModals.length === 1 && openModals[0] === modalElement && modalElement.style.display === 'none')) {
+                     document.body.style.overflow = '';
+                }
+            }
+        }
+
+        function openItemDetailModal(itemData) {
+            if (!itemData || !itemDetailModal) return;
+            document.getElementById('itemDetailTitle').textContent = itemData.title || "상세 정보";
+            document.getElementById('itemDetailImage').src = itemData.firstimage || itemData.image || "https://via.placeholder.com/400x200?text=No+Image";
+            document.getElementById('itemDetailImage').alt = itemData.title || "이미지";
+            document.getElementById('itemDetailOverview').textContent = itemData.overview || "설명이 없습니다.";
+
+            const periodEl = document.getElementById('itemDetailPeriod');
+            const locationEl = document.getElementById('itemDetailLocation');
+            const homepageDiv = document.getElementById('itemDetailHomepage');
+
+            periodEl.innerHTML = itemData.period ? `<strong>기간:</strong> ${itemData.period}` : "";
+            locationEl.innerHTML = itemData.addr1 || itemData.location ? `<strong>위치:</strong> ${itemData.addr1 || itemData.location}` : "";
+
+            homepageDiv.innerHTML = "";
+            if (itemData.homepage) {
+                let homepageText = itemData.homepage;
+                let homepageUrl = '';
+                const urlMatch = typeof homepageText === 'string' ? homepageText.match(/href=["']([^"']+)["']/i) : null;
+                if (urlMatch && urlMatch[1]) {
+                    homepageUrl = urlMatch[1];
+                } else if (typeof homepageText === 'string' && homepageText.toLowerCase().startsWith('http')) {
+                    homepageUrl = homepageText;
+                }
+
+                if (homepageUrl) {
+                    const link = document.createElement('a');
+                    link.href = homepageUrl;
+                    link.textContent = "홈페이지 방문";
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    homepageDiv.appendChild(link);
+                } else if (typeof homepageText === 'string' && homepageText.trim() !== "") {
+                     homepageDiv.innerHTML = `<strong>홈페이지/문의:</strong> ${homepageText}`;
                 }
             }
 
-            function prevSlide() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
+            periodEl.style.display = periodEl.innerHTML ? 'block' : 'none';
+            locationEl.style.display = locationEl.innerHTML ? 'block' : 'none';
+            homepageDiv.style.display = homepageDiv.innerHTML.trim() !== "" ? 'block' : 'none';
+
+            openModal(itemDetailModal);
+        }
+
+        function initializeKakaoMaps() {
+            console.log("카카오맵 서비스 로드 완료. 지도 서비스 초기화 중...");
+            // 화면 알림 대신 콘솔 로그 사용
+            try {
+                ps = new kakao.maps.services.Places();
+                console.log("카카오 장소 검색 서비스 준비 완료.");
+                requestCurrentLocation();
+            } catch (error) {
+                console.error("카카오 서비스 초기화 중 오류:", error);
+                alert("지도 서비스를 초기화할 수 없습니다.");
+                setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                isInitialLoadAttempt = false;
+            }
+        }
+
+        function requestCurrentLocation() {
+            if (navigator.geolocation) {
+                console.log("현재 GPS 위치를 확인 중입니다...");
+                navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+                    enableHighAccuracy: false, timeout: 10000, maximumAge: 0
+                });
+            } else {
+                console.warn("이 브라우저에서는 Geolocation이 지원되지 않습니다. 기본 위치로 진행합니다.");
+                alert("GPS를 지원하지 않는 환경입니다. 기본 위치로 진행합니다.");
+                if (isInitialLoadAttempt) {
+                    setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                    isInitialLoadAttempt = false;
                 }
             }
-
-            updateSlider();
-
-            return { nextSlide, prevSlide };
         }
 
-	    /*모달창*/
-        var signup1 = document.getElementById("signup");
-        var login1 = document.getElementById("login");
-
-        var signupmodal1 = document.getElementById("signupmodal");
-        var loginmodal1 = document.getElementById("loginmodal");
-
-        // 모달 열기 함수 (공통)
-        function openModal(modal) {
-            modal.style.display = "block";
-        }
-
-        // 모달 닫기 함수 (공통)
-        function closeModal(modal) {
-            modal.style.display = "none";
-            modal.reset();
-        }
-
-        //회원가입 모달 열기
-        signup1.onclick = function() {
-            openModal(signupmodal1);
-        }
-
-        //로그인 모달 열기
-        login1.onclick = function () {
-            openModal(loginmodal1);
-        }
-
-        //축제 및 관광지 모달 열기
-        var festival1 = document.getElementById("festival1");
-
-        var modal1 = document.getElementById("modal1");
-
-        festival1.onclick = function () {
-            openModal(modal1);
-        }
-
-        //지명 모달 열기
-        var place = document.getElementById("place");
-        var placemodal = document.getElementById("placemodal");
-
-        place.onclick = function () {
-            openModal(placemodal);
-        }
-
-        // 모달 외부 클릭 시 모달 닫기
-        window.onclick = function(event) {
-            if (event.target == signupmodal1) {
-                closeModal(signupmodal1);
-            }
-            if (event.target == loginmodal1) {
-                closeModal(loginmodal1);
-            }
-            if (event.target == modal1) {
-                closeModal(modal1);
-            }
-            if (event.target == placemodal) {
-                closeModal(placemodal);
-            }
-        }
-
-    // --- 전역 변수 선언 ---
-    var ps = null;
-    var resultOutputDiv = null;
-    var statusTextSpan = null;
-    var targetLat = null;
-    var targetLon = null;
-    var targetPlaceName = "알 수 없음";
-    var isInitialLoadAttempt = true;
-
-    // 현재 시간 기준, 부산 위치 기본값 사용
-    const DEFAULT_LATITUDE = 35.1795543;
-    const DEFAULT_LONGITUDE = 129.0756416;
-    const DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
-
-    // --- 초기화 ---
-    document.addEventListener('DOMContentLoaded', function() {
-        // DOM 요소 참조는 여기서 먼저 가져옵니다.
-        resultOutputDiv = document.getElementById('resultOutput');
-        statusTextSpan = document.getElementById('statusText');
-
-        // 엔터키 리스너 추가
-        const placeInput = document.getElementById('placeInput');
-        placeInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                searchPlace();
-            }
-        });
-
-        // *** kakao.maps.load() 사용 ***
-        // 카카오맵 SDK 로드가 완료된 후 initialize 함수를 실행하도록 합니다.
-        if (typeof kakao !== 'undefined' && kakao.maps) {
-            kakao.maps.load(initialize); // 로드 후 initialize 함수 호출
-        } else {
-            // kakao 객체 자체가 없는 경우 (스크립트 로드 실패)
-            console.error("카카오맵 SDK 기본 객체를 로드할 수 없습니다.");
-            alert("카카오맵 SDK를 로드할 수 없습니다. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
-            statusTextSpan.textContent = "오류: 지도 서비스 로드 실패.";
-        }
-    });
-
-    // *** SDK 로드 후 실행될 초기화 함수 ***
-    function initialize() {
-        console.log("카카오맵 서비스 로드 완료.");
-        statusTextSpan.textContent = "GPS 위치 확인 중..."; // 상태 메시지 업데이트
-
-        try {
-            // Places 서비스 객체 생성 (이제 안전하게 생성 가능)
-            ps = new kakao.maps.services.Places();
-            console.log("카카오 장소 검색 서비스 준비 완료.");
-
-            // 초기 GPS 위치 요청 시작
-            requestCurrentLocation();
-
-        } catch (error) {
-            // 혹시 Places 객체 생성 중 다른 오류 발생 시
-            console.error("서비스 초기화 중 오류:", error);
-            alert("지도 서비스를 초기화할 수 없습니다. (오류 발생)");
-            setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
+        function onGeoSuccess(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const source = isInitialLoadAttempt ? "초기 로드" : "사용자 요청";
+            console.log(`GPS 위치 확인 성공 (${source}): 위도(${lat}), 경도(${lon}). 기준 위치를 업데이트했습니다.`);
+            setTargetLocation(lat, lon, "현재 내 위치 (GPS)", true);
             isInitialLoadAttempt = false;
         }
-    }
 
-    // 1. GPS 위치 요청 함수 (이전과 동일)
-    function requestCurrentLocation() {
-        if (navigator.geolocation) {
-            console.log("GPS 위치 요청 중 (새로고침 시도)...");
-            const currentStatusDiv = document.getElementById('currentStatus');
-            statusTextSpan = currentStatusDiv.querySelector('#statusText'); // 동적으로 생성될 수 있으므로 다시 찾기
-             if (!statusTextSpan) { // 만약 span이 없다면 새로 만들거나 구조를 가정
-                 currentStatusDiv.innerHTML = `<span class="status-title">현재 기준 위치</span><span id="statusText">현재 GPS 위치를 확인 중입니다...</span>`;
-                 statusTextSpan = document.getElementById('statusText');
-             } else {
-                statusTextSpan.textContent = "현재 GPS 위치를 확인 중입니다...";
-             }
-
-
-            navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
-                enableHighAccuracy: false,
-                timeout: 10000,
-                maximumAge: 0
-            });
-        } else {
-            console.warn("이 브라우저에서는 Geolocation이 지원되지 않습니다.");
-            alert("GPS를 지원하지 않는 환경입니다.");
-             if (isInitialLoadAttempt) {
-                 setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
-                 isInitialLoadAttempt = false;
-             } else if (statusTextSpan) { // statusTextSpan이 있을 때만 업데이트
-                 statusTextSpan.textContent = "오류: GPS를 지원하지 않는 환경입니다.";
-             }
+        function onGeoError(error) {
+            console.error("GPS 위치 확인 실패:", error.code, error.message);
+            let message = "GPS 위치를 가져올 수 없습니다. ";
+            switch(error.code) {
+                case error.PERMISSION_DENIED: message += "사용자 권한이 거부되었습니다."; break;
+                case error.POSITION_UNAVAILABLE: message += "위치 정보를 사용할 수 없습니다."; break;
+                case error.TIMEOUT: message += "요청 시간이 초과되었습니다."; break;
+                default: message += "알 수 없는 오류가 발생했습니다."; break;
+            }
+            if (isInitialLoadAttempt) {
+                console.log(message + " 기본 위치(부산 시청)를 사용합니다.");
+                setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                isInitialLoadAttempt = false;
+            } else {
+                console.warn(`GPS 오류: ${message} 이전 기준 위치(${targetPlaceName})를 유지합니다.`);
+                alert(message);
+            }
         }
-    }
 
-    // Geolocation 성공 콜백 (이전과 동일)
-    function onGeoSuccess(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const source = isInitialLoadAttempt ? "초기 로드" : "사용자 요청";
-        console.log(`GPS 위치 확인 성공 (${source}): 위도(${lat}), 경도(${lon})`);
-        setTargetLocation(lat, lon, "현재 내 위치 (GPS)", true);
-        resultOutputDiv.innerHTML = `GPS 위치로 기준 위치를 업데이트했습니다. (${source})`;
-        isInitialLoadAttempt = false;
-    }
+        function setTargetLocation(lat, lon, name, sendToBackend) {
+            targetLat = parseFloat(lat);
+            targetLon = parseFloat(lon);
+            targetPlaceName = name;
+            console.log(`기준 위치 업데이트됨: ${name} (위도: ${targetLat}, 경도: ${targetLon})`);
+            // 화면 알림 대신 console에만 표시
 
-    // Geolocation 실패 콜백 (이전과 동일, statusTextSpan 확인 추가)
-    function onGeoError(error) {
-        console.error("GPS 위치 확인 실패:", error.message);
-        let message = "GPS 위치를 가져올 수 없습니다. ";
-        switch(error.code) { /* ... (오류 메시지 생성) ... */
-             case error.PERMISSION_DENIED: message += "사용자 권한이 거부되었습니다."; break;
-             case error.POSITION_UNAVAILABLE: message += "위치 정보를 사용할 수 없습니다."; break;
-             case error.TIMEOUT: message += "요청 시간이 초과되었습니다."; break;
-             default: message += "알 수 없는 오류가 발생했습니다."; break;
-         }
-
-        statusTextSpan = document.getElementById('statusText'); // 다시 찾아봄
-
-        if (isInitialLoadAttempt) {
-            console.log("초기 로드 시 GPS 실패, 기본값으로 설정합니다.");
-             if(statusTextSpan) statusTextSpan.textContent = message + " 기본 위치(부산 시청)를 사용합니다.";
-            setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, false);
-        } else {
-            console.log("버튼 클릭 후 GPS 실패, 이전 위치를 유지합니다.");
-            if(statusTextSpan) statusTextSpan.textContent = `오류: ${message} 이전 기준 위치(${targetPlaceName})를 유지합니다.`;
-            alert(message);
+            if (sendToBackend && targetLat != null && targetLon != null) {
+                fetchNearbyPlacesData(targetLat, targetLon);
+            }
         }
-        isInitialLoadAttempt = false;
-    }
 
-    // 2. 타겟(기준) 위치 설정 및 상태 업데이트 함수 (이전과 동일, statusTextSpan 확인 추가)
-    function setTargetLocation(lat, lon, name, sendToBackend) {
-        targetLat = lat;
-        targetLon = lon;
-        targetPlaceName = name;
-        console.log(`기준 위치 업데이트됨: ${name} (위도: ${lat}, 경도: ${lon})`);
+        function loadModalMap() {
+            if (!placeSearchModal || placeSearchModal.style.display !== 'flex') return;
+            const mapContainer = document.getElementById('modal_map_container');
+            if (!mapContainer) { console.error('모달 지도 컨테이너(modal_map_container)를 찾을 수 없습니다.'); return; }
 
-        const currentStatusDiv = document.getElementById('currentStatus');
-        currentStatusDiv.innerHTML = `
-            <span class="status-title">현재 기준 위치</span>
-            <span id="statusText">
-                <span class="label">위치명:</span> <span class="value">${targetPlaceName}</span><br>
-                <span class="label">위도:</span> <span class="value">${targetLat}</span><br>
-                <span class="label">경도:</span> <span class="value">${targetLon}</span>
-            </span>`;
-        statusTextSpan = document.getElementById('statusText'); // 참조 갱신
+            const initialCenter = modalClickedLatLng || (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
 
-        if (sendToBackend) {
-            sendLocationToBackend(targetLat, targetLon, targetPlaceName);
+            if (modalMap) {
+                modalMap.relayout();
+                modalMap.setCenter(initialCenter);
+                if (modalMapMarker) {
+                    modalMapMarker.setPosition(initialCenter);
+                    modalMapMarker.setMap(modalMap);
+                } else {
+                    modalMapMarker = new kakao.maps.Marker({ position: initialCenter, map: modalMap });
+                }
+            } else {
+                const mapOption = { center: initialCenter, level: 7 };
+                modalMap = new kakao.maps.Map(mapContainer, mapOption);
+                modalMapMarker = new kakao.maps.Marker({ position: initialCenter, map: modalMap });
+
+                kakao.maps.event.addListener(modalMap, 'rightclick', function(mouseEvent) {
+                    modalClickedLatLng = mouseEvent.latLng;
+                    modalMapMarker.setPosition(modalClickedLatLng);
+                    modalMapMarker.setMap(modalMap);
+                    placeInput.value = `위도: ${modalClickedLatLng.getLat().toFixed(6)}, 경도: ${modalClickedLatLng.getLng().toFixed(6)}`;
+                    console.log('모달 지도 우클릭:', modalClickedLatLng.toString());
+                });
+            }
+            if (!modalClickedLatLng) modalClickedLatLng = initialCenter;
         }
-    }
 
-    // 3. 장소 검색 실행 함수 (이전과 동일)
-    function searchPlace() {
-        if (!ps) { // ps 객체가 초기화되었는지 확인
-             alert("장소 검색 서비스가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
-             console.error("Places 서비스 객체(ps)가 초기화되지 않았습니다.");
-             return;
-         }
-        var keyword = document.getElementById('placeInput').value.trim();
-        if (!keyword) { alert('검색할 장소 이름을 입력해주세요!'); return; }
-        console.log(`"${keyword}" 검색 시작 (기준 위치 변경 시도)...`);
-        resultOutputDiv.innerHTML = `"${keyword}" 검색 중...`;
-        ps.keywordSearch(keyword, placeSearchCallback);
-    }
+        function openPlaceSearchModal() {
+            if (placeSearchModal) {
+                placeInput.value = '';
+                modalClickedLatLng = null;
+                openModal(placeSearchModal);
+                setTimeout(loadModalMap, 50);
+            }
+        }
+        
+        function handlePlaceInputEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                setPlaceFromModal();
+            }
+        }
 
-    // 4. 장소 검색 콜백 함수 (이전과 동일)
-        // 4. 장소 검색 콜백 함수
+        function setPlaceFromModal() {
+            const keyword = placeInput.value.trim();
+            if (keyword && !keyword.startsWith("위도:")) {
+                if (!ps) { alert("장소 검색 서비스가 아직 준비되지 않았습니다."); console.error("Places 서비스 객체(ps)가 초기화되지 않았습니다."); return; }
+                console.log(`모달에서 "${keyword}" 검색 시작...`);
+                ps.keywordSearch(keyword, placeSearchCallback);
+            } else if (modalClickedLatLng) {
+                console.log("모달 지도에서 선택한 위치로 기준 설정:", modalClickedLatLng.toString());
+                const mockData = [{
+                    place_name: `지도 선택 (${modalClickedLatLng.getLat().toFixed(4)}, ${modalClickedLatLng.getLng().toFixed(4)})`,
+                    y: modalClickedLatLng.getLat(),
+                    x: modalClickedLatLng.getLng()
+                }];
+                placeSearchCallback(mockData, kakao.maps.services.Status.OK, { keyword: '지도에서 선택한 위치' });
+            } else {
+                alert('검색할 장소를 입력하거나, 지도에서 원하는 위치를 마우스 오른쪽 버튼으로 클릭해주세요.');
+                return;
+            }
+            closeModal(placeSearchModal);
+        }
+
         function placeSearchCallback(data, status, pagination) {
-            console.log("placeSearchCallback status:", status); // 상태 확인용 로그 (디버깅 시 유용)
+            console.log("placeSearchCallback status:", status, ", data:", data);
+            // 화면 알림 대신 콘솔 로그 사용
 
             if (status === kakao.maps.services.Status.OK) {
-                // 검색 성공 시 (이전 코드와 동일)
                 if (data.length > 0) {
-                    var place = data[0];
-                    var searchedName = place.place_name;
-                    var searchedLat = place.y;
-                    var searchedLon = place.x;
+                    const place = data[0];
+                    const searchedName = place.place_name;
+                    const searchedLat = parseFloat(place.y);
+                    const searchedLon = parseFloat(place.x);
 
-                    // 결과 영역 업데이트 (성공 메시지 포함)
-                    resultOutputDiv.innerHTML = `
-                        <span class="status-title">검색 결과</span>
-                        <div class="place-name"><span class="label">장소:</span> <span class="value">${searchedName}</span></div>
-                        <div><span class="label">위도:</span> <span class="value">${searchedLat}</span></div>
-                        <div><span class="label">경도:</span> <span class="value">${searchedLon}</span></div>
-                        <div><em>이 위치를 새로운 기준 위치로 설정합니다.</em></div>`;
-
-                    // 타겟 위치 업데이트 및 백엔드 전송 호출
+                    console.log(`검색 결과: ${searchedName} (${searchedLat}, ${searchedLon}). 기준 위치로 설정합니다.`);
                     setTargetLocation(searchedLat, searchedLon, searchedName, true);
                     isInitialLoadAttempt = false;
                 } else {
-                    // Status는 OK지만 data 배열이 비어있는 경우 (거의 발생하지 않음)
-                    console.log("장소 검색 데이터 없음 (Status: OK, Data Length: 0)");
-                    resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과 데이터가 비어 있습니다. 기준 위치는 변경되지 않습니다.`;
+                    const keywordForMsg = pagination && pagination.keyword ? `"${pagination.keyword}"에 대한 ` : "";
+                    console.log(`${keywordForMsg}검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`);
+                    alert(`${keywordForMsg}검색 결과가 없습니다.`);
                 }
-
             } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-                // 검색 결과가 없는 경우
-                console.log("장소 검색 결과 없음 (ZERO_RESULT)");
-                resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`;
-                // targetLocation은 변경하지 않음
-
+                const keywordForMsg = pagination && pagination.keyword ? `"${pagination.keyword}"에 대한 ` : "";
+                 console.log(`${keywordForMsg}검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`);
+                 alert(`${keywordForMsg}검색 결과가 없습니다.`);
             } else if (status === kakao.maps.services.Status.ERROR) {
-                // 검색 중 서버 오류가 발생한 경우
-                console.error("장소 검색 중 서버 오류 발생 (ERROR):", status);
-                resultOutputDiv.textContent = '장소 검색 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 기준 위치는 변경되지 않습니다.';
-                alert('장소 검색 중 서버 오류가 발생했습니다.'); // 사용자에게 명시적으로 알림
-                // targetLocation은 변경하지 않음
-
+                 console.error('장소 검색 중 서버 오류가 발생했습니다. 기준 위치는 변경되지 않습니다.');
+                 alert('장소 검색 중 서버 오류가 발생했습니다.');
             } else {
-                // 그 외 다른 상태 코드 (예: INVALID_REQUEST - 요청 파라미터 오류 등)
-                console.warn("장소 검색 기타 상태:", status);
-                resultOutputDiv.textContent = `장소 검색 중 예상치 못한 상태가 발생했습니다 (상태 코드: ${status}). 기준 위치는 변경되지 않습니다.`;
-                // targetLocation은 변경하지 않음
+                 console.warn(`장소 검색 중 예상치 못한 상태(${status}). 기준 위치는 변경되지 않습니다.`);
+                 alert(`장소 검색 오류 (상태 코드: ${status})`);
             }
         }
-         if (status === kakao.maps.services.Status.OK && data.length > 0) {
-            var place = data[0];
-            resultOutputDiv.innerHTML = `
-                <span class="status-title">검색 결과</span>
-                <div class="place-name"><span class="label">장소:</span> <span class="value">${place.place_name}</span></div>
-                <div><span class="label">위도:</span> <span class="value">${place.y}</span></div>
-                <div><span class="label">경도:</span> <span class="value">${place.x}</span></div>
-                <div><em>이 위치를 새로운 기준 위치로 설정합니다.</em></div>`;
-            setTargetLocation(place.y, place.x, place.place_name, true);
-            isInitialLoadAttempt = false;
-         } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-             resultOutputDiv.textContent = `"${pagination.keyword}"에 대한 검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`;
-         } else if (status === kakao.maps.services.Status.ERROR) {
-             resultOutputDiv.textContent = '장소 검색 중 오류가 발생했습니다. 기준 위치는 변경되지 않습니다.';
-             alert('장소 검색 중 오류가 발생했습니다.');
-         } else {
-             resultOutputDiv.textContent = `장소 검색 중 예상치 못한 상태(${status}). 기준 위치는 변경되지 않습니다.`;
-         }
 
-        // 백엔드로 위치정보 전송
-        async function sendLocationToBackend(latitude, longitude, targetPlaceName) {
-            const url = '/api/receive-location/';
-            const data = {
-                latitude: latitude,
-                longitude: longitude,
-                targetPlaceName: targetPlaceName
-            };
+        async function fetchNearbyPlacesData(lat, lon) {
+            const apiUrl = csrfToken ? '/api/receive-location/' : null;
+            if (!apiUrl) {
+                 console.warn("CSRF 토큰이 없거나 API URL이 설정되지 않아 서버 요청을 보내지 않습니다.");
+                 allPlaces = []; renderPlaces(); return;
+            }
+
+            console.log(`서버 요청: ${apiUrl} (위도: ${lat}, 경도: ${lon}) - 주변 관광지 정보 요청 중...`);
 
             try {
-                const response = await fetch(url, {
+                const fetchOptions = {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                // 응답 상태 확인
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ latitude: lat, longitude: lon })
+                };
+                const response = await fetch(apiUrl, fetchOptions);
                 if (!response.ok) {
-                    // 서버에서 오류 응답일경우
-                    const errorData = await response.json().catch(() => null);
-                    const message = errorData?.message || '서버 오류가 발생했습니다 (상태 코드: ${response.status})';
-                    throw new Error(message);
+                    const errorText = await response.text();
+                    let errorDetail = "";
+                    try { const errorJson = JSON.parse(errorText); errorDetail = errorJson.message || errorJson.error || JSON.stringify(errorJson); }
+                    catch(e) { errorDetail = errorText.substring(0, 200); }
+                    throw new Error(`서버 요청 실패 (상태: ${response.status}). 내용: ${errorDetail}`);
                 }
-
-                // 성공적으로 응답받으면 JSON으로 파싱
                 const result = await response.json();
-                console.log('백엔드 응답:', result);
-
-                // 결과 처리
-                if (result.status === 'success') {
-                    displayPlaces(result.places);
+                if (result.status === 'success' && Array.isArray(result.places)) {
+                    console.log(`주변 관광지 정보 ${result.places.length}개를 성공적으로 가져왔습니다.`);
+                    allPlaces = result.places;
+                    renderPlaces();
                 } else {
-                    //백엔드에서 status: 'error'를 보낸경우
-                    resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
+                    throw new Error(result.message || '백엔드 데이터 형식 오류 또는 데이터 없음');
                 }
-
             } catch (error) {
-                    //네트워크 오류 또는 위에서 throw된 오류 처리
-                    console.error('백엔드 요청 실패:', error);
-                    resultsDiv.innerHTML = `<p style="color: red;">데이터를 가져오는 데 실패했습니다: ${error.message}</p>`;
-                }
+                console.error('데이터 로딩 실패:', error);
+                alert(`데이터 로딩 중 오류가 발생했습니다: ${error.message}`);
+                allPlaces = []; renderPlaces();
+            }
         }
 
-        // 백엔드로 위치정보 전송
-        async function sendLocation(latitude, longitude) {
-            const url = '/api/receive-location/';
-            const data = {
-                latitude: latitude,
-                longitude: longitude
-            };
+        function renderPlaces() {
+            const festivalSliderEl = document.getElementById('festivalSlider');
+            const touristSliderEl = document.getElementById('touristSlider');
+            if (!festivalSliderEl || !touristSliderEl) { console.error("슬라이더 요소를 찾을 수 없습니다."); return; }
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(data)
+            festivalSliderEl.innerHTML = '';
+            touristSliderEl.innerHTML = '';
+
+            if (!allPlaces || allPlaces.length === 0) {
+                const noDataMsg = '<p style="text-align:center; color:#777; padding: 20px 0;">주변에 표시할 정보가 없습니다.</p>';
+                festivalSliderEl.innerHTML = noDataMsg;
+                touristSliderEl.innerHTML = noDataMsg;
+            } else {
+                allPlaces.forEach(item => {
+                    const cardHTML = `
+                        <img src="${item.firstimage || item.image || '사진 없음'}" alt="${item.title || '정보 없음'}">
+                        <div class="info">
+                            <h3>${item.title || '제목 없음'}</h3>
+                            <p>${item.addr || item.location || '위치 정보 없음'}</p>
+                        </div>
+                    `;
+                    
+                    const cardElementFestival = document.createElement('div');
+                    cardElementFestival.className = 'card';
+                    cardElementFestival.innerHTML = cardHTML;
+                    cardElementFestival.addEventListener('click', () => openItemDetailModal(item));
+                    festivalSliderEl.appendChild(cardElementFestival);
+
+                    const cardElementTourist = document.createElement('div');
+                    cardElementTourist.className = 'card';
+                    cardElementTourist.innerHTML = cardHTML;
+                    cardElementTourist.addEventListener('click', () => openItemDetailModal(item));
+                    touristSliderEl.appendChild(cardElementTourist);
                 });
-
-                // 응답 상태 확인
-                if (!response.ok) {
-                    // 서버에서 오류 응답일경우
-                    const errorData = await response.json().catch(() => null);
-                    const message = errorData?.message || '서버 오류가 발생했습니다 (상태 코드: ${response.status})';
-                    throw new Error(message);
-                }
-
-                // 성공적으로 응답받으면 JSON으로 파싱
-                const result = await response.json();
-                console.log('백엔드 응답:', result);
-
-                // 결과 처리
-                if (result.status === 'success') {
-                    displayPlaces(result.places);
-                } else {
-                    //백엔드에서 status: 'error'를 보낸경우
-                    resultsDiv.innerHTML = `<p style="color: red;">오류: ${result.message || '알 수 없는 오류'}</p>`;
-                }
-
-            } catch (error) {
-                    //네트워크 오류 또는 위에서 throw된 오류 처리
-                    console.error('백엔드 요청 실패:', error);
-                    resultsDiv.innerHTML = `<p style="color: red;">데이터를 가져오는 데 실패했습니다: ${error.message}</p>`;
-                }
+            }
+            if (festivalSliderControls && typeof festivalSliderControls.reinit === 'function') festivalSliderControls.reinit();
+            else festivalSliderControls = setupSlider('festivalSlider', 'festivalPrevBtn', 'festivalNextBtn');
+            
+            if (touristSliderControls && typeof touristSliderControls.reinit === 'function') touristSliderControls.reinit();
+            else touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
         }
 
-            //회원가입 로직 실행
-            document.addEventListener('DOMContentLoaded', () => {
-            //필요한 요소들 선택
-            const signupForm = document.getElementById('signupForm');
-            const signupId = document.getElementById('signupId');
-            const signupPassword = document.getElementById('signupPassword');
-            const signupPasswordConfirm = document.getElementById('signupPasswordConfirm');
-            const signupEmail = document.getElementById('signupEmail');
+        function showError(errorElement, message) {
+            if (errorElement) errorElement.textContent = message;
+        }
+        function clearAuthErrors() {
+            if(usernameError) usernameError.textContent = "";
+            if(passwordErrorEl) passwordErrorEl.textContent = "";
+            if(passwordConfirmErrorEl) passwordConfirmErrorEl.textContent = "";
+            if(emailErrorEl) emailErrorEl.textContent = "";
+            if(loginIdErrorEl) loginIdErrorEl.textContent = "";
+            if(loginPasswordErrorEl) loginPasswordErrorEl.textContent = "";
+        }
 
-            //오류 메시지를 표시할 span 요소들 선택
-            const usernameError = document.getElementById('usernameError');
-            const PasswordError = document.getElementById('PasswordError');
-            const PasswordConfirmError = document.getElementById('PasswordConfirmError');
-            const EmailError = document.getElementById('EmailError');
+        document.addEventListener('DOMContentLoaded', function() {
+            // resultOutputDiv = document.getElementById('resultOutput'); // 이 변수는 이제 직접적인 화면 표시에 사용되지 않음
+            
+            placeInput = document.getElementById('placeInput');
+            userSearchInput = document.getElementById('userSearchInput');
+            mainSearchButton = document.getElementById('mainSearchButton');
 
-            //폼 제출 이벤트 리스너 추가
-            signupForm.addEventListener('submit', (event) => {
-                //기본 폼 제출 동작 막기 (유효성 검사 후 직접 제출 제어)
-                event.preventDefault();
+            signupModal = document.getElementById('signupmodal');
+            loginModal = document.getElementById('loginmodal');
+            itemDetailModal = document.getElementById('modal1');
+            placeSearchModal = document.getElementById('placemodal');
 
-                //오류 초기화
-                clearErrors();
+            signupForm = document.getElementById('signupForm');
+            loginForm = document.getElementById('loginForm');
 
-                let isValid = true; //전체 유효성 상태
+            usernameError = document.getElementById('usernameError');
+            passwordErrorEl = document.getElementById('passwordError');
+            passwordConfirmErrorEl = document.getElementById('passwordConfirmError');
+            emailErrorEl = document.getElementById('emailError');
+            loginIdErrorEl = document.getElementById('loginIdError');
+            loginPasswordErrorEl = document.getElementById('loginPasswordError');
 
-                // 1. 아이디 검사 (여기서는 비어있는지만 확인)
-                if (signupId.value.trim() === "") {
-                    showError(usernameError, '아이디를 입력해주세요.');
-                    isValid = false;
-                }
+            csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            if (!csrfToken) console.warn("CSRF 토큰을 찾을 수 없습니다.");
 
-                // 2. 비밀번호 검사
-                const passwordValue = signupPassword.value;
-                if (passwordValue.length < 8) {
-                    showError(PasswordError, '비밀번호는 8자 이상이어야 합니다.');
-                    isValid = false;
-                }
+            if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
+                kakao.maps.load(initializeKakaoMaps);
+            } else {
+                console.error("카카오맵 SDK 기본 객체를 로드할 수 없습니다.");
+                alert("카카오맵 SDK를 로드할 수 없습니다. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
+                setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+            }
 
-                // 3. 비밀번호 확인 검사
-                if (signupPasswordConfirm.value !== passwordValue) {
-                    showError(PasswordConfirmError, '비밀번호가 일치하지 않습니다.');
-                    isValid = false;
-                } else if (signupPasswordConfirm.value.trim() === "") {
-                    showError(PasswordConfirmError, '비밀번호 확인을 입력해주세요.');
-                    isValid = false;
-                }
+            if(placeInput) placeInput.addEventListener('keydown', handlePlaceInputEnter);
+            
+            const setPlaceModalBtn = document.getElementById('setPlaceFromModalButton');
+            if (setPlaceModalBtn) setPlaceModalBtn.onclick = setPlaceFromModal;
 
-                // 4. 이메일 검사 (간단한 정규식 사용)
-                const emailValue = signupEmail.value.trim();
-                // 이메일 형식 검사를 위한 정규 표현식
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (emailValue === "") {
-                    showError(EmailError, '이메일을 입력해주세요.');
-                    isValid = false;
-                } else if (!emailRegex.test(emailValue)) {
-                    showError(EmailError, '올바른 이메일 형식이 아닙니다.')
-                    isValid = false;
-                }
+            const placeSearchOpenBtn = document.getElementById('placeSearchOpenButton');
+            if(placeSearchOpenBtn) placeSearchOpenBtn.onclick = openPlaceSearchModal;
+            else console.error("placeSearchOpenButton 요소를 찾을 수 없습니다.");
 
-                //모든 유효성 검사를 통과하면 폼 제출
-                if (isValid) {
-                    //실제 서버로 폼 데이터 전송
-                    alert('유효성 검사 통과! 폼을 제출합니다.'); //테스트용 알림
-                    signupForm.submit();
-                    signupForm.reset();
+            if (mainSearchButton) {
+                mainSearchButton.onclick = function() {
+                    const query = userSearchInput.value.trim();
+                    if (!query) {
+                        alert("검색어를 입력해주세요.");
+                        return;
+                    }
+
+                    console.log("메인 검색 버튼 클릭됨. 현재 GPS 위치 재요청 시작...");
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => { // GPS 성공 시 콜백
+                                const searchLat = position.coords.latitude;
+                                const searchLon = position.coords.longitude;
+                                const placeName = "현재 내 위치 (GPS)"; // GPS 성공 시 위치명
+                                console.log(`메인 검색 기준: GPS 성공 (${searchLat.toFixed(6)}, ${searchLon.toFixed(6)})`);
+
+                                // GPS 성공 좌표로 팝업 표시
+                                alert(
+                                    `검색 기능은 추후 구현될 예정입니다.\n\n` +
+                                    `검색어: ${query}\n` +
+                                    `검색 기준 위치: ${placeName}\n` +
+                                    `기준 위도: ${searchLat.toFixed(6)}\n` +
+                                    `기준 경도: ${searchLon.toFixed(6)}`
+                                );
+                            },
+                            (error) => { // GPS 실패 시 콜백
+                                console.warn(`메인 검색 기준: GPS 오류(${error.code}: ${error.message}), 기본 위치(부산 시청) 사용`);
+                                const searchLat = DEFAULT_LATITUDE; // 기본 위도
+                                const searchLon = DEFAULT_LONGITUDE; // 기본 경도
+                                const placeName = DEFAULT_PLACE_NAME; // 기본 위치명
+
+                                // 기본 좌표로 팝업 표시
+                                alert(
+                                    `검색 기능은 추후 구현될 예정입니다.\n\n` +
+                                    `검색어: ${query}\n` +
+                                    `검색 기준 위치: ${placeName}\n` +
+                                    `기준 위도: ${searchLat.toFixed(6)}\n` +
+                                    `기준 경도: ${searchLon.toFixed(6)}`
+                                );
+                            },
+                            { // getCurrentPosition 옵션
+                                enableHighAccuracy: false, // 높은 정확도 비활성화 (빠른 응답 선호 시)
+                                timeout: 8000, // 타임아웃 8초
+                                maximumAge: 0 // 캐시 사용 안 함
+                            }
+                        );
+                    } else {
+                        // Geolocation API 미지원 시
+                        console.warn("메인 검색 기준: Geolocation 미지원, 기본 위치(부산 시청) 사용");
+                        const searchLat = DEFAULT_LATITUDE;
+                        const searchLon = DEFAULT_LONGITUDE;
+                        const placeName = DEFAULT_PLACE_NAME;
+                        alert(
+                            `검색 기능은 추후 구현될 예정입니다.\n\n` +
+                            `검색어: ${query}\n` +
+                            `검색 기준 위치: ${placeName}\n` +
+                            `기준 위도: ${searchLat.toFixed(6)}\n` +
+                            `기준 경도: ${searchLon.toFixed(6)}`
+                        );
+                    }
+                };
+            }
+            if (userSearchInput) {
+                userSearchInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') mainSearchButton.click();
+                });
+            }
+
+            const signupBtn = document.getElementById("signupButton");
+            const loginBtn = document.getElementById("loginButton");
+            const logoutBtn = document.getElementById("logoutButton");
+
+            if(signupBtn && signupModal) signupBtn.onclick = function() { clearAuthErrors(); openModal(signupModal); }
+            if(loginBtn && loginModal) loginBtn.onclick = function () { clearAuthErrors(); openModal(loginModal); }
+
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                     closeModal(event.target);
                 }
             });
 
-            //오류 메시지 표시 함수
-            function showError(errorElement, message) {
-                errorElement.textContent = message;
+            if (signupForm) {
+                const signupIdEl = document.getElementById('signupId');
+                const signupPasswordEl = document.getElementById('signupPassword');
+                const signupPasswordConfirmEl = document.getElementById('signupPasswordConfirm');
+                const signupEmailEl = document.getElementById('signupEmail');
+                signupForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); clearAuthErrors(); let isValid = true;
+                    if (!signupIdEl.value.trim()) { showError(usernameError, '아이디를 입력해주세요.'); isValid = false; }
+                    const pwVal = signupPasswordEl.value;
+                    if (pwVal.length < 8) { showError(passwordErrorEl, '비밀번호는 8자 이상이어야 합니다.'); isValid = false; }
+                    if (!signupPasswordConfirmEl.value.trim()) { showError(passwordConfirmErrorEl, '비밀번호 확인을 입력해주세요.'); isValid = false; }
+                    else if (signupPasswordConfirmEl.value !== pwVal) { showError(passwordConfirmErrorEl, '비밀번호가 일치하지 않습니다.'); isValid = false; }
+                    const emailVal = signupEmailEl.value.trim();
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailVal) { showError(emailErrorEl, '이메일을 입력해주세요.'); isValid = false; }
+                    else if (!emailRegex.test(emailVal)) { showError(emailErrorEl, '올바른 이메일 형식이 아닙니다.'); isValid = false; }
+                    if (isValid) {
+                        alert('유효성 검사 통과! (실제 회원가입 처리 로직은 백엔드에 구현 필요)');
+                        closeModal(signupModal);
+                    }
+                });
             }
 
-            //모든 오류 메시지 초기화 함수
-            function clearErrors() {
-                usernameError.textContent = "";
-                PasswordError.textContent = "";
-                PasswordConfirmError.textContent = "";
-                EmailError.textContent = "";
-            }
-        });
-
-        // 로그인 로직 실행
-        const loginForm = document.getElementById('loginForm');
-        const loginIdInput = document.getElementById('loginId');
-        const loginPasswordInput = document.getElementById('loginPassword');
-        const modalBody = loginForm.parentElement; // 폼의 부모 요소 (modal_body)
-
-        // 폼 제출(submit) 이벤트 리스너를 추가합니다.
-        loginForm.addEventListener('submit', (event) => {
-            // 기본 폼 제출 동작(페이지 새로고침 등)을 막습니다.
-            event.preventDefault();
-
-
-            const username = loginIdInput.value;
-            const password = loginPasswordInput.value;
-            const existingError = modalBody.querySelector('.error-message');
-
-            //오류 메시지를 표시할 span 요소들 선택
-            const Erroruser = document.getElementById('Erroruser');
-                // --- 나중에 DB 연동 로직을 추가할 부분 ---
-                // 여기서는 임시로 아이디와 비밀번호를 확인합니다.
-                // 실제로는 서버에 username과 password를 보내서
-                // DB에서 사용자 정보를 확인하고 결과를 받아와야 합니다.
-
-            // 임시 로직 시작
-            if (username === 'testuser' && password === 'password123') {
-                alert('로그인 성공');
-                clearErrors();
-                // 로그인 성공 후 모달을 닫는 과정
-                loginForm.reset();
-
-                document.getElementById('loginmodal').style.display = 'none';
-
-            } else {
-                alert('존재하지 않는 아이디이거나, 비밀번호가 일치하지 않습니다.');
-                loginForm.reset();
-            }
-
-            //오류 메시지 표시 함수
-            function showError(errorElement, message) {
-                errorElement.textContent = message;
-            }
-
-            //모든 오류 메시지 초기화 함수
-            function clearErrors() {
-                usernameError.textContent = "";
-                PasswordError.textContent = "";
-                PasswordConfirmError.textContent = "";
-                EmailError.textContent = "";
+            if (loginForm) {
+                const loginIdInputEl = document.getElementById('loginId');
+                const loginPasswordInputEl = document.getElementById('loginPassword');
+                loginForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); clearAuthErrors(); let isValid = true;
+                    const username = loginIdInputEl.value.trim();
+                    const password = loginPasswordInputEl.value;
+                    if(!username) { showError(loginIdErrorEl, "아이디를 입력해주세요."); isValid = false;}
+                    if(!password) { showError(loginPasswordErrorEl, "비밀번호를 입력해주세요."); isValid = false;}
+                    if (isValid) {
+                        if (username === 'testuser' && password === 'password123') {
+                            alert('로그인 성공 (테스트 계정)'); closeModal(loginModal);
+                        } else {
+                            showError(loginPasswordErrorEl, '아이디 또는 비밀번호가 일치하지 않습니다.');
+                            loginPasswordInputEl.value = ''; loginPasswordInputEl.focus();
+                        }
+                    }
+                });
             }
         });
-
     </script>
+</body>
+</html>
