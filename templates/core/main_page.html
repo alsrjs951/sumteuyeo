@@ -471,14 +471,24 @@
             border-radius: 4px;
         }
 
+        .auth-user-display {
+            display: inline-flex; /* 버튼과 같은 라인에 정렬되도록 */
+            align-items: center; /* 수직 중앙 정렬 */
+            padding: 0.5rem 0.5rem; /* 로그아웃 버튼과의 간격 및 내부 여백 */
+            font-size: 0.875rem;
+            color: #333; /* 원하는 글자색 */
+            /* margin-right: 0.75rem; */ /* 로그아웃 버튼과의 간격 (auth-buttons의 gap으로도 조절 가능) */
+        }
+
     </style>
 </head>
 <body>
     <header class="app-header">
-        <div class="logo-title">축제&관광 정보</div>
+        <div class="logo-title">숨트여</div>
         <div class="auth-buttons">
             <button id="signupButton" class="auth-button">회원가입</button>
             <button id="loginButton" class="auth-button">로그인</button>
+            <span id="loginid" class="auth-user-display hidden"></span>
             <button id="logoutButton" class="auth-button hidden">로그아웃</button>
         </div>
     </header>
@@ -544,18 +554,18 @@
         <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정">
             <i class="fas fa-map"></i>
         </button>
-        <input id="userSearchInput" type="text" placeholder="축제 또는 관광지를 검색하세요">
+        <input id="userSearchInput" type="text" placeholder="어디 가고 싶으신가요? 어떤 분위기를 원하시나요?">
         <button class="text-search-btn" id="mainSearchButton">검색</button>
     </div>
 
     <div class="pink-screen">
         <div class="blue">
             주말에 어디 가지?<br>
-            다음주 남구에서 열리는 축제는?
+            이번주 부산 핫플은?
         </div>
         <div class="big">
             대충 검색해도 나오는<br>
-            정확한 축제 정보
+            정확한 관광지 정보
         </div>
     </div>
 
@@ -573,19 +583,19 @@
 
     <div class="category-section">
         <div class="slider-container">
-            <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
+            <h2 class="category-title">당신을 위한 추천</h2>
             <div class="slider" id="festivalSlider">
             </div>
             <div class="slider-controls">
-                <button id="festivalPrevBtn" aria-label="이전 축제 보기">&#10094;</button>
-                <button id="festivalNextBtn" aria-label="다음 축제 보기">&#10095;</button>
+                <button id="festivalPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
+                <button id="festivalNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
             </div>
         </div>
     </div>
 
     <div class="category-section">
         <div class="slider-container">
-            <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
             <div class="slider" id="touristSlider">
             </div>
             <div class="slider-controls">
@@ -597,7 +607,7 @@
 
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
-        // --- 전역 변수 및 DOM 요소 참조 ---
+        // --- 전역 변수 및 DOM 요소 참조 (기존 코드 유지) ---
         let ps = null;
         let targetLat = null;
         let targetLon = null;
@@ -614,18 +624,40 @@
         let modalMap = null;
         let modalMapMarker = null;
         let modalClickedLatLng = null;
-
         let placeInput, userSearchInput;
         let signupModal, loginModal, itemDetailModal, placeSearchModal;
+        
+        // 인증 관련 DOM 요소
         let signupForm, loginForm;
+        let signupButton, loginButton, logoutButton; // 헤더 버튼
+        let signupIdEl, signupPasswordEl, signupPasswordConfirmEl, signupEmailEl;
         let usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl;
+        let loginIdInputEl, loginPasswordInputEl;
         let loginIdErrorEl, loginPasswordErrorEl;
+        let loggedInUserDisplayEl; // 로그인된 사용자 아이디 표시할 span
+        
         let csrfToken;
-        // let resultOutputDiv; // 더 이상 화면에 메시지를 직접 표시하지 않으므로, 변수 사용 최소화
         let mainSearchButton;
 
+        const API_BASE_URL = 'http://127.0.0.1:8000'; // 백엔드 API 기본 URL
 
-        // --- 슬라이더 설정 함수 ---
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // --- 슬라이더 설정 함수 (기존 코드 유지) ---
         function setupSlider(sliderId, prevBtnId, nextBtnId) {
             const slider = document.getElementById(sliderId);
             const prevButtonElement = document.getElementById(prevBtnId);
@@ -647,7 +679,8 @@
 
             let currentIndex = 0;
             const cardMargin = cards.length > 0 ? (parseFloat(window.getComputedStyle(cards[0]).marginLeft) + parseFloat(window.getComputedStyle(cards[0]).marginRight)) : 20;
-            let effectiveCardWidthForTranslation = cards.length > 0 ? cards[0].offsetWidth + cardMargin : 0;
+            let effectiveCardWidthForTranslation = cards.length > 0 ?
+            cards[0].offsetWidth + cardMargin : 0;
             
             let visibleCount = 3; 
 
@@ -686,8 +719,8 @@
                 }
             };
             nextButtonElement.onclick = () => {
-                 visibleCount = calculateVisibleCount(); 
-                if (currentIndex < cards.length - visibleCount) {
+                 visibleCount = calculateVisibleCount();
+                 if (currentIndex < cards.length - visibleCount) {
                     currentIndex++;
                     updateSliderUI();
                 }
@@ -716,9 +749,10 @@
             };
         }
 
+        // --- 모달 관련 함수 (기존 코드 유지, 단 closeModal 수정) ---
         function openModal(modalElement) {
             if (modalElement) {
-                modalElement.style.display = "flex";
+                modalElement.style.display = "flex"; // 또는 'flex'
                 document.body.style.overflow = 'hidden';
             }
         }
@@ -728,17 +762,26 @@
                 modalElement.style.display = "none";
                 const form = modalElement.querySelector('form');
                 if (form) {
-                    form.reset();
-                    const errorMessages = form.querySelectorAll('.error-message');
-                    errorMessages.forEach(span => span.textContent = '');
+                    form.reset(); // 폼 필드 초기화
+                    // 오류 메시지 초기화 (인증 폼에만 해당되도록 수정)
+                    if (form.id === 'signupForm' || form.id === 'loginForm') {
+                        clearAuthErrors();
+                    }
                 }
-                const openModals = document.querySelectorAll('.modal.open');
-                if (openModals.length === 0 || (openModals.length === 1 && openModals[0] === modalElement && modalElement.style.display === 'none')) {
-                     document.body.style.overflow = '';
+                // 모든 모달이 닫혔는지 확인 후 body 스크롤 복원
+                const openModals = document.querySelectorAll('.modal');
+                let anyModalOpen = false;
+                openModals.forEach(mod => {
+                    if (mod.style.display === 'flex' || mod.style.display === 'block') { // 'flex'도 확인
+                        anyModalOpen = true;
+                    }
+                });
+                if (!anyModalOpen) {
+                    document.body.style.overflow = '';
                 }
             }
         }
-
+        
         function openItemDetailModal(itemData) {
             if (!itemData || !itemDetailModal) return;
             document.getElementById('itemDetailTitle').textContent = itemData.title || "상세 정보";
@@ -749,15 +792,14 @@
             const periodEl = document.getElementById('itemDetailPeriod');
             const locationEl = document.getElementById('itemDetailLocation');
             const homepageDiv = document.getElementById('itemDetailHomepage');
-
             periodEl.innerHTML = itemData.period ? `<strong>기간:</strong> ${itemData.period}` : "";
             locationEl.innerHTML = itemData.addr1 || itemData.location ? `<strong>위치:</strong> ${itemData.addr1 || itemData.location}` : "";
-
             homepageDiv.innerHTML = "";
             if (itemData.homepage) {
                 let homepageText = itemData.homepage;
                 let homepageUrl = '';
-                const urlMatch = typeof homepageText === 'string' ? homepageText.match(/href=["']([^"']+)["']/i) : null;
+                const urlMatch = typeof homepageText === 'string' ?
+                homepageText.match(/href=["']([^"']+)["']/i) : null;
                 if (urlMatch && urlMatch[1]) {
                     homepageUrl = urlMatch[1];
                 } else if (typeof homepageText === 'string' && homepageText.toLowerCase().startsWith('http')) {
@@ -772,7 +814,7 @@
                     link.rel = "noopener noreferrer";
                     homepageDiv.appendChild(link);
                 } else if (typeof homepageText === 'string' && homepageText.trim() !== "") {
-                     homepageDiv.innerHTML = `<strong>홈페이지/문의:</strong> ${homepageText}`;
+                    homepageDiv.innerHTML = `<strong>홈페이지/문의:</strong> ${homepageText}`;
                 }
             }
 
@@ -783,9 +825,9 @@
             openModal(itemDetailModal);
         }
 
+        // --- 지도 관련 함수 (기존 코드 유지) ---
         function initializeKakaoMaps() {
             console.log("카카오맵 서비스 로드 완료. 지도 서비스 초기화 중...");
-            // 화면 알림 대신 콘솔 로그 사용
             try {
                 ps = new kakao.maps.services.Places();
                 console.log("카카오 장소 검색 서비스 준비 완료.");
@@ -847,7 +889,6 @@
             targetLon = parseFloat(lon);
             targetPlaceName = name;
             console.log(`기준 위치 업데이트됨: ${name} (위도: ${targetLat}, 경도: ${targetLon})`);
-            // 화면 알림 대신 console에만 표시
 
             if (sendToBackend && targetLat != null && targetLon != null) {
                 fetchNearbyPlacesData(targetLat, targetLon);
@@ -859,8 +900,8 @@
             const mapContainer = document.getElementById('modal_map_container');
             if (!mapContainer) { console.error('모달 지도 컨테이너(modal_map_container)를 찾을 수 없습니다.'); return; }
 
-            const initialCenter = modalClickedLatLng || (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
-
+            const initialCenter = modalClickedLatLng ||
+            (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
             if (modalMap) {
                 modalMap.relayout();
                 modalMap.setCenter(initialCenter);
@@ -874,7 +915,6 @@
                 const mapOption = { center: initialCenter, level: 7 };
                 modalMap = new kakao.maps.Map(mapContainer, mapOption);
                 modalMapMarker = new kakao.maps.Marker({ position: initialCenter, map: modalMap });
-
                 kakao.maps.event.addListener(modalMap, 'rightclick', function(mouseEvent) {
                     modalClickedLatLng = mouseEvent.latLng;
                     modalMapMarker.setPosition(modalClickedLatLng);
@@ -925,7 +965,6 @@
 
         function placeSearchCallback(data, status, pagination) {
             console.log("placeSearchCallback status:", status, ", data:", data);
-            // 화면 알림 대신 콘솔 로그 사용
 
             if (status === kakao.maps.services.Status.OK) {
                 if (data.length > 0) {
@@ -956,20 +995,19 @@
         }
 
         async function fetchNearbyPlacesData(lat, lon) {
-            const apiUrl = csrfToken ? '/api/receive-location/' : null;
+            const apiUrl = csrfToken ? '/api/receive-location/' : null; // 이 API는 인증과 무관하므로 그대로 둡니다.
             if (!apiUrl) {
                  console.warn("CSRF 토큰이 없거나 API URL이 설정되지 않아 서버 요청을 보내지 않습니다.");
                  allPlaces = []; renderPlaces(); return;
             }
 
             console.log(`서버 요청: ${apiUrl} (위도: ${lat}, 경도: ${lon}) - 주변 관광지 정보 요청 중...`);
-
             try {
                 const fetchOptions = {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                     body: JSON.stringify({ latitude: lat, longitude: lon })
-                };
+                 };
                 const response = await fetch(apiUrl, fetchOptions);
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -1000,7 +1038,6 @@
 
             festivalSliderEl.innerHTML = '';
             touristSliderEl.innerHTML = '';
-
             if (!allPlaces || allPlaces.length === 0) {
                 const noDataMsg = '<p style="text-align:center; color:#777; padding: 20px 0;">주변에 표시할 정보가 없습니다.</p>';
                 festivalSliderEl.innerHTML = noDataMsg;
@@ -1013,7 +1050,7 @@
                             <h3>${item.title || '제목 없음'}</h3>
                             <p>${item.addr || item.location || '위치 정보 없음'}</p>
                         </div>
-                    `;
+                     `;
                     
                     const cardElementFestival = document.createElement('div');
                     cardElementFestival.className = 'card';
@@ -1035,43 +1072,259 @@
             else touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
         }
 
+        // --- 인증 관련 함수 ---
         function showError(errorElement, message) {
-            if (errorElement) errorElement.textContent = message;
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block'; // 보이도록 설정
+            }
         }
+
         function clearAuthErrors() {
-            if(usernameError) usernameError.textContent = "";
-            if(passwordErrorEl) passwordErrorEl.textContent = "";
-            if(passwordConfirmErrorEl) passwordConfirmErrorEl.textContent = "";
-            if(emailErrorEl) emailErrorEl.textContent = "";
-            if(loginIdErrorEl) loginIdErrorEl.textContent = "";
-            if(loginPasswordErrorEl) loginPasswordErrorEl.textContent = "";
+            if (usernameError) { usernameError.textContent = ""; usernameError.style.display = 'none'; }
+            if (passwordErrorEl) { passwordErrorEl.textContent = ""; passwordErrorEl.style.display = 'none'; }
+            if (passwordConfirmErrorEl) { passwordConfirmErrorEl.textContent = ""; passwordConfirmErrorEl.style.display = 'none'; }
+            if (emailErrorEl) { emailErrorEl.textContent = ""; emailErrorEl.style.display = 'none'; }
+            if (loginIdErrorEl) { loginIdErrorEl.textContent = ""; loginIdErrorEl.style.display = 'none'; }
+            if (loginPasswordErrorEl) { loginPasswordErrorEl.textContent = ""; loginPasswordErrorEl.style.display = 'none'; }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // resultOutputDiv = document.getElementById('resultOutput'); // 이 변수는 이제 직접적인 화면 표시에 사용되지 않음
-            
-            placeInput = document.getElementById('placeInput');
-            userSearchInput = document.getElementById('userSearchInput');
-            mainSearchButton = document.getElementById('mainSearchButton');
+        function updateAuthUI(isLoggedIn, username = '') {
+            if (!signupButton || !loginButton || !logoutButton || !loggedInUserDisplayEl) {
+                console.error("Auth UI elements not found!");
+                return;
+            }
 
+            if (isLoggedIn) { // 로그인 상태일 경우
+                signupButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
+
+                loggedInUserDisplayEl.textContent = `현재 로그인된 아이디: ${username}`; // 아이디 표시
+                loggedInUserDisplayEl.classList.remove('hidden'); // 아이디 표시 영역 보이기
+                logoutButton.classList.remove('hidden');
+            } else { // 로그아웃 상태일 경우
+                signupButton.classList.remove('hidden');
+                loginButton.classList.remove('hidden');
+
+                loggedInUserDisplayEl.textContent = ''; // 아이디 내용 지우기
+                loggedInUserDisplayEl.classList.add('hidden'); // 아이디 표시 영역 숨기기
+                logoutButton.classList.add('hidden');
+            }
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            clearAuthErrors();
+
+            const username = signupIdEl.value.trim();
+            const password_1 = signupPasswordEl.value;
+            const password_2 = signupPasswordConfirmEl.value;
+            const email = signupEmailEl.value.trim();
+
+            // 클라이언트 측 유효성 검사 (이전과 동일)
+            let isValid = true;
+            if (!username) { showError(usernameError, '아이디를 입력해주세요.'); isValid = false; }
+            if (password_1.length < 1) { 
+                showError(passwordErrorEl, '비밀번호를 입력해주세요.'); isValid = false;
+            } else if (password_1 !== password_2) {
+                showError(passwordConfirmErrorEl, '비밀번호가 일치하지 않습니다.'); isValid = false;
+            }
+            if (!password_2) { showError(passwordConfirmErrorEl, '비밀번호 확인을 입력해주세요.'); isValid = false; }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) { showError(emailErrorEl, '이메일을 입력해주세요.'); isValid = false; }
+            else if (!emailRegex.test(email)) { showError(emailErrorEl, '올바른 이메일 형식이 아닙니다.'); isValid = false; }
+            if (!isValid) return;
+
+            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
+            if (!currentCsrfToken) {
+                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/signup/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': currentCsrfToken // 최신 토큰 사용
+                    },
+                    body: JSON.stringify({ username, password_1, password_2, email })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    alert(data.message || '회원가입 성공! 자동으로 로그인됩니다.');
+                    closeModal(signupModal);
+                    updateAuthUI(true, data.username); 
+                    // 회원가입과 동시에 로그인되므로, 다음 요청을 위해 CSRF 토큰이 갱신되었을 수 있음
+                    // (getCookie는 다음 요청 시 자동으로 새 쿠키값을 읽음)
+                } else {
+                    // 오류 처리 (이전과 동일하게 상세히)
+                    if (data.errors) { 
+                        if (data.errors.username) showError(usernameError, data.errors.username[0].message);
+                        if (data.errors.email) showError(emailErrorEl, data.errors.email[0].message);
+                        if (data.errors.password_1) showError(passwordErrorEl, data.errors.password_1[0].message); 
+                        if (data.errors.password_2) showError(passwordConfirmErrorEl, data.errors.password_2[0].message);
+                        let generalError = data.message || "";
+                        if (data.errors.non_field_errors) generalError += data.errors.non_field_errors.join(' ');
+                        if (generalError && !Object.keys(data.errors).some(k => ['username', 'email', 'password_1', 'password_2'].includes(k))) {
+                            alert(`회원가입 실패: ${generalError}`);
+                        } else if (!generalError && !Object.keys(data.errors).length && data.detail) {
+                            alert(`회원가입 실패: ${data.detail}`);
+                        }
+                    } else if (data.message) {
+                        alert(`회원가입 실패: ${data.message}`);
+                    } else if (data.detail) {
+                        alert(`회원가입 실패: ${data.detail}`);
+                    } else {
+                        alert('회원가입에 실패했습니다. 입력 내용을 확인해주세요.');
+                    }
+                }
+            } catch (error) {
+                console.error('Signup API error:', error);
+                alert('회원가입 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearAuthErrors();
+
+            const username = loginIdInputEl.value.trim(); 
+            const password = loginPasswordInputEl.value; 
+
+            let isValid = true;
+            if (!username) { showError(loginIdErrorEl, "아이디를 입력해주세요."); isValid = false; }
+            if (!password) { showError(loginPasswordErrorEl, "비밀번호를 입력해주세요."); isValid = false; }
+            if (!isValid) return;
+
+            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
+            if (!currentCsrfToken) {
+                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': currentCsrfToken // 최신 토큰 사용
+                    },
+                    body: JSON.stringify({ username, password }) 
+                });
+                
+                const data = await response.json(); 
+
+                if (response.ok && data.status === 'success') {
+                    alert(data.message || '로그인 성공!');
+                    closeModal(loginModal);
+                    updateAuthUI(true, data.username); 
+                    // 로그인 성공 시에도 백엔드에서 CSRF 토큰이 갱신됨
+                } else {
+                    const errorMessage = data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.';
+                    showError(loginPasswordErrorEl, errorMessage);
+                    loginPasswordInputEl.value = ''; 
+                    loginPasswordInputEl.focus();
+                    console.error('Login failed. Server response:', data, 'Status code:', response.status);
+                }
+            } catch (error) { 
+                console.error('Login API request/parsing error:', error);
+                showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
+            }
+        }
+
+        async function handleLogout() {
+            if (!confirm("로그아웃 하시겠습니까?")) return;
+
+            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
+            if (!currentCsrfToken) {
+                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+                // 로그아웃 시도이므로, 일단 UI는 로그아웃 상태로 변경 시도
+                updateAuthUI(false);
+                window.location.reload(); // CSRF 없으면 의미 없으므로 새로고침
+                return;
+            }
+
+            let loggedOutSuccessfully = false;
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': currentCsrfToken, // 최신 토큰 사용
+                        'Content-Type': 'application/json' 
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json(); 
+                    if (data.status === 'success') {
+                        // alert(data.message || '로그아웃 되었습니다.'); // 메시지는 새로고침 전에 표시
+                        loggedOutSuccessfully = true;
+                    } else {
+                        alert(data.message || '로그아웃 처리 중 서버에서 오류를 반환했습니다.');
+                    }
+                } else { 
+                    let errorMsg = `로그아웃에 실패했습니다 (서버 응답 코드: ${response.status}).`;
+                    try {
+                        const errorData = await response.json(); 
+                        errorMsg = errorData.message || errorData.detail || errorMsg;
+                        console.error('Logout failed (server error response):', response.status, errorData);
+                    } catch (e) {
+                        errorMsg = `로그아웃 실패 (서버 응답 코드: ${response.status}, ${response.statusText || '내용 없음'})`;
+                        console.error('Logout failed (non-JSON server error response):', response.status, response.statusText);
+                    }
+                    alert(errorMsg); // 오류 메시지 표시
+                }
+            } catch (error) { 
+                console.error('Logout API request processing error:', error);
+                alert('로그아웃 요청 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
+            }
+
+            updateAuthUI(false); // UI는 즉시 로그아웃 상태로 변경
+            if (loggedOutSuccessfully) {
+                alert('로그아웃 되었습니다.'); // 성공 메시지
+            }
+        }
+        // --- DOMContentLoaded 이벤트 리스너 ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // 인증 관련 요소 초기화
             signupModal = document.getElementById('signupmodal');
             loginModal = document.getElementById('loginmodal');
-            itemDetailModal = document.getElementById('modal1');
-            placeSearchModal = document.getElementById('placemodal');
-
             signupForm = document.getElementById('signupForm');
             loginForm = document.getElementById('loginForm');
 
+            signupButton = document.getElementById('signupButton');
+            loginButton = document.getElementById('loginButton');
+            logoutButton = document.getElementById('logoutButton');
+
+            loggedInUserDisplayEl = document.getElementById('loginid');
+
+            signupIdEl = document.getElementById('signupId');
+            signupPasswordEl = document.getElementById('signupPassword');
+            signupPasswordConfirmEl = document.getElementById('signupPasswordConfirm');
+            signupEmailEl = document.getElementById('signupEmail');
             usernameError = document.getElementById('usernameError');
             passwordErrorEl = document.getElementById('passwordError');
             passwordConfirmErrorEl = document.getElementById('passwordConfirmError');
             emailErrorEl = document.getElementById('emailError');
+            
+            loginIdInputEl = document.getElementById('loginId');
+            loginPasswordInputEl = document.getElementById('loginPassword');
             loginIdErrorEl = document.getElementById('loginIdError');
             loginPasswordErrorEl = document.getElementById('loginPasswordError');
 
             csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-            if (!csrfToken) console.warn("CSRF 토큰을 찾을 수 없습니다.");
+            if (!csrfToken) console.warn("CSRF 토큰을 찾을 수 없습니다. API 요청이 실패할 수 있습니다.");
 
+            // 기타 기존 초기화 코드
+            placeInput = document.getElementById('placeInput');
+            userSearchInput = document.getElementById('userSearchInput');
+            mainSearchButton = document.getElementById('mainSearchButton');
+            itemDetailModal = document.getElementById('modal1');
+            placeSearchModal = document.getElementById('placemodal');
+            
+            // 카카오맵 SDK 로드
             if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
                 kakao.maps.load(initializeKakaoMaps);
             } else {
@@ -1080,15 +1333,14 @@
                 setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
             }
 
+            // 장소 검색 모달 관련 이벤트
             if(placeInput) placeInput.addEventListener('keydown', handlePlaceInputEnter);
-            
             const setPlaceModalBtn = document.getElementById('setPlaceFromModalButton');
             if (setPlaceModalBtn) setPlaceModalBtn.onclick = setPlaceFromModal;
-
             const placeSearchOpenBtn = document.getElementById('placeSearchOpenButton');
             if(placeSearchOpenBtn) placeSearchOpenBtn.onclick = openPlaceSearchModal;
-            else console.error("placeSearchOpenButton 요소를 찾을 수 없습니다.");
 
+            // 메인 검색 버튼 이벤트 (기존 코드 유지)
             if (mainSearchButton) {
                 mainSearchButton.onclick = function() {
                     const query = userSearchInput.value.trim();
@@ -1096,33 +1348,27 @@
                         alert("검색어를 입력해주세요.");
                         return;
                     }
-
                     console.log("메인 검색 버튼 클릭됨. 현재 GPS 위치 재요청 시작...");
-
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
-                            (position) => { // GPS 성공 시 콜백
+                            (position) => { 
                                 const searchLat = position.coords.latitude;
                                 const searchLon = position.coords.longitude;
-                                const placeName = "현재 내 위치 (GPS)"; // GPS 성공 시 위치명
+                                const placeName = "현재 내 위치 (GPS)"; 
                                 console.log(`메인 검색 기준: GPS 성공 (${searchLat.toFixed(6)}, ${searchLon.toFixed(6)})`);
-
-                                // GPS 성공 좌표로 팝업 표시
                                 alert(
-                                    `검색 기능은 추후 구현될 예정입니다.\n\n` +
+                                     `검색 기능은 추후 구현될 예정입니다.\n\n` +
                                     `검색어: ${query}\n` +
                                     `검색 기준 위치: ${placeName}\n` +
                                     `기준 위도: ${searchLat.toFixed(6)}\n` +
                                     `기준 경도: ${searchLon.toFixed(6)}`
-                                );
+                                 );
                             },
-                            (error) => { // GPS 실패 시 콜백
+                            (error) => { 
                                 console.warn(`메인 검색 기준: GPS 오류(${error.code}: ${error.message}), 기본 위치(부산 시청) 사용`);
-                                const searchLat = DEFAULT_LATITUDE; // 기본 위도
-                                const searchLon = DEFAULT_LONGITUDE; // 기본 경도
-                                const placeName = DEFAULT_PLACE_NAME; // 기본 위치명
-
-                                // 기본 좌표로 팝업 표시
+                                const searchLat = DEFAULT_LATITUDE; 
+                                const searchLon = DEFAULT_LONGITUDE; 
+                                const placeName = DEFAULT_PLACE_NAME; 
                                 alert(
                                     `검색 기능은 추후 구현될 예정입니다.\n\n` +
                                     `검색어: ${query}\n` +
@@ -1131,14 +1377,9 @@
                                     `기준 경도: ${searchLon.toFixed(6)}`
                                 );
                             },
-                            { // getCurrentPosition 옵션
-                                enableHighAccuracy: false, // 높은 정확도 비활성화 (빠른 응답 선호 시)
-                                timeout: 8000, // 타임아웃 8초
-                                maximumAge: 0 // 캐시 사용 안 함
-                            }
+                            { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
                         );
                     } else {
-                        // Geolocation API 미지원 시
                         console.warn("메인 검색 기준: Geolocation 미지원, 기본 위치(부산 시청) 사용");
                         const searchLat = DEFAULT_LATITUDE;
                         const searchLon = DEFAULT_LONGITUDE;
@@ -1159,61 +1400,27 @@
                 });
             }
 
-            const signupBtn = document.getElementById("signupButton");
-            const loginBtn = document.getElementById("loginButton");
-            const logoutBtn = document.getElementById("logoutButton");
+            // 인증 모달 열기 버튼 이벤트
+            if(signupButton && signupModal) signupButton.onclick = function() { clearAuthErrors(); openModal(signupModal); }
+            if(loginButton && loginModal) loginButton.onclick = function () { clearAuthErrors(); openModal(loginModal); }
+            if(logoutButton) logoutButton.onclick = handleLogout; // 로그아웃 핸들러 연결
 
-            if(signupBtn && signupModal) signupBtn.onclick = function() { clearAuthErrors(); openModal(signupModal); }
-            if(loginBtn && loginModal) loginBtn.onclick = function () { clearAuthErrors(); openModal(loginModal); }
-
+            // 모달 외부 클릭 시 닫기
             window.addEventListener('click', function(event) {
                 if (event.target.classList.contains('modal')) {
                      closeModal(event.target);
                 }
             });
 
+            // 폼 제출 이벤트 리스너 연결
             if (signupForm) {
-                const signupIdEl = document.getElementById('signupId');
-                const signupPasswordEl = document.getElementById('signupPassword');
-                const signupPasswordConfirmEl = document.getElementById('signupPasswordConfirm');
-                const signupEmailEl = document.getElementById('signupEmail');
-                signupForm.addEventListener('submit', (event) => {
-                    event.preventDefault(); clearAuthErrors(); let isValid = true;
-                    if (!signupIdEl.value.trim()) { showError(usernameError, '아이디를 입력해주세요.'); isValid = false; }
-                    const pwVal = signupPasswordEl.value;
-                    if (pwVal.length < 8) { showError(passwordErrorEl, '비밀번호는 8자 이상이어야 합니다.'); isValid = false; }
-                    if (!signupPasswordConfirmEl.value.trim()) { showError(passwordConfirmErrorEl, '비밀번호 확인을 입력해주세요.'); isValid = false; }
-                    else if (signupPasswordConfirmEl.value !== pwVal) { showError(passwordConfirmErrorEl, '비밀번호가 일치하지 않습니다.'); isValid = false; }
-                    const emailVal = signupEmailEl.value.trim();
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailVal) { showError(emailErrorEl, '이메일을 입력해주세요.'); isValid = false; }
-                    else if (!emailRegex.test(emailVal)) { showError(emailErrorEl, '올바른 이메일 형식이 아닙니다.'); isValid = false; }
-                    if (isValid) {
-                        alert('유효성 검사 통과! (실제 회원가입 처리 로직은 백엔드에 구현 필요)');
-                        closeModal(signupModal);
-                    }
-                });
+                signupForm.addEventListener('submit', handleSignup);
             }
-
             if (loginForm) {
-                const loginIdInputEl = document.getElementById('loginId');
-                const loginPasswordInputEl = document.getElementById('loginPassword');
-                loginForm.addEventListener('submit', (event) => {
-                    event.preventDefault(); clearAuthErrors(); let isValid = true;
-                    const username = loginIdInputEl.value.trim();
-                    const password = loginPasswordInputEl.value;
-                    if(!username) { showError(loginIdErrorEl, "아이디를 입력해주세요."); isValid = false;}
-                    if(!password) { showError(loginPasswordErrorEl, "비밀번호를 입력해주세요."); isValid = false;}
-                    if (isValid) {
-                        if (username === 'testuser' && password === 'password123') {
-                            alert('로그인 성공 (테스트 계정)'); closeModal(loginModal);
-                        } else {
-                            showError(loginPasswordErrorEl, '아이디 또는 비밀번호가 일치하지 않습니다.');
-                            loginPasswordInputEl.value = ''; loginPasswordInputEl.focus();
-                        }
-                    }
-                });
+                loginForm.addEventListener('submit', handleLogin);
             }
+            updateAuthUI(false); 
+
         });
     </script>
 </body>
