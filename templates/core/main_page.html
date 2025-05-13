@@ -11,7 +11,7 @@
         /* 기본 스타일 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
+margin: 0;
         }
 
         /* 헤더 */
@@ -25,7 +25,7 @@
             left: 0;
             right: 0;
             z-index: 1000;
-        }
+}
         .app-header .logo-title {
             font-size: 1.5em;
             font-weight: bold;
@@ -34,6 +34,7 @@
         .auth-buttons {
             display: flex;
             gap: 0.75rem;
+            align-items: center; /* 버튼 수직 정렬 */
         }
         .auth-button {
             padding: 0.5rem 1rem;
@@ -67,6 +68,7 @@
             min-width: 200px;
             font-size: 16px;
             height: 20px;
+            /* content-box 기준이므로 실제 높이는 padding 포함 */
             box-sizing: content-box;
         }
         .search-bar .text-search-btn {
@@ -79,6 +81,7 @@
             font-size: 16px;
             white-space: nowrap;
             height: 42px;
+            /* input 높이와 맞춤 (padding 포함) */
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
@@ -138,8 +141,7 @@
 
         /* 상태 표시줄 - 항상 숨김 처리 */
         #currentStatus, #resultOutput {
-            display: none !important; /* JS로도 보이지 않도록 !important 추가 */
-            /* 아래는 display: block 일 때 적용될 스타일 (참고용) */
+            display: none !important;
             margin: 15px auto;
             padding: 15px;
             background-color: #e9ecef;
@@ -151,9 +153,6 @@
             box-sizing: border-box;
             text-align: center;
         }
-        /* #currentStatus 관련 스타일은 더 이상 화면에 보이지 않으므로 유지 또는 제거 가능 */
-        /* #resultOutput 관련 스타일도 더 이상 화면에 보이지 않으므로 유지 또는 제거 가능 */
-
 
         /* 카테고리 섹션 및 슬라이더 */
         .category-section {
@@ -165,7 +164,7 @@
             position: relative;
             overflow: hidden;
             margin: 20px auto;
-            padding: 0 30px;
+            padding: 0 30px; /* 버튼 공간 확보 */
         }
         .category-title {
             font-size: 1.5em;
@@ -179,10 +178,14 @@
             transition: transform 0.5s ease-in-out;
         }
         .card {
+            position: relative;
+            /* 하트 아이콘 절대 위치 기준 */
             flex: 0 0 auto;
-            width: calc(33.333% - 20px);
+            width: calc(33.333% - 20px); /* 3개 보이도록, 마진 고려 */
             min-width: 280px;
+            /* 최소 너비 */
             max-width: 300px;
+            /* 최대 너비 */
             margin: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -194,6 +197,7 @@
             flex-direction: column;
             box-sizing: border-box;
             overflow: hidden;
+            /* 내부 요소가 넘치지 않도록 */
         }
         .card:hover {
             transform: translateY(-5px) scale(1.02);
@@ -213,49 +217,45 @@
             flex-direction: column;
             flex-grow: 1;
             min-height: 100px;
+            /* 제목2줄+주소1줄 정도의 최소 높이 */
         }
-        .info h3 {
+        .info h3 { /* 제목 스타일 */
             margin-top: 0;
             margin-bottom: 8px;
             font-size: 1.2em;
             color: #333;
             line-height: 1.3;
+            /* 두 줄 제한 (Webkit 계열) */
             height: calc(1.2em * 1.3 * 2);
+            /* 글꼴크기*줄간격*줄수 */
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-box-orient: vertical;
         }
-        .info p {
-            margin-bottom: 5px;
+        .info p { /* 주소 스타일 */
+            margin-bottom: 30px;
             font-size: 0.9em;
             color: #555;
             line-height: 1.4;
+            /* 한 줄 제한 */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-        .info p.description {
-            flex-grow: 1;
-            white-space: normal;
-            overflow: visible;
-            text-overflow: clip;
-        }
-        .info p:last-child {
-            margin-bottom: 0;
         }
 
         .slider-controls {
             position: absolute;
             top: 50%;
-            left: -10px;
+            left: -10px;  /* 컨테이너 패딩 바깥으로 살짝 */
             right: -10px;
+            /* 컨테이너 패딩 바깥으로 살짝 */
             transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
-            padding: 0;
+            padding: 0; /* 버튼 자체 패딩으로 조절 */
             z-index: 10;
-            pointer-events: none;
+            pointer-events: none; /* 버튼만 클릭되도록 */
         }
         .slider-controls button {
             background-color: rgba(255, 255, 255, 0.7);
@@ -267,7 +267,7 @@
             font-size: 20px;
             cursor: pointer;
             transition: background-color 0.2s ease, box-shadow 0.2s ease;
-            pointer-events: auto;
+            pointer-events: auto; /* 버튼 클릭 가능하도록 */
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .slider-controls button:hover {
@@ -285,26 +285,33 @@
         /* 모달 공통 스타일 */
         .modal {
             display: none;
+            /* 초기에는 숨김 */
             position: fixed;
             z-index: 1001;
+            /* 헤더보다 위에 */
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
+            overflow: auto; /* 내용 많을 시 스크롤 */
             background-color: rgba(0, 0, 0, 0.5);
+            /* 반투명 배경 */
             align-items: center;
+            /* 수직 중앙 정렬 */
             justify-content: center;
+            /* 수평 중앙 정렬 */
         }
-        .modal.open {
+        .modal.open { /* JavaScript로 이 클래스 추가 시 모달 보임 */
             display: flex;
         }
         .modal_body {
             background-color: white;
             border-radius: 0.5rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            max-width: 550px;
+            max-width: 800px;
+            /* 모든 모달의 기본 너비를 800px로 증가 */
             width: 90%;
+            /* 화면 너비의 90%를 사용하되, max-width를 넘지 않도록 */
             max-height: 90vh;
             overflow-y: auto;
             padding: 25px 30px;
@@ -312,7 +319,7 @@
             position: relative;
             box-sizing: border-box;
         }
-        #placemodal .modal_body {
+        #placemodal .modal_body { /* 장소 검색 모달은 좀 더 넓게 */
             max-width: 600px;
         }
         .modal-close-btn-custom {
@@ -325,6 +332,7 @@
             color: #888;
             line-height: 1;
             padding: 5px;
+            /* 클릭 영역 확보 */
         }
         .modal-close-btn-custom:hover {
             color: #333;
@@ -337,8 +345,10 @@
             margin-top: 0;
             margin-bottom: 1.2rem;
             color: #333;
-            text-align: left;
+            text-align: center;
             line-height: 1.4;
+            padding-right: 30px;
+            /* 하트 아이콘 공간 확보 */
         }
         #modal1 .modal_body img#itemDetailImage {
             width: 100%;
@@ -360,6 +370,7 @@
         }
         #modal1 .modal_body p#itemDetailOverview {
             white-space: pre-wrap;
+            /* 줄바꿈, 공백 유지 */
             background-color: #f8f9fa;
             padding: 10px;
             border-radius: 4px;
@@ -369,15 +380,15 @@
             display: inline-block;
             margin-top: 10px;
             padding: 8px 15px;
-            background-color: #007bff;
-            color: white;
+            background-color: #afadad;
+            color: black;
             text-decoration: none;
             font-weight: bold;
             border-radius: 4px;
             transition: background-color 0.2s ease;
-        }
+}
         #modal1 .modal_body div#itemDetailHomepage.homepage-link a:hover {
-            background-color: #0056b3;
+            background-color: #d4d4d4;
             text-decoration: none;
         }
 
@@ -389,10 +400,6 @@
             margin-top: 0;
             text-align: center;
             color: #333;
-        }
-        #placemodal .modal-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
         }
         .modal-form label {
             display: block;
@@ -413,19 +420,13 @@
             box-sizing: border-box;
             line-height: 1.5;
         }
-        #placemodal .modal-form input#placeInput {
-             width: 100%;
-             margin-bottom: 15px;
-             padding: 12px;
-             font-size: 1rem;
-        }
         .modal-form input:focus {
             outline: none;
-            border-color: #60a5fa;
+            border-color: #60a5fa; /* 포커스 시 테두리 색 변경 */
             box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+            /* 포커스 시 그림자 효과 */
         }
-        .modal-form button[type="submit"],
-        #placemodal .modal-form button[type="button"] {
+        .modal-form button[type="submit"] {
             width: 100%;
             padding: 0.8rem;
             background-color: #4a5568;
@@ -439,23 +440,18 @@
             margin-top: 0.5rem;
             line-height: 1.5;
         }
-        #placemodal .modal-form button[type="button"] {
-            width: auto;
-            padding: 10px 25px;
-            font-size: 0.95rem;
-        }
-
-        .modal-form button[type="submit"]:hover,
-        #placemodal .modal-form button[type="button"]:hover {
+        .modal-form button[type="submit"]:hover {
             background-color: #2d3748;
         }
         .error-message {
             color: #dc3545;
+            /* 오류 메시지 색상 */
             font-size: 0.85em;
             text-align: left;
             display: block;
-            min-height: 1.3em;
+            min-height: 1.3em; /* 메시지 없을 때도 공간 유지 */
             margin-top: -0.8rem;
+            /* 입력란과의 간격 조절 */
             margin-bottom: 0.8rem;
         }
         .hidden {
@@ -470,14 +466,138 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        #placemodal .modal-form button[type="button"] { /* 장소 설정 버튼 */
+            width: auto;
+            /* 자동 너비 */
+            padding: 10px 25px;
+            font-size: 0.95rem;
+        }
+        #placemodal .modal-form button[type="button"]:hover {
+             background-color: #2d3748;
+        }
 
         .auth-user-display {
-            display: inline-flex; /* 버튼과 같은 라인에 정렬되도록 */
-            align-items: center; /* 수직 중앙 정렬 */
-            padding: 0.5rem 0.5rem; /* 로그아웃 버튼과의 간격 및 내부 여백 */
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 0.5rem;
             font-size: 0.875rem;
-            color: #333; /* 원하는 글자색 */
-            /* margin-right: 0.75rem; */ /* 로그아웃 버튼과의 간격 (auth-buttons의 gap으로도 조절 가능) */
+            color: #333;
+        }
+        
+        /* --- 찜 기능 관련 스타일 --- */
+        .wishlist-btn-header {
+            padding: 0.5rem 1rem;
+            background-color: #ff6b6b; /* 찜 목록 버튼 색상 */
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        .wishlist-btn-header:hover {
+            background-color: #e74c3c;
+        }
+
+        /* 상세 모달 내 하트 아이콘 */
+        #modal1 .modal_body .heart-icon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #ddd; /* 비어있는 하트 색상 */
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            position: sticky; /* 변경: 스티키 포지션으로 */
+            bottom: 25px;
+            /* 표시 영역 하단에서의 거리 */
+            /* 우측 정렬을 위한 추가 */
+            float: right;
+            /* 오른쪽으로 붙임 */
+            margin-right: 5px;
+            /* 오른쪽 패딩(30px) 안쪽으로 좀 더 들어오게 조정 (기존 right: 30px과 유사하게) */
+            /* padding: 5px; 와 bottom: 25px; 를 고려하여 최종 위치 조정 */
+            padding: 5px;
+            /* 아이콘 자체 패딩 */
+            display: none;
+            /* 기본적으로 숨김, 로그인 시 JS로 표시 */
+            z-index: 10;
+            /* 다른 내용 위에 표시 */
+        }
+
+        #modal1 .modal_body .heart-icon.active {
+            color: #ff4757;
+            /* 채워진 하트 색상 (빨간색) */
+            transform: scale(1.1);
+        }
+
+        /* 카드 위 하트 아이콘 */
+        .card .card-heart-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.6rem; /* 카드에 맞게 크기 조정 */
+            color: rgba(255, 255, 255, 0.9);
+            /* 반투명 흰색 - 이미지 위에서 잘보이도록 */
+            text-shadow: 0 0 4px rgba(0,0,0,0.6);
+            /* 그림자 효과 */
+            z-index: 5; 
+            cursor: pointer;
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .card .card-heart-icon:hover {
+            transform: scale(1.15);
+        }
+        .card .card-heart-icon.active {
+            color: #ff4757;
+            /* 채워진 하트 색상 (빨간색) */
+        }
+
+        /* --- 찜 목록 모달 스타일 --- */
+        #wishlistModal .modal_body {
+            max-width: 700px;
+        }
+        #wishlistModal .wishlist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        #wishlistModal .wishlist-item:last-child {
+            border-bottom: none;
+        }
+        #wishlistModal .wishlist-item:hover {
+            background-color: #f9f9f9;
+        }
+        #wishlistModal .wishlist-item img {
+            width: 100px;
+            height: 75px; 
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 20px; 
+        }
+        #wishlistModal .wishlist-item-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.15em; 
+            color: #333;
+        }
+        #wishlistModal .wishlist-item-info p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+        #wishlistModal .empty-wishlist-message {
+            text-align: center;
+            padding: 40px 20px; 
+            color: #777;
+            font-size: 1.1em;
+        }
+
+        #loginmodal .modal_body,
+        #signupmodal .modal_body {
+            max-width: 480px;
+        /* 로그인, 회원가입 모달은 더 작게 설정 */
         }
 
     </style>
@@ -489,25 +609,20 @@
             <button id="signupButton" class="auth-button">회원가입</button>
             <button id="loginButton" class="auth-button">로그인</button>
             <span id="loginid" class="auth-user-display hidden"></span>
+            <button id="wishlistButton" class="wishlist-btn-header hidden"><i class="fas fa-heart"></i> 찜 목록</button>
             <button id="logoutButton" class="auth-button hidden">로그아웃</button>
         </div>
     </header>
 
-    <div id="currentStatus">
-        <span class="status-title">현재 기준 위치</span>
-        <span id="statusText">지도 서비스 로딩 중...</span>
-    </div>
-    <div id="resultOutput">
-        </div>
-
+    <div id="currentStatus"></div> <div id="resultOutput"></div>
 
     <div id="placemodal" class="modal">
         <div class="modal_body">
-            <span class="modal-close-btn-custom" onclick="closeModal(placeSearchModal)">&times;</span>
             <h2 class="modal-title">기준 위치 변경</h2>
             <div id="modal_map_container"></div>
             <div class="modal-form" style="text-align:center;">
-                <input type="text" id="placeInput" placeholder="장소 검색 또는 지도에서 우클릭">
+     
+           <input type="text" id="placeInput" placeholder="장소 검색 또는 지도에서 우클릭">
                 <button type="button" id="setPlaceFromModalButton" class="auth-button">선택한 위치로 설정</button>
             </div>
         </div>
@@ -516,18 +631,20 @@
     <div id="signupmodal" class="modal">
         <div class="modal_body">
             <span class="modal-close-btn-custom" onclick="closeModal(signupModal)">&times;</span>
-            <h2 class="modal-title">회원가입</h2>
+        
+    <h2 class="modal-title">회원가입</h2>
             <form class="modal-form" id="signupForm">
                 <div><label for="signupId">아이디</label><input type="text" id="signupId" name="signupId" required></div>
                 <span id="usernameError" class="error-message"></span>
                 <div><label for="signupPassword">비밀번호</label><input type="password" id="signupPassword" name="signupPassword" required></div>
                 <span id="passwordError" class="error-message"></span>
-                <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
+   
+             <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
                 <span id="passwordConfirmError" class="error-message"></span>
                 <div><label for="signupEmail">이메일</label><input type="email" id="signupEmail" name="signupEmail" required></div>
                 <span id="emailError" class="error-message"></span>
                 <button type="submit">가입하기</button>
-            </form>
+     </form>
         </div>
     </div>
 
@@ -537,7 +654,8 @@
             <h2 class="modal-title">로그인</h2>
             <form class="modal-form" id="loginForm">
                 <div><label for="loginId">아이디</label><input type="text" id="loginId" name="loginId" required></div>
-                <span id="loginIdError" class="error-message"></span>
+      
+          <span id="loginIdError" class="error-message"></span>
                 <div><label for="loginPassword">비밀번호</label><input type="password" id="loginPassword" name="loginPassword" required></div>
                 <span id="loginPasswordError" class="error-message"></span>
                 <button type="submit">로그인</button>
@@ -547,35 +665,30 @@
 
     {% csrf_token %}
 
-    <div class="search-bar">
-        <button onclick="requestCurrentLocation()" class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정">
-            <i class="fas fa-map-marker-alt"></i>
-        </button>
-        <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정">
-            <i class="fas fa-map"></i>
-        </button>
+  
+  <div class="search-bar">
+        <button onclick="requestCurrentLocation()" class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정"><i class="fas fa-map-marker-alt"></i></button>
+        <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
         <input id="userSearchInput" type="text" placeholder="어디 가고 싶으신가요? 어떤 분위기를 원하시나요?">
         <button class="text-search-btn" id="mainSearchButton">검색</button>
     </div>
 
     <div class="pink-screen">
-        <div class="blue">
-            주말에 어디 가지?<br>
-            이번주 부산 핫플은?
-        </div>
-        <div class="big">
-            대충 검색해도 나오는<br>
-            정확한 관광지 정보
-        </div>
+        <div class="blue">주말에 어디 가지?<br>이번주 부산 핫플은?</div>
+        <div class="big">대충 검색해도 나오는<br>정확한 관광지 정보</div>
     </div>
 
     <div id="modal1" class="modal">
         <div class="modal_body">
-            <span class="modal-close-btn-custom" onclick="closeModal(itemDetailModal)">&times;</span>
-            <h2 id="itemDetailTitle">상세 정보</h2>
+            <i class="fas fa-heart heart-icon" id="modalHeartIcon" title="찜하기"></i>
             <img id="itemDetailImage" src="" alt="상세 이미지">
+ 
+           <h2 id="itemDetailTitle">상세 정보</h2>
             <p id="itemDetailOverview"></p>
             <p id="itemDetailPeriod"></p>
+
+            <div id="itemDetailMapContainer" style="width:100%;height:250px;margin-bottom:15px;border-radius:4px;border: 1px solid #eee;"></div>
+
             <p id="itemDetailLocation"></p>
             <div id="itemDetailHomepage" class="homepage-link"></div>
         </div>
@@ -584,10 +697,10 @@
     <div class="category-section">
         <div class="slider-container">
             <h2 class="category-title">당신을 위한 추천</h2>
-            <div class="slider" id="festivalSlider">
-            </div>
+            <div class="slider" id="festivalSlider"></div>
             <div class="slider-controls">
-                <button id="festivalPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
+  
+              <button id="festivalPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
                 <button id="festivalNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
             </div>
         </div>
@@ -596,8 +709,8 @@
     <div class="category-section">
         <div class="slider-container">
             <h2 class="category-title">여름에 가기 좋은 곳</h2>
-            <div class="slider" id="touristSlider">
-            </div>
+        
+    <div class="slider" id="touristSlider"></div>
             <div class="slider-controls">
                 <button id="touristPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
                 <button id="touristNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
@@ -605,41 +718,77 @@
         </div>
     </div>
 
+    <div id="wishlistModal" class="modal">
+        <div class="modal_body">
+  
+          <h2 class="modal-title">나의 찜 목록</h2>
+            <div id="wishlistItemsContainer">
+                <p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
-        // --- 전역 변수 및 DOM 요소 참조 (기존 코드 유지) ---
-        let ps = null;
-        let targetLat = null;
-        let targetLon = null;
-        let targetPlaceName = "알 수 없음";
+        let ps = null, targetLat = null, targetLon = null, targetPlaceName = "알 수 없음";
         let isInitialLoadAttempt = true;
-        const DEFAULT_LATITUDE = 35.1795543;
-        const DEFAULT_LONGITUDE = 129.0756416;
-        const DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
-
-        let allPlaces = [];
-        let festivalSliderControls = null;
-        let touristSliderControls = null;
-
-        let modalMap = null;
-        let modalMapMarker = null;
-        let modalClickedLatLng = null;
-        let placeInput, userSearchInput;
-        let signupModal, loginModal, itemDetailModal, placeSearchModal;
-        
-        // 인증 관련 DOM 요소
-        let signupForm, loginForm;
-        let signupButton, loginButton, logoutButton; // 헤더 버튼
+        const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
+        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null;
+        let modalMap = null, modalMapMarker = null, modalClickedLatLng = null;
+        let placeInput, userSearchInput, mainSearchButton;
+        let geocoder = null; // 주소-좌표 변환 서비스 객체
+        let itemDetailMap = null;
+        // 상세 모달용 지도 객체
+        let itemDetailMapMarker = null;
+        // 상세 모달용 마커 객체
+        let signupModal, loginModal, itemDetailModal, placeSearchModal, wishlistModal;
+        let signupForm, loginForm, signupButton, loginButton, logoutButton, loggedInUserDisplayEl;
         let signupIdEl, signupPasswordEl, signupPasswordConfirmEl, signupEmailEl;
         let usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl;
-        let loginIdInputEl, loginPasswordInputEl;
-        let loginIdErrorEl, loginPasswordErrorEl;
-        let loggedInUserDisplayEl; // 로그인된 사용자 아이디 표시할 span
+        let loginIdInputEl, loginPasswordInputEl, loginIdErrorEl, loginPasswordErrorEl;
         
-        let csrfToken;
-        let mainSearchButton;
+        let wishlist = [], modalHeartIconEl, wishlistButtonEl, wishlistItemsContainerEl, currentDetailItemId = null;
+        const API_BASE_URL = 'http://127.0.0.1:8000'; 
+        let openedDetailFromWishlist = false;
+        // --- 찜 목록 유지 로직 추가 ---
+        let currentLoggedInUsername = null;
+        function getWishlistStorageKey() {
+            if (currentLoggedInUsername) {
+                return `touristWishlist_${currentLoggedInUsername}`;
+            }
+            return null;
+        }
 
-        const API_BASE_URL = 'http://127.0.0.1:8000'; // 백엔드 API 기본 URL
+        function loadWishlist() {
+            const key = getWishlistStorageKey();
+            wishlist = []; // 항상 먼저 초기화
+            if (key) {
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    try {
+                        const parsedList = JSON.parse(stored);
+                        if (Array.isArray(parsedList)) {
+                            wishlist = parsedList;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing wishlist from localStorage:", e);
+                        // wishlist는 이미 빈 배열로 초기화됨
+                    }
+                }
+            }
+            // 키가 없거나(로그인 안됨) 저장된 목록이 없으면 wishlist는 빈 배열 상태 유지
+        }
+
+        function saveWishlist() {
+      
+            const key = getWishlistStorageKey();
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(wishlist));
+            }
+            // 로그인하지 않은 경우 (key가 null) 저장하지 않음
+        }
+        // --- 찜 목록 유지 로직 끝 ---
+
 
         function getCookie(name) {
             let cookieValue = null;
@@ -647,7 +796,6 @@
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {
                     const cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
                     if (cookie.substring(0, name.length + 1) === (name + '=')) {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
@@ -657,771 +805,741 @@
             return cookieValue;
         }
 
-        // --- 슬라이더 설정 함수 (기존 코드 유지) ---
         function setupSlider(sliderId, prevBtnId, nextBtnId) {
-            const slider = document.getElementById(sliderId);
-            const prevButtonElement = document.getElementById(prevBtnId);
-            const nextButtonElement = document.getElementById(nextBtnId);
-
-            if (!slider || !prevButtonElement || !nextButtonElement) {
-                console.error("Slider or control buttons not found for:", sliderId);
-                if(prevButtonElement) prevButtonElement.classList.add('hidden');
-                if(nextButtonElement) nextButtonElement.classList.add('hidden');
+            const slider = document.getElementById(sliderId), prevBtn = document.getElementById(prevBtnId), nextBtn = document.getElementById(nextBtnId);
+            if (!slider || !prevBtn || !nextBtn) {
                 return null;
             }
-
-            let cards = slider.querySelectorAll('.card');
-            if (cards.length === 0) {
-                prevButtonElement.classList.add('hidden');
-                nextButtonElement.classList.add('hidden');
-                return { reinit: function() { const currentCards = slider.querySelectorAll('.card'); if(currentCards.length === 0) {prevButtonElement.classList.add('hidden'); nextButtonElement.classList.add('hidden');}} };
-            }
-
-            let currentIndex = 0;
+            let cards = slider.querySelectorAll('.card'), currentIndex = 0;
             const cardMargin = cards.length > 0 ? (parseFloat(window.getComputedStyle(cards[0]).marginLeft) + parseFloat(window.getComputedStyle(cards[0]).marginRight)) : 20;
-            let effectiveCardWidthForTranslation = cards.length > 0 ?
+            let cardWidth = cards.length > 0 ?
             cards[0].offsetWidth + cardMargin : 0;
             
-            let visibleCount = 3; 
-
-            function calculateVisibleCount() {
-                 if (cards.length === 0 || !effectiveCardWidthForTranslation) return 1;
-                 const sliderContainerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
-                 return Math.max(1, Math.floor(sliderContainerWidth / effectiveCardWidthForTranslation));
-            }
-
-            function updateSliderUI() {
+            function updateUI() {
                 if (cards.length === 0) {
-                    slider.style.transform = `translateX(0px)`;
-                    prevButtonElement.classList.add('hidden');
-                    nextButtonElement.classList.add('hidden');
+                    slider.style.transform = 'translateX(0px)';
+                    prevBtn.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
                     return;
                 }
-                effectiveCardWidthForTranslation = cards[0].offsetWidth + cardMargin;
-                visibleCount = calculateVisibleCount(); 
-                slider.style.transform = `translateX(-${currentIndex * effectiveCardWidthForTranslation}px)`;
-
-                if (cards.length <= visibleCount) {
-                    prevButtonElement.classList.add('hidden');
-                    nextButtonElement.classList.add('hidden');
-                } else {
-                    prevButtonElement.classList.remove('hidden');
-                    nextButtonElement.classList.remove('hidden');
-                    prevButtonElement.disabled = currentIndex === 0;
-                    nextButtonElement.disabled = currentIndex >= cards.length - visibleCount;
-                }
+                cardWidth = cards[0].offsetWidth + cardMargin;
+                const containerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
+                const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
+                slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+                prevBtn.classList.toggle('hidden', cards.length <= visibleCount);
+                nextBtn.classList.toggle('hidden', cards.length <= visibleCount);
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex >= cards.length - visibleCount;
             }
-
-            prevButtonElement.onclick = () => {
+            prevBtn.onclick = () => {
                 if (currentIndex > 0) {
                     currentIndex--;
-                    updateSliderUI();
+                    updateUI();
                 }
             };
-            nextButtonElement.onclick = () => {
-                 visibleCount = calculateVisibleCount();
-                 if (currentIndex < cards.length - visibleCount) {
-                    currentIndex++;
-                    updateSliderUI();
-                }
+            nextBtn.onclick = () => {
+                const containerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
+                const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
+                if (currentIndex < cards.length - visibleCount) {
+                    currentIndex++; updateUI();
+                }           
             };
-            
-            window.addEventListener('resize', debounce(updateSliderUI, 250));
-            updateSliderUI();
+            window.addEventListener('resize', debounce(updateUI, 250));
+            updateUI();
             return {
-                reinit: function() {
-                    cards = slider.querySelectorAll('.card');
-                    currentIndex = 0;
-                    updateSliderUI();
-                }
+                reinit: () => { cards = slider.querySelectorAll('.card'); currentIndex = 0; updateUI(); }
             };
         }
 
         function debounce(func, wait) {
             let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+            return (...args) => {
+                clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait);
             };
         }
 
-        // --- 모달 관련 함수 (기존 코드 유지, 단 closeModal 수정) ---
-        function openModal(modalElement) {
-            if (modalElement) {
-                modalElement.style.display = "flex"; // 또는 'flex'
-                document.body.style.overflow = 'hidden';
-            }
+        function openModal(modalEl) {
+            if (modalEl) {
+                modalEl.classList.add("open"); document.body.style.overflow = 'hidden';
+            } 
         }
+        
+        function closeModal(modalEl) {
+            if (modalEl) {
+                const wasItemDetailModal = modalEl === itemDetailModal;
+                const wasOpen = modalEl.classList.contains('open');
 
-        function closeModal(modalElement) {
-            if (modalElement) {
-                modalElement.style.display = "none";
-                const form = modalElement.querySelector('form');
+                modalEl.classList.remove("open");
+                const form = modalEl.querySelector('form');
                 if (form) {
-                    form.reset(); // 폼 필드 초기화
-                    // 오류 메시지 초기화 (인증 폼에만 해당되도록 수정)
-                    if (form.id === 'signupForm' || form.id === 'loginForm') {
+                    form.reset();
+                    if (form.id === 'signupForm' || form.id === 'loginForm'){
                         clearAuthErrors();
                     }
                 }
-                // 모든 모달이 닫혔는지 확인 후 body 스크롤 복원
-                const openModals = document.querySelectorAll('.modal');
-                let anyModalOpen = false;
-                openModals.forEach(mod => {
-                    if (mod.style.display === 'flex' || mod.style.display === 'block') { // 'flex'도 확인
-                        anyModalOpen = true;
-                    }
-                });
-                if (!anyModalOpen) {
+                if (document.querySelectorAll('.modal.open').length === 0) {
                     document.body.style.overflow = '';
+                }
+
+                if (wasItemDetailModal && wasOpen && openedDetailFromWishlist) {
+                    openWishlistModal();
+                    openedDetailFromWishlist = false; 
                 }
             }
         }
         
         function openItemDetailModal(itemData) {
             if (!itemData || !itemDetailModal) return;
-            document.getElementById('itemDetailTitle').textContent = itemData.title || "상세 정보";
+            currentDetailItemId = itemData.title; 
             document.getElementById('itemDetailImage').src = itemData.firstimage || itemData.image || "https://via.placeholder.com/400x200?text=No+Image";
-            document.getElementById('itemDetailImage').alt = itemData.title || "이미지";
+            document.getElementById('itemDetailTitle').textContent = itemData.title || "상세 정보";
             document.getElementById('itemDetailOverview').textContent = itemData.overview || "설명이 없습니다.";
+            document.getElementById('itemDetailPeriod').innerHTML = itemData.period ? `<strong>기간:</strong> ${itemData.period}` : "";
 
-            const periodEl = document.getElementById('itemDetailPeriod');
-            const locationEl = document.getElementById('itemDetailLocation');
-            const homepageDiv = document.getElementById('itemDetailHomepage');
-            periodEl.innerHTML = itemData.period ? `<strong>기간:</strong> ${itemData.period}` : "";
-            locationEl.innerHTML = itemData.addr1 || itemData.location ? `<strong>위치:</strong> ${itemData.addr1 || itemData.location}` : "";
-            homepageDiv.innerHTML = "";
+            const locationAddress = itemData.addr || itemData.location || "";
+            document.getElementById('itemDetailLocation').innerHTML = locationAddress ? `<strong>위치:</strong> ${locationAddress}` : "";
+            const homepageDiv = document.getElementById('itemDetailHomepage'); homepageDiv.innerHTML = "";
             if (itemData.homepage) {
-                let homepageText = itemData.homepage;
-                let homepageUrl = '';
-                const urlMatch = typeof homepageText === 'string' ?
-                homepageText.match(/href=["']([^"']+)["']/i) : null;
-                if (urlMatch && urlMatch[1]) {
+                let homepageText = itemData.homepage, homepageUrl = '';
+                const urlMatch = typeof homepageText === 'string' ? homepageText.match(/href=["']([^"']+)["']/i) : null;
+                if (urlMatch && urlMatch[1]){
                     homepageUrl = urlMatch[1];
-                } else if (typeof homepageText === 'string' && homepageText.toLowerCase().startsWith('http')) {
+                }
+                else if (typeof homepageText === 'string' && homepageText.toLowerCase().startsWith('http')){
                     homepageUrl = homepageText;
                 }
-
                 if (homepageUrl) {
-                    const link = document.createElement('a');
-                    link.href = homepageUrl;
-                    link.textContent = "홈페이지 방문";
-                    link.target = "_blank";
-                    link.rel = "noopener noreferrer";
+                    const link = Object.assign(document.createElement('a'), 
+                    { href: homepageUrl, textContent: "홈페이지 방문", target: "_blank", rel: "noopener noreferrer" });
                     homepageDiv.appendChild(link);
-                } else if (typeof homepageText === 'string' && homepageText.trim() !== "") {
+                } else if (typeof homepageText === 'string' && homepageText.trim() !== ""){
                     homepageDiv.innerHTML = `<strong>홈페이지/문의:</strong> ${homepageText}`;
                 }
             }
-
-            periodEl.style.display = periodEl.innerHTML ? 'block' : 'none';
-            locationEl.style.display = locationEl.innerHTML ? 'block' : 'none';
+            document.getElementById('itemDetailPeriod').style.display = document.getElementById('itemDetailPeriod').innerHTML ? 'block' : 'none';
+         
+            document.getElementById('itemDetailLocation').style.display = document.getElementById('itemDetailLocation').innerHTML ? 'block' : 'none';
             homepageDiv.style.display = homepageDiv.innerHTML.trim() !== "" ? 'block' : 'none';
 
+            const mapContainer = document.getElementById('itemDetailMapContainer');
+            if (!mapContainer) {
+                console.error("지도 컨테이너(itemDetailMapContainer)를 찾을 수 없습니다.");
+            } else if (locationAddress && geocoder) {
+                if (itemDetailMapMarker){
+                    itemDetailMapMarker.setMap(null);
+                }
+                mapContainer.style.display = 'none'; 
+
+                geocoder.addressSearch(locationAddress, function(result, status) {
+                    if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                        const coords = result[0]; 
+                        const itemLat = parseFloat(coords.y);
+                        const itemLng = parseFloat(coords.x);
+                        displayItemMapOnDetailModal(mapContainer, itemLat, itemLng);
+                    } else {
+                        mapContainer.style.display = 'none'; 
+                            
+                        if (itemDetailMapMarker){
+                            itemDetailMapMarker.setMap(null);
+                        }
+                    }
+                });
+
+            } else {
+                mapContainer.style.display = 'none';
+                if (itemDetailMapMarker){
+                    itemDetailMapMarker.setMap(null);
+                }
+            }
+            
+            const isLoggedIn = logoutButton && !logoutButton.classList.contains('hidden');
+            if (modalHeartIconEl) {
+                if (isLoggedIn) {
+                    modalHeartIconEl.style.display = 'inline-block';
+                    updateModalHeartIcon(currentDetailItemId);
+                } else {
+                    modalHeartIconEl.style.display = 'none';
+                }
+            }
             openModal(itemDetailModal);
         }
 
-        // --- 지도 관련 함수 (기존 코드 유지) ---
-        function initializeKakaoMaps() {
-            console.log("카카오맵 서비스 로드 완료. 지도 서비스 초기화 중...");
-            try {
-                ps = new kakao.maps.services.Places();
-                console.log("카카오 장소 검색 서비스 준비 완료.");
-                requestCurrentLocation();
-            } catch (error) {
-                console.error("카카오 서비스 초기화 중 오류:", error);
-                alert("지도 서비스를 초기화할 수 없습니다.");
-                setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
-                isInitialLoadAttempt = false;
+        // loadWishlist() 와 saveWishlist()는 맨 위에 currentLoggedInUsername 관련 로직과 함께 정의됨
+
+        function addToWishlist(itemId) {
+            if (!itemId || wishlist.includes(itemId)){
+                return;
+            }
+            wishlist.push(itemId); 
+            saveWishlist(); 
+            updateAllHeartIcons(itemId, true); 
+        }
+
+        function removeFromWishlist(itemId) {
+            if (!itemId) return;
+            const index = wishlist.indexOf(itemId);
+            if (index > -1) { 
+                wishlist.splice(index, 1);
+                saveWishlist();
+            }
+            updateAllHeartIcons(itemId, false);
+        }
+        function isWished(itemId) {
+            return itemId ? wishlist.includes(itemId) : false;
+        }
+
+        function updateModalHeartIcon(itemId) {
+            if (modalHeartIconEl) {
+                modalHeartIconEl.classList.toggle('active', isWished(itemId));
+                modalHeartIconEl.title = isWished(itemId) ? '찜 해제' : '찜하기';
+            }
+        }
+        function updateAllHeartIcons(itemId, isActive) {
+            document.querySelectorAll(`.card[data-item-id="${CSS.escape(itemId)}"] .card-heart-icon`).forEach(heart => {
+                heart.classList.toggle('active', isActive);
+                heart.title = isActive ? '찜 해제' : '찜하기';
+            });
+            if (itemDetailModal.classList.contains('open') && currentDetailItemId === itemId) {
+                const isLoggedIn = logoutButton && !logoutButton.classList.contains('hidden');
+                if (isLoggedIn) { 
+                    updateModalHeartIcon(itemId);
+                }
             }
         }
 
+        function toggleWishlistItem() { 
+            const isLoggedIn = logoutButton && !logoutButton.classList.contains('hidden');
+            if (!isLoggedIn) {
+                alert("로그인이 필요한 기능입니다.");
+                return;
+            }
+            if (!currentDetailItemId) return; 
+            isWished(currentDetailItemId) ? removeFromWishlist(currentDetailItemId) : addToWishlist(currentDetailItemId);
+        }
+
+        function updateWishlistButtonVisibility() { // 이 함수는 현재 직접 호출되지 않지만, updateAuthUI에서 처리
+            if (wishlistButtonEl && logoutButton) {
+                wishlistButtonEl.classList.toggle('hidden', logoutButton.classList.contains('hidden'));
+            }
+        }
+        function openWishlistModal() {
+            const isLoggedIn = logoutButton && !logoutButton.classList.contains('hidden');
+            if (!isLoggedIn) {
+                alert("로그인이 필요한 기능입니다.");
+                return;
+            }
+            if (!wishlistItemsContainerEl || !wishlistModal || !allPlaces){
+                return;
+            }
+            wishlistItemsContainerEl.innerHTML = ''; 
+            if (wishlist.length === 0) {
+                wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
+            } else {
+                // allPlaces에서 찜 목록에 있는 아이템들만 필터링하여 표시
+                const wishedPlaces = allPlaces.filter(item => item.title && wishlist.includes(item.title));
+                if (wishedPlaces.length === 0 && wishlist.length > 0) {
+                     // wishlist에는 ID가 있으나 allPlaces에 해당 아이템이 없는 경우 (예: 데이터 소스 변경 등)
+                     wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지 정보를 현재 불러올 수 없습니다. 다시 시도해주세요.</p>';
+                } else if (wishedPlaces.length === 0) {
+                     wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
+                }
+                
+                wishedPlaces.forEach(item => {
+                    const itemEl = Object.assign(document.createElement('div'), { className: 'wishlist-item' });
+                    itemEl.setAttribute('data-item-id', item.title); 
+                 
+                    itemEl.innerHTML = `<img src="${item.firstimage || item.image || 'https://via.placeholder.com/100x75?text=No+Image'}" alt="${item.title || ''}"><div class="wishlist-item-info"><h4>${item.title||''}</h4><p>${item.addr||item.location||''}</p></div>`;
+                    itemEl.onclick = () => { 
+                        openedDetailFromWishlist = true; 
+                        closeModal(wishlistModal); 
+         
+                        openItemDetailModal(item); 
+                    };
+                    wishlistItemsContainerEl.appendChild(itemEl);
+                });
+            }
+            openModal(wishlistModal);
+        }
+
+        function initializeKakaoMaps() {
+            try {
+                ps = new kakao.maps.services.Places();
+                geocoder = new kakao.maps.services.Geocoder();
+                console.log("Kakao Maps services (Places, Geocoder) initialized.");
+            } catch (e) {
+                console.error("Kakao Maps Services (Places/Geocoder) error:", e);
+                alert("지도 서비스(장소검색/주소변환)를 초기화할 수 없습니다.");
+            }
+        }
         function requestCurrentLocation() {
             if (navigator.geolocation) {
-                console.log("현재 GPS 위치를 확인 중입니다...");
-                navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
-                    enableHighAccuracy: false, timeout: 10000, maximumAge: 0
-                });
+                navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, { timeout: 10000 });
             } else {
-                console.warn("이 브라우저에서는 Geolocation이 지원되지 않습니다. 기본 위치로 진행합니다.");
-                alert("GPS를 지원하지 않는 환경입니다. 기본 위치로 진행합니다.");
                 if (isInitialLoadAttempt) {
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     isInitialLoadAttempt = false;
                 }
+                alert("GPS를 지원하지 않는 환경입니다.");
             }
         }
-
-        function onGeoSuccess(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const source = isInitialLoadAttempt ? "초기 로드" : "사용자 요청";
-            console.log(`GPS 위치 확인 성공 (${source}): 위도(${lat}), 경도(${lon}). 기준 위치를 업데이트했습니다.`);
-            setTargetLocation(lat, lon, "현재 내 위치 (GPS)", true);
+        function onGeoSuccess(pos) {
+            setTargetLocation(pos.coords.latitude, pos.coords.longitude, "현재 내 위치 (GPS)", true);
             isInitialLoadAttempt = false;
         }
-
-        function onGeoError(error) {
-            console.error("GPS 위치 확인 실패:", error.code, error.message);
-            let message = "GPS 위치를 가져올 수 없습니다. ";
-            switch(error.code) {
-                case error.PERMISSION_DENIED: message += "사용자 권한이 거부되었습니다."; break;
-                case error.POSITION_UNAVAILABLE: message += "위치 정보를 사용할 수 없습니다."; break;
-                case error.TIMEOUT: message += "요청 시간이 초과되었습니다."; break;
-                default: message += "알 수 없는 오류가 발생했습니다."; break;
-            }
+        function onGeoError(err) {
             if (isInitialLoadAttempt) {
-                console.log(message + " 기본 위치(부산 시청)를 사용합니다.");
                 setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                 isInitialLoadAttempt = false;
-            } else {
-                console.warn(`GPS 오류: ${message} 이전 기준 위치(${targetPlaceName})를 유지합니다.`);
-                alert(message);
             }
+            alert(`GPS 오류: ${err.message}`);
         }
-
         function setTargetLocation(lat, lon, name, sendToBackend) {
             targetLat = parseFloat(lat);
-            targetLon = parseFloat(lon);
-            targetPlaceName = name;
-            console.log(`기준 위치 업데이트됨: ${name} (위도: ${targetLat}, 경도: ${targetLon})`);
-
-            if (sendToBackend && targetLat != null && targetLon != null) {
+            targetLon = parseFloat(lon); targetPlaceName = name;
+            if (sendToBackend && targetLat != null && targetLon != null){
                 fetchNearbyPlacesData(targetLat, targetLon);
             }
         }
-
         function loadModalMap() {
-            if (!placeSearchModal || placeSearchModal.style.display !== 'flex') return;
+            if (!placeSearchModal || !placeSearchModal.classList.contains('open')){
+                return;
+            }
             const mapContainer = document.getElementById('modal_map_container');
-            if (!mapContainer) { console.error('모달 지도 컨테이너(modal_map_container)를 찾을 수 없습니다.'); return; }
-
-            const initialCenter = modalClickedLatLng ||
-            (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
+            if (!mapContainer) {
+                return;
+            }
+            const center = modalClickedLatLng || (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
             if (modalMap) {
-                modalMap.relayout();
-                modalMap.setCenter(initialCenter);
-                if (modalMapMarker) {
-                    modalMapMarker.setPosition(initialCenter);
-                    modalMapMarker.setMap(modalMap);
+                modalMap.relayout(); modalMap.setCenter(center);
+                if (modalMapMarker){
+                    modalMapMarker.setPosition(center);
                 } else {
-                    modalMapMarker = new kakao.maps.Marker({ position: initialCenter, map: modalMap });
+                    modalMapMarker = new kakao.maps.Marker({ position: center, map: modalMap });
                 }
             } else {
-                const mapOption = { center: initialCenter, level: 7 };
-                modalMap = new kakao.maps.Map(mapContainer, mapOption);
-                modalMapMarker = new kakao.maps.Marker({ position: initialCenter, map: modalMap });
-                kakao.maps.event.addListener(modalMap, 'rightclick', function(mouseEvent) {
-                    modalClickedLatLng = mouseEvent.latLng;
-                    modalMapMarker.setPosition(modalClickedLatLng);
-                    modalMapMarker.setMap(modalMap);
+                modalMap = new kakao.maps.Map(mapContainer, { center: center, level: 7 });
+                modalMapMarker = new kakao.maps.Marker({ position: center, map: modalMap });
+                kakao.maps.event.addListener(modalMap, 'rightclick', (mouseEvent) => {
+                    modalClickedLatLng = mouseEvent.latLng; modalMapMarker.setPosition(modalClickedLatLng);
                     placeInput.value = `위도: ${modalClickedLatLng.getLat().toFixed(6)}, 경도: ${modalClickedLatLng.getLng().toFixed(6)}`;
-                    console.log('모달 지도 우클릭:', modalClickedLatLng.toString());
                 });
             }
-            if (!modalClickedLatLng) modalClickedLatLng = initialCenter;
+            if (!modalClickedLatLng) modalClickedLatLng = center;
         }
-
         function openPlaceSearchModal() {
             if (placeSearchModal) {
-                placeInput.value = '';
-                modalClickedLatLng = null;
-                openModal(placeSearchModal);
-                setTimeout(loadModalMap, 50);
-            }
+                placeInput.value = ''; modalClickedLatLng = null;
+                openModal(placeSearchModal); setTimeout(loadModalMap, 50);
+            } 
         }
-        
         function handlePlaceInputEnter(event) {
             if (event.key === 'Enter') {
-                event.preventDefault();
-                setPlaceFromModal();
+                event.preventDefault(); setPlaceFromModal();
             }
         }
-
         function setPlaceFromModal() {
             const keyword = placeInput.value.trim();
             if (keyword && !keyword.startsWith("위도:")) {
-                if (!ps) { alert("장소 검색 서비스가 아직 준비되지 않았습니다."); console.error("Places 서비스 객체(ps)가 초기화되지 않았습니다."); return; }
-                console.log(`모달에서 "${keyword}" 검색 시작...`);
+                if (!ps) { alert("장소 검색 서비스가 준비되지 않았습니다.");
+                    return;
+                }
                 ps.keywordSearch(keyword, placeSearchCallback);
             } else if (modalClickedLatLng) {
-                console.log("모달 지도에서 선택한 위치로 기준 설정:", modalClickedLatLng.toString());
-                const mockData = [{
-                    place_name: `지도 선택 (${modalClickedLatLng.getLat().toFixed(4)}, ${modalClickedLatLng.getLng().toFixed(4)})`,
-                    y: modalClickedLatLng.getLat(),
-                    x: modalClickedLatLng.getLng()
-                }];
-                placeSearchCallback(mockData, kakao.maps.services.Status.OK, { keyword: '지도에서 선택한 위치' });
+                placeSearchCallback([{ place_name: `지도 선택 (${modalClickedLatLng.getLat().toFixed(4)}, ${modalClickedLatLng.getLng().toFixed(4)})`, y: modalClickedLatLng.getLat(), x: modalClickedLatLng.getLng() }], kakao.maps.services.Status.OK, {});
             } else {
-                alert('검색할 장소를 입력하거나, 지도에서 원하는 위치를 마우스 오른쪽 버튼으로 클릭해주세요.');
-                return;
+                alert('검색할 장소를 입력하거나, 지도에서 우클릭해주세요.'); return;
             }
             closeModal(placeSearchModal);
         }
-
         function placeSearchCallback(data, status, pagination) {
-            console.log("placeSearchCallback status:", status, ", data:", data);
-
-            if (status === kakao.maps.services.Status.OK) {
-                if (data.length > 0) {
-                    const place = data[0];
-                    const searchedName = place.place_name;
-                    const searchedLat = parseFloat(place.y);
-                    const searchedLon = parseFloat(place.x);
-
-                    console.log(`검색 결과: ${searchedName} (${searchedLat}, ${searchedLon}). 기준 위치로 설정합니다.`);
-                    setTargetLocation(searchedLat, searchedLon, searchedName, true);
-                    isInitialLoadAttempt = false;
-                } else {
-                    const keywordForMsg = pagination && pagination.keyword ? `"${pagination.keyword}"에 대한 ` : "";
-                    console.log(`${keywordForMsg}검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`);
-                    alert(`${keywordForMsg}검색 결과가 없습니다.`);
-                }
-            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-                const keywordForMsg = pagination && pagination.keyword ? `"${pagination.keyword}"에 대한 ` : "";
-                 console.log(`${keywordForMsg}검색 결과가 없습니다. 기준 위치는 변경되지 않습니다.`);
-                 alert(`${keywordForMsg}검색 결과가 없습니다.`);
-            } else if (status === kakao.maps.services.Status.ERROR) {
-                 console.error('장소 검색 중 서버 오류가 발생했습니다. 기준 위치는 변경되지 않습니다.');
-                 alert('장소 검색 중 서버 오류가 발생했습니다.');
-            } else {
-                 console.warn(`장소 검색 중 예상치 못한 상태(${status}). 기준 위치는 변경되지 않습니다.`);
-                 alert(`장소 검색 오류 (상태 코드: ${status})`);
-            }
+            if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                setTargetLocation(parseFloat(data[0].y), parseFloat(data[0].x), data[0].place_name, true);
+                isInitialLoadAttempt = false;
+            } else { alert("검색 결과가 없습니다."); }
         }
-
+        
         async function fetchNearbyPlacesData(lat, lon) {
-            const apiUrl = csrfToken ? '/api/receive-location/' : null; // 이 API는 인증과 무관하므로 그대로 둡니다.
-            if (!apiUrl) {
-                 console.warn("CSRF 토큰이 없거나 API URL이 설정되지 않아 서버 요청을 보내지 않습니다.");
-                 allPlaces = []; renderPlaces(); return;
+            const currentCsrfToken = getCookie('csrftoken');
+            if (!currentCsrfToken) {
+                 console.warn("CSRF 토큰이 없어 서버 요청을 보내지 않습니다. (fetchNearbyPlacesData)");
+                    allPlaces = []; renderPlaces();
+                    return;
             }
-
-            console.log(`서버 요청: ${apiUrl} (위도: ${lat}, 경도: ${lon}) - 주변 관광지 정보 요청 중...`);
             try {
-                const fetchOptions = {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                    body: JSON.stringify({ latitude: lat, longitude: lon })
-                 };
-                const response = await fetch(apiUrl, fetchOptions);
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    let errorDetail = "";
-                    try { const errorJson = JSON.parse(errorText); errorDetail = errorJson.message || errorJson.error || JSON.stringify(errorJson); }
-                    catch(e) { errorDetail = errorText.substring(0, 200); }
-                    throw new Error(`서버 요청 실패 (상태: ${response.status}). 내용: ${errorDetail}`);
-                }
+                const response = await fetch(`${API_BASE_URL}/api/receive-location/`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': currentCsrfToken },
+                    body: JSON.stringify({ latitude: lat, longitude: lon }) 
+                });
+            if (!response.ok) {
+                let errorDetail = `서버 요청 실패 (상태: ${response.status})`;
+                try {
+                    const errorJson = await response.json();
+                    errorDetail = errorJson.detail || errorJson.message || errorDetail;
+                } catch (e) { /* 응답이 JSON이 아닐 수 있음 */ }
+                throw new Error(errorDetail);
+            }
                 const result = await response.json();
-                if (result.status === 'success' && Array.isArray(result.places)) {
-                    console.log(`주변 관광지 정보 ${result.places.length}개를 성공적으로 가져왔습니다.`);
+                if (result.status === 'success' && Array.isArray(result.places)) { 
                     allPlaces = result.places;
-                    renderPlaces();
-                } else {
-                    throw new Error(result.message || '백엔드 데이터 형식 오류 또는 데이터 없음');
+                    renderPlaces(); 
+                } else { 
+                    throw new Error(result.message || '백엔드 데이터 형식 오류');
                 }
-            } catch (error) {
-                console.error('데이터 로딩 실패:', error);
-                alert(`데이터 로딩 중 오류가 발생했습니다: ${error.message}`);
-                allPlaces = []; renderPlaces();
+            } catch (error) { 
+                console.error('데이터 로딩 실패 (fetchNearbyPlacesData):', error);
+                alert(`데이터 로딩 오류: ${error.message}`); 
+                allPlaces = []; renderPlaces(); 
             }
         }
 
         function renderPlaces() {
-            const festivalSliderEl = document.getElementById('festivalSlider');
-            const touristSliderEl = document.getElementById('touristSlider');
-            if (!festivalSliderEl || !touristSliderEl) { console.error("슬라이더 요소를 찾을 수 없습니다."); return; }
-
-            festivalSliderEl.innerHTML = '';
-            touristSliderEl.innerHTML = '';
+            const festivalSliderEl = document.getElementById('festivalSlider'), touristSliderEl = document.getElementById('touristSlider');
+            if (!festivalSliderEl || !touristSliderEl){
+                return;
+            }
+            [festivalSliderEl, touristSliderEl].forEach(el => el.innerHTML = '');
+            const isLoggedIn = logoutButton && !logoutButton.classList.contains('hidden');
             if (!allPlaces || allPlaces.length === 0) {
-                const noDataMsg = '<p style="text-align:center; color:#777; padding: 20px 0;">주변에 표시할 정보가 없습니다.</p>';
-                festivalSliderEl.innerHTML = noDataMsg;
-                touristSliderEl.innerHTML = noDataMsg;
+                const msg = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보가 없습니다.</p>';
+                festivalSliderEl.innerHTML = msg; touristSliderEl.innerHTML = msg;
             } else {
                 allPlaces.forEach(item => {
-                    const cardHTML = `
-                        <img src="${item.firstimage || item.image || '사진 없음'}" alt="${item.title || '정보 없음'}">
-                        <div class="info">
-                            <h3>${item.title || '제목 없음'}</h3>
-                            <p>${item.addr || item.location || '위치 정보 없음'}</p>
-                        </div>
-                     `;
-                    
-                    const cardElementFestival = document.createElement('div');
-                    cardElementFestival.className = 'card';
-                    cardElementFestival.innerHTML = cardHTML;
-                    cardElementFestival.addEventListener('click', () => openItemDetailModal(item));
-                    festivalSliderEl.appendChild(cardElementFestival);
-
-                    const cardElementTourist = document.createElement('div');
-                    cardElementTourist.className = 'card';
-                    cardElementTourist.innerHTML = cardHTML;
-                    cardElementTourist.addEventListener('click', () => openItemDetailModal(item));
-                    touristSliderEl.appendChild(cardElementTourist);
+                    const itemId = item.title; 
+                    let heartIconHTML = '';
+                    if (isLoggedIn) { 
+                        const isItemWished = isWished(itemId); // 현재 로드된 wishlist 기준으로 판단
+                        heartIconHTML = `<i class="fas fa-heart card-heart-icon ${isItemWished ? 'active' : ''}" title="${isItemWished ? '찜 해제' : '찜하기'}"></i>`;
+                    }
+           
+                    const cardHTML = `${heartIconHTML}<img src="${item.firstimage||item.image||'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title||''}"><div class="info"><h3>${item.title||''}</h3><p>${item.addr||item.location||''}</p></div>`;
+                    [festivalSliderEl, touristSliderEl].forEach(sliderEl => {
+                        const cardEl = Object.assign(document.createElement('div'), { className: 'card', innerHTML: cardHTML });
+                        cardEl.setAttribute('data-item-id', itemId);
+                        cardEl.onclick = (e) => {
+                            if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
+                                e.stopPropagation();
+                                currentDetailItemId = itemId; // 상세 모달 열기 전, 대상 아이템 ID 설정
+                                toggleWishlistItem();
+                                return;
+                            }
+                            openedDetailFromWishlist = false;
+                            openItemDetailModal(item);
+                        };
+                        sliderEl.appendChild(cardEl);
+                    });
                 });
             }
-            if (festivalSliderControls && typeof festivalSliderControls.reinit === 'function') festivalSliderControls.reinit();
-            else festivalSliderControls = setupSlider('festivalSlider', 'festivalPrevBtn', 'festivalNextBtn');
-            
-            if (touristSliderControls && typeof touristSliderControls.reinit === 'function') touristSliderControls.reinit();
-            else touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
-        }
-
-        // --- 인증 관련 함수 ---
-        function showError(errorElement, message) {
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block'; // 보이도록 설정
+            if (festivalSliderControls){
+                festivalSliderControls.reinit();
+            }
+            else{
+                festivalSliderControls = setupSlider('festivalSlider', 'festivalPrevBtn', 'festivalNextBtn');
+            }
+            if (touristSliderControls){
+                touristSliderControls.reinit();
+            } else {
+                touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
             }
         }
 
+        function showError(el, msg) {
+            if (el) {
+                el.textContent = msg;
+                el.style.display = 'block';
+            }
+        }
         function clearAuthErrors() {
-            if (usernameError) { usernameError.textContent = ""; usernameError.style.display = 'none'; }
-            if (passwordErrorEl) { passwordErrorEl.textContent = ""; passwordErrorEl.style.display = 'none'; }
-            if (passwordConfirmErrorEl) { passwordConfirmErrorEl.textContent = ""; passwordConfirmErrorEl.style.display = 'none'; }
-            if (emailErrorEl) { emailErrorEl.textContent = ""; emailErrorEl.style.display = 'none'; }
-            if (loginIdErrorEl) { loginIdErrorEl.textContent = ""; loginIdErrorEl.style.display = 'none'; }
-            if (loginPasswordErrorEl) { loginPasswordErrorEl.textContent = ""; loginPasswordErrorEl.style.display = 'none'; }
+            [usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl, loginIdErrorEl, loginPasswordErrorEl].forEach(el => { if (el) { el.textContent = ""; el.style.display = 'none'; } });
+        }
+        
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/check-status/`, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.logged_in && data.username) {
+                        currentLoggedInUsername = data.username;
+                        // 사용자 이름 설정
+                        loadWishlist();
+                        // 해당 사용자의 찜 목록 로드
+                    } else {
+                        currentLoggedInUsername = null;
+                        // 로그아웃 상태
+                        wishlist = [];
+                        // 찜 목록 비우기
+                    }
+                    updateAuthUI(data.logged_in && data.username, data.username);
+                } else {
+                    currentLoggedInUsername = null;
+                    wishlist = [];
+                    updateAuthUI(false); 
+                }
+            } catch (error) { 
+                console.error('로그인 상태 확인 오류:', error);
+                currentLoggedInUsername = null;
+                wishlist = [];
+                updateAuthUI(false); 
+            }
         }
 
         function updateAuthUI(isLoggedIn, username = '') {
-            if (!signupButton || !loginButton || !logoutButton || !loggedInUserDisplayEl) {
-                console.error("Auth UI elements not found!");
+            if (!signupButton || !loginButton || !logoutButton || !loggedInUserDisplayEl || !wishlistButtonEl){
                 return;
             }
-
-            if (isLoggedIn) { // 로그인 상태일 경우
-                signupButton.classList.add('hidden');
-                loginButton.classList.add('hidden');
-
-                loggedInUserDisplayEl.textContent = `현재 로그인된 아이디: ${username}`; // 아이디 표시
-                loggedInUserDisplayEl.classList.remove('hidden'); // 아이디 표시 영역 보이기
-                logoutButton.classList.remove('hidden');
-            } else { // 로그아웃 상태일 경우
-                signupButton.classList.remove('hidden');
-                loginButton.classList.remove('hidden');
-
-                loggedInUserDisplayEl.textContent = ''; // 아이디 내용 지우기
-                loggedInUserDisplayEl.classList.add('hidden'); // 아이디 표시 영역 숨기기
-                logoutButton.classList.add('hidden');
-            }
+            signupButton.classList.toggle('hidden', isLoggedIn);
+            loginButton.classList.toggle('hidden', isLoggedIn);
+            loggedInUserDisplayEl.textContent = isLoggedIn ? `로그인 ID: ${username}` : '';
+            loggedInUserDisplayEl.classList.toggle('hidden', !isLoggedIn);
+            logoutButton.classList.toggle('hidden', !isLoggedIn);
+            wishlistButtonEl.classList.toggle('hidden', !isLoggedIn); 
+            renderPlaces();
+            // 로그인 상태 변경 시 장소 목록(하트 아이콘 포함) 다시 렌더링
         }
-
+        
         async function handleSignup(event) {
             event.preventDefault();
             clearAuthErrors();
-
-            const username = signupIdEl.value.trim();
-            const password_1 = signupPasswordEl.value;
-            const password_2 = signupPasswordConfirmEl.value;
-            const email = signupEmailEl.value.trim();
-
-            // 클라이언트 측 유효성 검사 (이전과 동일)
-            let isValid = true;
-            if (!username) { showError(usernameError, '아이디를 입력해주세요.'); isValid = false; }
-            if (password_1.length < 1) { 
-                showError(passwordErrorEl, '비밀번호를 입력해주세요.'); isValid = false;
-            } else if (password_1 !== password_2) {
-                showError(passwordConfirmErrorEl, '비밀번호가 일치하지 않습니다.'); isValid = false;
-            }
-            if (!password_2) { showError(passwordConfirmErrorEl, '비밀번호 확인을 입력해주세요.'); isValid = false; }
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email) { showError(emailErrorEl, '이메일을 입력해주세요.'); isValid = false; }
-            else if (!emailRegex.test(email)) { showError(emailErrorEl, '올바른 이메일 형식이 아닙니다.'); isValid = false; }
-            if (!isValid) return;
-
-            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
-            if (!currentCsrfToken) {
-                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+            const username = signupIdEl.value.trim(), pwd1 = signupPasswordEl.value, pwd2 = signupPasswordConfirmEl.value, email = signupEmailEl.value.trim();
+            const csrf = getCookie('csrftoken');
+            if (!csrf) {
+                alert('CSRF 토큰 오류');
                 return;
             }
-
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/signup/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': currentCsrfToken // 최신 토큰 사용
-                    },
-                    body: JSON.stringify({ username, password_1, password_2, email })
-                });
-                const data = await response.json();
-
-                if (response.ok && data.status === 'success') {
-                    alert(data.message || '회원가입 성공! 자동으로 로그인됩니다.');
+                const res = await fetch(`${API_BASE_URL}/api/auth/signup/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ username, password_1: pwd1, password_2: pwd2, email }) });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') { 
+                    alert(data.message || '회원가입 성공! 로그인해주세요.');
+                    // 회원가입 후 자동 로그인 대신 로그인 유도
                     closeModal(signupModal);
-                    updateAuthUI(true, data.username); 
-                    // 회원가입과 동시에 로그인되므로, 다음 요청을 위해 CSRF 토큰이 갱신되었을 수 있음
-                    // (getCookie는 다음 요청 시 자동으로 새 쿠키값을 읽음)
-                } else {
-                    // 오류 처리 (이전과 동일하게 상세히)
+                    // updateAuthUI(true, data.username); // 자동 로그인 안 함
+                } 
+                else { 
                     if (data.errors) { 
-                        if (data.errors.username) showError(usernameError, data.errors.username[0].message);
-                        if (data.errors.email) showError(emailErrorEl, data.errors.email[0].message);
-                        if (data.errors.password_1) showError(passwordErrorEl, data.errors.password_1[0].message); 
-                        if (data.errors.password_2) showError(passwordConfirmErrorEl, data.errors.password_2[0].message);
-                        let generalError = data.message || "";
-                        if (data.errors.non_field_errors) generalError += data.errors.non_field_errors.join(' ');
-                        if (generalError && !Object.keys(data.errors).some(k => ['username', 'email', 'password_1', 'password_2'].includes(k))) {
-                            alert(`회원가입 실패: ${generalError}`);
-                        } else if (!generalError && !Object.keys(data.errors).length && data.detail) {
-                            alert(`회원가입 실패: ${data.detail}`);
+                        if(data.errors.username){
+                            showError(usernameError, data.errors.username.join(' '));
                         }
-                    } else if (data.message) {
-                        alert(`회원가입 실패: ${data.message}`);
-                    } else if (data.detail) {
-                        alert(`회원가입 실패: ${data.detail}`);
+                        if(data.errors.password_1){
+                            showError(passwordErrorEl, data.errors.password_1.join(' '));
+                        }
+                        if(data.errors.password_2){
+                            showError(passwordConfirmErrorEl, data.errors.password_2.join(' '));
+                        }
+                        if(data.errors.email){
+                            showError(emailErrorEl, data.errors.email.join(' '));
+                        }
+                        if(data.errors.non_field_errors){
+                        alert(data.errors.non_field_errors.join(' '));
+                        }
                     } else {
-                        alert('회원가입에 실패했습니다. 입력 내용을 확인해주세요.');
+                        alert(data.message || data.detail || '회원가입 실패');
                     }
                 }
-            } catch (error) {
-                console.error('Signup API error:', error);
-                alert('회원가입 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
+            } catch (e) {
+                alert('회원가입 중 오류');
             }
         }
 
         async function handleLogin(event) {
             event.preventDefault();
             clearAuthErrors();
-
-            const username = loginIdInputEl.value.trim(); 
-            const password = loginPasswordInputEl.value; 
-
-            let isValid = true;
-            if (!username) { showError(loginIdErrorEl, "아이디를 입력해주세요."); isValid = false; }
-            if (!password) { showError(loginPasswordErrorEl, "비밀번호를 입력해주세요."); isValid = false; }
-            if (!isValid) return;
-
-            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
-            if (!currentCsrfToken) {
-                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+            const username = loginIdInputEl.value.trim(), password = loginPasswordInputEl.value;
+            const csrf = getCookie('csrftoken'); 
+            if (!csrf) {
+                alert('CSRF 토큰 오류');
                 return;
             }
-
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': currentCsrfToken // 최신 토큰 사용
-                    },
-                    body: JSON.stringify({ username, password }) 
-                });
-                
-                const data = await response.json(); 
-
-                if (response.ok && data.status === 'success') {
+                const res = await fetch(`${API_BASE_URL}/api/auth/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') { 
+                    currentLoggedInUsername = data.username;
+                    // 사용자 이름 설정
+                    loadWishlist();
+                    // 해당 사용자의 찜 목록 로드
                     alert(data.message || '로그인 성공!');
-                    closeModal(loginModal);
+                    closeModal(loginModal); 
                     updateAuthUI(true, data.username); 
-                    // 로그인 성공 시에도 백엔드에서 CSRF 토큰이 갱신됨
-                } else {
-                    const errorMessage = data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.';
-                    showError(loginPasswordErrorEl, errorMessage);
-                    loginPasswordInputEl.value = ''; 
-                    loginPasswordInputEl.focus();
-                    console.error('Login failed. Server response:', data, 'Status code:', response.status);
+                } 
+                else {
+                    showError(loginPasswordErrorEl, data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.');
                 }
-            } catch (error) { 
-                console.error('Login API request/parsing error:', error);
-                showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
+            } catch (e) {
+                showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다.');
             }
         }
 
         async function handleLogout() {
             if (!confirm("로그아웃 하시겠습니까?")) return;
+            const csrf = getCookie('csrftoken');
+            
+            if (csrf) { // CSRF 토큰이 있을 때만 서버에 로그아웃 요청
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/logout/`, { method: 'POST', headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' } });
+                    // 서버 응답 성공 여부와 관계없이 클라이언트 측 상태는 업데이트
+                    // if (res.ok && (await res.json()).status === 'success') { /* 성공 메시지는 아래에서 일괄 처리 */ } 
+                    // else { /* 실패 메시지도 아래에서 일괄 처리 또는 무시 */ }
+                } catch (e) { /* 오류 발생 시에도 클라이언트 측 상태 업데이트는 진행 */ }
+            }
 
-            const currentCsrfToken = getCookie('csrftoken'); // 요청 직전에 토큰 가져오기
-            if (!currentCsrfToken) {
-                alert('CSRF 토큰을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
-                // 로그아웃 시도이므로, 일단 UI는 로그아웃 상태로 변경 시도
+            currentLoggedInUsername = null;
+            // 현재 사용자 정보 초기화
+            wishlist = [];
+            // 메모리의 찜 목록 초기화 (localStorage는 건드리지 않음)
+            // saveWishlist();
+            // 호출하지 않음! (로그인 안된 상태로 저장 시도 방지)
+            
+            alert('로그아웃 되었습니다.');
+            updateAuthUI(false); // UI 업데이트
+        }
+
+        async function checkInitialAuthStatus() {
+            try {
+                // GET 요청으로 백엔드의 /api/auth/status/ 엔드포인트 호출
+                const response = await fetch(`${API_BASE_URL}/api/auth/status/`, { // API_BASE_URL은 이미 정의되어 있어야 합니다.
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isAuthenticated) {
+                        // 로그인 상태이면 UI 업데이트
+                        console.log('페이지 로드: 사용자 인증됨 -', data.username);
+                        currentLoggedInUsername = data.username; // *** 수정된 부분: 전역 사용자 이름 설정 ***
+                        loadWishlist();                        // *** 수정된 부분: 해당 사용자의 찜 목록 로드 ***
+                        updateAuthUI(true, data.username); 
+                    } else {
+                        // 로그아웃 상태이면 UI 업데이트
+                        console.log('페이지 로드: 사용자 인증 안됨');
+                        currentLoggedInUsername = null;        // *** 수정된 부분: 사용자 이름 null로 설정 ***
+                        loadWishlist();                        // *** 수정된 부분: 찜 목록 로드 (빈 목록이 됨) ***
+                        updateAuthUI(false);
+                    }
+                } else {
+                    // API 호출 자체가 실패한 경우 (네트워크 오류, 서버 오류 등)
+                    console.error('인증 상태 확인 API 호출 실패:', response.status);
+                    // 오류 발생 시 안전하게 로그아웃 상태로 처리
+                    currentLoggedInUsername = null;        // *** 추가된 부분 ***
+                    loadWishlist();                        // *** 추가된 부분 ***
+                    updateAuthUI(false);
+                }
+            } catch (error) {
+                // 네트워크 연결 오류 등 fetch 중 예외 발생 시
+                console.error('인증 상태 확인 중 JS 오류:', error);
+                // 오류 발생 시 안전하게 로그아웃 상태로 처리
+                currentLoggedInUsername = null;        // *** 추가된 부분 ***
+                loadWishlist();                        // *** 추가된 부분 ***
                 updateAuthUI(false);
-                window.location.reload(); // CSRF 없으면 의미 없으므로 새로고침
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            signupModal=document.getElementById('signupmodal');
+            loginModal=document.getElementById('loginmodal');
+            itemDetailModal=document.getElementById('modal1'); 
+            placeSearchModal=document.getElementById('placemodal');
+            wishlistModal=document.getElementById('wishlistModal');
+
+            signupForm=document.getElementById('signupForm');
+            loginForm=document.getElementById('loginForm');
+
+            signupButton=document.getElementById('signupButton');
+            loginButton=document.getElementById('loginButton');
+            logoutButton=document.getElementById('logoutButton'); 
+
+            loggedInUserDisplayEl=document.getElementById('loginid');
+            signupIdEl=document.getElementById('signupId');
+            signupPasswordEl=document.getElementById('signupPassword');
+            signupPasswordConfirmEl=document.getElementById('signupPasswordConfirm');
+            signupEmailEl=document.getElementById('signupEmail');
+
+            usernameError=document.getElementById('usernameError');
+            passwordErrorEl=document.getElementById('passwordError');
+            passwordConfirmErrorEl=document.getElementById('passwordConfirmError');
+            emailErrorEl=document.getElementById('emailError');
+
+            loginIdInputEl=document.getElementById('loginId');
+            loginPasswordInputEl=document.getElementById('loginPassword');
+
+            loginIdErrorEl=document.getElementById('loginIdError');
+            loginPasswordErrorEl=document.getElementById('loginPasswordError');
+            
+            placeInput=document.getElementById('placeInput');
+            userSearchInput=document.getElementById('userSearchInput');
+            mainSearchButton=document.getElementById('mainSearchButton');
+
+            modalHeartIconEl=document.getElementById('modalHeartIcon');
+            wishlistButtonEl=document.getElementById('wishlistButton');
+            wishlistItemsContainerEl=document.getElementById('wishlistItemsContainer');
+
+
+            csrfToken = getCookie('csrftoken');
+                // 페이지 로드 시 CSRF 토큰을 쿠키에서 가져옵니다.
+            if (!csrfToken){
+                console.warn("CSRF 토큰을 찾을 수 없습니다. 일부 기능이 제한될 수 있습니다.");
+            }
+            await checkInitialAuthStatus(); // 비동기 함수 호출 결과를 기다림
+            
+            if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
+                kakao.maps.load(() => { initializeKakaoMaps(); requestCurrentLocation(); });
+            } else { console.error("Kakao Maps SDK load error."); requestCurrentLocation(); }
+
+            if(placeInput) placeInput.onkeydown = handlePlaceInputEnter;
+            const setPlaceBtn = document.getElementById('setPlaceFromModalButton'); if(setPlaceBtn) setPlaceBtn.onclick = setPlaceFromModal;
+            const placeOpenBtn = document.getElementById('placeSearchOpenButton'); if(placeOpenBtn) placeOpenBtn.onclick = openPlaceSearchModal;
+            if(mainSearchButton) mainSearchButton.onclick = () => { if(userSearchInput.value.trim()) alert(`검색 기능 준비중: ${userSearchInput.value.trim()}`); else alert("검색어 입력 필요"); };
+            if(userSearchInput) userSearchInput.onkeydown = (e) => { if(e.key === 'Enter' && mainSearchButton) mainSearchButton.click(); };
+            if(signupButton) signupButton.onclick = () => { clearAuthErrors(); openModal(signupModal); };
+            if(loginButton) loginButton.onclick = () => { clearAuthErrors(); openModal(loginModal); };
+            if(logoutButton) logoutButton.onclick = handleLogout;
+            window.onclick = (e) => { if (e.target.classList.contains('modal') && e.target.classList.contains('open')) closeModal(e.target); };
+            if(signupForm) signupForm.onsubmit = handleSignup;
+            if(loginForm) loginForm.onsubmit = handleLogin;
+            if(modalHeartIconEl) modalHeartIconEl.onclick = toggleWishlistItem;
+            if(wishlistButtonEl) wishlistButtonEl.onclick = openWishlistModal;
+        });
+
+        function displayItemMapOnDetailModal(mapContainerElement, lat, lng) {
+            if (!mapContainerElement || isNaN(lat) || isNaN(lng) || typeof kakao === 'undefined' || !kakao.maps) {
+                if (mapContainerElement) mapContainerElement.style.display = 'none';
+                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
+                console.warn("상세 정보 모달 지도 표시에 필요한 정보가 부족하거나 SDK가 준비되지 않았습니다.");
                 return;
             }
 
-            let loggedOutSuccessfully = false;
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': currentCsrfToken, // 최신 토큰 사용
-                        'Content-Type': 'application/json' 
-                    }
+            mapContainerElement.style.display = 'block';
+            const mapOption = {
+                center: new kakao.maps.LatLng(lat, lng),
+                level: 4 
+            };
+            if (itemDetailMap) {
+                itemDetailMap.setCenter(mapOption.center);
+                itemDetailMap.setLevel(mapOption.level);
+            } else { 
+                itemDetailMap = new kakao.maps.Map(mapContainerElement, mapOption);
+            }
+
+            if (itemDetailMapMarker) {
+                itemDetailMapMarker.setPosition(mapOption.center);
+                itemDetailMapMarker.setMap(itemDetailMap); 
+            } else { 
+                itemDetailMapMarker = new kakao.maps.Marker({
+                    position: mapOption.center,
+                    map: itemDetailMap
                 });
+            }
 
-                if (response.ok) {
-                    const data = await response.json(); 
-                    if (data.status === 'success') {
-                        // alert(data.message || '로그아웃 되었습니다.'); // 메시지는 새로고침 전에 표시
-                        loggedOutSuccessfully = true;
-                    } else {
-                        alert(data.message || '로그아웃 처리 중 서버에서 오류를 반환했습니다.');
-                    }
-                } else { 
-                    let errorMsg = `로그아웃에 실패했습니다 (서버 응답 코드: ${response.status}).`;
-                    try {
-                        const errorData = await response.json(); 
-                        errorMsg = errorData.message || errorData.detail || errorMsg;
-                        console.error('Logout failed (server error response):', response.status, errorData);
-                    } catch (e) {
-                        errorMsg = `로그아웃 실패 (서버 응답 코드: ${response.status}, ${response.statusText || '내용 없음'})`;
-                        console.error('Logout failed (non-JSON server error response):', response.status, response.statusText);
-                    }
-                    alert(errorMsg); // 오류 메시지 표시
+            setTimeout(() => {
+                if (itemDetailMap) {
+                    itemDetailMap.relayout();
+                    itemDetailMap.setCenter(mapOption.center);
                 }
-            } catch (error) { 
-                console.error('Logout API request processing error:', error);
-                alert('로그아웃 요청 중 오류가 발생했습니다. 네트워크 연결 또는 서버 상태를 확인해주세요.');
-            }
-
-            updateAuthUI(false); // UI는 즉시 로그아웃 상태로 변경
-            if (loggedOutSuccessfully) {
-                alert('로그아웃 되었습니다.'); // 성공 메시지
-            }
+            }, 50);
         }
-        // --- DOMContentLoaded 이벤트 리스너 ---
-        document.addEventListener('DOMContentLoaded', function() {
-            // 인증 관련 요소 초기화
-            signupModal = document.getElementById('signupmodal');
-            loginModal = document.getElementById('loginmodal');
-            signupForm = document.getElementById('signupForm');
-            loginForm = document.getElementById('loginForm');
-
-            signupButton = document.getElementById('signupButton');
-            loginButton = document.getElementById('loginButton');
-            logoutButton = document.getElementById('logoutButton');
-
-            loggedInUserDisplayEl = document.getElementById('loginid');
-
-            signupIdEl = document.getElementById('signupId');
-            signupPasswordEl = document.getElementById('signupPassword');
-            signupPasswordConfirmEl = document.getElementById('signupPasswordConfirm');
-            signupEmailEl = document.getElementById('signupEmail');
-            usernameError = document.getElementById('usernameError');
-            passwordErrorEl = document.getElementById('passwordError');
-            passwordConfirmErrorEl = document.getElementById('passwordConfirmError');
-            emailErrorEl = document.getElementById('emailError');
-            
-            loginIdInputEl = document.getElementById('loginId');
-            loginPasswordInputEl = document.getElementById('loginPassword');
-            loginIdErrorEl = document.getElementById('loginIdError');
-            loginPasswordErrorEl = document.getElementById('loginPasswordError');
-
-            csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-            if (!csrfToken) console.warn("CSRF 토큰을 찾을 수 없습니다. API 요청이 실패할 수 있습니다.");
-
-            // 기타 기존 초기화 코드
-            placeInput = document.getElementById('placeInput');
-            userSearchInput = document.getElementById('userSearchInput');
-            mainSearchButton = document.getElementById('mainSearchButton');
-            itemDetailModal = document.getElementById('modal1');
-            placeSearchModal = document.getElementById('placemodal');
-            
-            // 카카오맵 SDK 로드
-            if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
-                kakao.maps.load(initializeKakaoMaps);
-            } else {
-                console.error("카카오맵 SDK 기본 객체를 로드할 수 없습니다.");
-                alert("카카오맵 SDK를 로드할 수 없습니다. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
-                setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
-            }
-
-            // 장소 검색 모달 관련 이벤트
-            if(placeInput) placeInput.addEventListener('keydown', handlePlaceInputEnter);
-            const setPlaceModalBtn = document.getElementById('setPlaceFromModalButton');
-            if (setPlaceModalBtn) setPlaceModalBtn.onclick = setPlaceFromModal;
-            const placeSearchOpenBtn = document.getElementById('placeSearchOpenButton');
-            if(placeSearchOpenBtn) placeSearchOpenBtn.onclick = openPlaceSearchModal;
-
-            // 메인 검색 버튼 이벤트 (기존 코드 유지)
-            if (mainSearchButton) {
-                mainSearchButton.onclick = function() {
-                    const query = userSearchInput.value.trim();
-                    if (!query) {
-                        alert("검색어를 입력해주세요.");
-                        return;
-                    }
-                    console.log("메인 검색 버튼 클릭됨. 현재 GPS 위치 재요청 시작...");
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => { 
-                                const searchLat = position.coords.latitude;
-                                const searchLon = position.coords.longitude;
-                                const placeName = "현재 내 위치 (GPS)"; 
-                                console.log(`메인 검색 기준: GPS 성공 (${searchLat.toFixed(6)}, ${searchLon.toFixed(6)})`);
-                                alert(
-                                     `검색 기능은 추후 구현될 예정입니다.\n\n` +
-                                    `검색어: ${query}\n` +
-                                    `검색 기준 위치: ${placeName}\n` +
-                                    `기준 위도: ${searchLat.toFixed(6)}\n` +
-                                    `기준 경도: ${searchLon.toFixed(6)}`
-                                 );
-                            },
-                            (error) => { 
-                                console.warn(`메인 검색 기준: GPS 오류(${error.code}: ${error.message}), 기본 위치(부산 시청) 사용`);
-                                const searchLat = DEFAULT_LATITUDE; 
-                                const searchLon = DEFAULT_LONGITUDE; 
-                                const placeName = DEFAULT_PLACE_NAME; 
-                                alert(
-                                    `검색 기능은 추후 구현될 예정입니다.\n\n` +
-                                    `검색어: ${query}\n` +
-                                    `검색 기준 위치: ${placeName}\n` +
-                                    `기준 위도: ${searchLat.toFixed(6)}\n` +
-                                    `기준 경도: ${searchLon.toFixed(6)}`
-                                );
-                            },
-                            { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
-                        );
-                    } else {
-                        console.warn("메인 검색 기준: Geolocation 미지원, 기본 위치(부산 시청) 사용");
-                        const searchLat = DEFAULT_LATITUDE;
-                        const searchLon = DEFAULT_LONGITUDE;
-                        const placeName = DEFAULT_PLACE_NAME;
-                        alert(
-                            `검색 기능은 추후 구현될 예정입니다.\n\n` +
-                            `검색어: ${query}\n` +
-                            `검색 기준 위치: ${placeName}\n` +
-                            `기준 위도: ${searchLat.toFixed(6)}\n` +
-                            `기준 경도: ${searchLon.toFixed(6)}`
-                        );
-                    }
-                };
-            }
-            if (userSearchInput) {
-                userSearchInput.addEventListener('keydown', function(event) {
-                    if (event.key === 'Enter') mainSearchButton.click();
-                });
-            }
-
-            // 인증 모달 열기 버튼 이벤트
-            if(signupButton && signupModal) signupButton.onclick = function() { clearAuthErrors(); openModal(signupModal); }
-            if(loginButton && loginModal) loginButton.onclick = function () { clearAuthErrors(); openModal(loginModal); }
-            if(logoutButton) logoutButton.onclick = handleLogout; // 로그아웃 핸들러 연결
-
-            // 모달 외부 클릭 시 닫기
-            window.addEventListener('click', function(event) {
-                if (event.target.classList.contains('modal')) {
-                     closeModal(event.target);
-                }
-            });
-
-            // 폼 제출 이벤트 리스너 연결
-            if (signupForm) {
-                signupForm.addEventListener('submit', handleSignup);
-            }
-            if (loginForm) {
-                loginForm.addEventListener('submit', handleLogin);
-            }
-            updateAuthUI(false); 
-
-        });
     </script>
 </body>
 </html>
