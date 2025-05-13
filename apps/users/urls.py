@@ -17,4 +17,7 @@ urlpatterns = [
     # 로그아웃 API 엔드포인트 URL
     # 예: POST 요청을 /api/auth/logout/ 으로 보내면 views.logout_api_view 함수가 처리
     path('logout/', views.logout_api_view, name='logout'),
+
+    # 로그인 상태 확인 URL
+    path('status/', views.check_auth_status, name='status'),
 ]
