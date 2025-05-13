@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib.auth.forms import AuthenticationForm # Django 기본 로그인 폼
 from django.views.decorators.http import require_POST # POST 요청만 허용하는 데코레이터
+from django.views.decorators.http import require_GET # GET 요청만 허용
 from django.db import IntegrityError # 데이터베이스 레벨 오류 처리용
 
 # 회원가입 폼 (forms.Form 상속 버전)
@@ -115,3 +116,16 @@ def logout_api_view(request):
             status=400,
             json_dumps_params={'ensure_ascii': False} # 한글 처리
         )
+
+@require_GET # GET 요청만 허용
+def check_auth_status(request):
+    """현재 사용자의 인증 상태를 확인하는 API 뷰"""
+    if request.user.is_authenticated:
+        # 로그인 상태일 경우
+        return JsonResponse({
+            'isAuthenticated': True,
+            'username': request.user.username # 사용자 이름 추가
+        }, json_dumps_params={'ensure_ascii': False})
+    else:
+        # 로그아웃 상태일 경우
+        return JsonResponse({'isAuthenticated': False})
