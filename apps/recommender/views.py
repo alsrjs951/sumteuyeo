@@ -11,10 +11,10 @@ from django.conf import settings
 
 
 # --- Helper Function: 주변 관광지 목록 가져오기 (Lazy Loading 적용) ---
-def get_nearby_places_list(latitude, longitude, api_key):  # 함수 이름 변경 (get_nearby_places -> get_nearby_places_list)
+def get_nearby_places_list(latitude, longitude, api_key):
     """
     주어진 위도, 경도를 기반으로 TourAPI(locationBasedList1)를 호출하여
-    주변 관광지 기본 정보 리스트(contentid 포함)를 반환합니다.
+    주변 관광지 기본 정보 리스트(contentid, 통합 주소, 전화번호 포함)를 반환합니다.
     상세 정보(개요, 홈페이지)는 포함하지 않습니다.
     requests.get 호출 시 verify 경로를 명시합니다.
 
@@ -27,7 +27,7 @@ def get_nearby_places_list(latitude, longitude, api_key):  # 함수 이름 변�
         tuple: (places_list, error_message)
                성공 시 (list, None), 실패 시 ([], str) 형태
     """
-    places_summary_list = []  # 반환할 리스트 이름 변경
+    places_summary_list = []
     error_message = None
 
     try:
@@ -69,11 +69,25 @@ def get_nearby_places_list(latitude, longitude, api_key):  # 함수 이름 변�
 
         if items:
             for item in items:
+                addr1 = item.get('addr1', '')
+                addr2 = item.get('addr2', '')
+
+                # addr1과 addr2를 합쳐서 하나의 addr 필드로 만듭니다.
+                # 두 주소 필드가 모두 있을 경우 공백으로 연결하고, 한쪽만 있거나 없으면 있는 값만 사용합니다.
+                # 양쪽 모두 공백이거나 None일 경우 빈 문자열이 됩니다.
+                address_parts = []
+                if addr1 and addr1.strip(): # None이거나 공백 문자열이 아닌 경우
+                    address_parts.append(addr1.strip())
+                if addr2 and addr2.strip(): # None이거나 공백 문자열이 아닌 경우
+                    address_parts.append(addr2.strip())
+                full_address = " ".join(address_parts)
+
                 places_summary_list.append({
-                    'contentid': item.get('contentid'),  # 프론트엔드에서 상세 정보 요청 시 사용
+                    'contentid': item.get('contentid'),
                     'title': item.get('title', '이름 없음'),
-                    'addr1': item.get('addr1', ''),  # 주소
-                    'firstimage': item.get('firstimage', ''),  # 대표 이미지
+                    'addr': full_address,  # 수정된 부분: 통합된 주소
+                    'tel': item.get('tel', ''),  # 추가된 부분: 전화번호
+                    'firstimage': item.get('firstimage', ''),
                     # 필요하다면 locationBasedList1에서 제공하는 다른 기본 정보 추가 가능
                     # 예: 'mapx': item.get('mapx'), 'mapy': item.get('mapy')
                 })
@@ -166,7 +180,6 @@ def get_place_detail_view(request, content_id):
         if api_data_detail['response']['header']['resultCode'] == '0000':
             detail_items_data = api_data_detail['response']['body'].get('items', {})
             detail_item = detail_items_data.get('item')
-            # detailCommon1은 contentId로 조회시 항상 단일 아이템이거나, 없거나. 리스트로 올 경우 첫번째 아이템 선택
             if detail_item and isinstance(detail_item, list):
                 detail_item = detail_item[0] if detail_item else None
 
@@ -174,29 +187,25 @@ def get_place_detail_view(request, content_id):
                 overview = detail_item.get('overview', '')
                 homepage_raw = detail_item.get('homepage', '')
                 if homepage_raw:
-                    # 정규표현식으로 a 태그의 href 값 추출
                     match = re.search(r'href=[\'"]?([^\'" >]+)', homepage_raw, re.IGNORECASE)
                     if match:
                         homepage_url = match.group(1)
-                    # 간혹 URL만 텍스트로 오는 경우도 고려 (<a> 태그 없이)
                     elif 'http' in homepage_raw and '<' not in homepage_raw:
-                        # 간단한 URL 패턴 검사 (더 정교하게 할 수도 있음)
                         url_match = re.search(r'(https?://[^\s<>"\'()]+)', homepage_raw)
                         if url_match:
                             homepage_url = url_match.group(1)
-                        else:  # 그래도 못찾으면 원본 일부라도... (프론트에서 처리 필요할 수도)
+                        else:
                             homepage_url = homepage_raw.split()[0] if homepage_raw.split() else ''
                     else:
-                        homepage_url = ''  # 파싱 실패 시 빈 값 또는 원본 텍스트 일부
+                        homepage_url = ''
 
                 return JsonResponse({
                     'status': 'success',
-                    'contentid': content_id,  # 요청했던 content_id 다시 보내주기
+                    'contentid': content_id,
                     'overview': overview,
                     'homepage': homepage_url
                 })
             else:
-                # 아이템은 있으나 상세 정보가 없는 경우 (API 명세상 거의 없을듯하나 방어 코드)
                 return JsonResponse({'status': 'error', 'message': '상세 정보를 찾을 수 없습니다.'}, status=404)
 
         else:
@@ -204,14 +213,14 @@ def get_place_detail_view(request, content_id):
             print(
                 f"TourAPI Warning (detailCommon1 for contentId {content_id}, resultCode {api_data_detail['response']['header']['resultCode']}): {detail_error}")
             return JsonResponse({'status': 'error', 'message': f'상세 정보 API 오류: {detail_error}'},
-                                status=502)  # Bad Gateway (외부 API 문제)
+                                status=502)
 
     except requests.exceptions.SSLError as e:
         print(f"!!! SSLError occurred (detailCommon1 for contentId {content_id}): {e}")
         return JsonResponse({'status': 'error', 'message': 'SSL 인증서 검증 오류 (상세정보)'}, status=502)
     except requests.exceptions.Timeout:
         print(f"API 요청 시간 초과 (detailCommon1 for contentId {content_id})")
-        return JsonResponse({'status': 'error', 'message': '상세 정보 요청 시간 초과'}, status=504)  # Gateway Timeout
+        return JsonResponse({'status': 'error', 'message': '상세 정보 요청 시간 초과'}, status=504)
     except requests.exceptions.RequestException as e:
         print(f"API 요청 오류 (detailCommon1 for contentId {content_id}): {e}")
         if response_detail is not None:
@@ -229,11 +238,11 @@ def get_place_detail_view(request, content_id):
 
 @ensure_csrf_cookie
 def location_page_view(request):
-    return render(request, 'core/main_page.html') # 탬플릿 경로 확인
+    return render(request, 'core/main_page.html')
 
 
 @require_POST
-def receive_location(request):  # 주변 관광지 "목록"을 요청하는 뷰
+def receive_location(request):
     try:
         data = json.loads(request.body)
         latitude = data.get('latitude')
@@ -251,7 +260,6 @@ def receive_location(request):  # 주변 관광지 "목록"을 요청하는 뷰
             return JsonResponse({'status': 'error', 'message': 'API 키 설정에 문제가 발생했습니다.'}, status=500)
 
         print("Calling get_nearby_places_list function...")
-        # 수정된 함수 호출 (이름 변경 get_nearby_places -> get_nearby_places_list)
         places_summary_list, error_msg = get_nearby_places_list(latitude, longitude, TOUR_API_KEY)
         print(f"get_nearby_places_list returned. Error message: {error_msg}")
 
@@ -269,7 +277,6 @@ def receive_location(request):  # 주변 관광지 "목록"을 요청하는 뷰
             return JsonResponse({'status': 'error', 'message': error_msg}, status=status_code)
         else:
             print("Success! Returning places summary list.")
-            # 'places' 키는 프론트엔드와 일관성을 위해 유지
             return JsonResponse({'status': 'success', 'places': places_summary_list})
 
     except json.JSONDecodeError:
