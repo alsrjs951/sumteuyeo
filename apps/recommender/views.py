@@ -1,35 +1,127 @@
 import json
-import requests  # 외부 API 호출을 위한 라이브러리
-import re  # 홈페이지 URL 파싱을 위한 정규표현식 라이브러리
-import certifi  # SSL 인증서 경로를 명시적으로 사용하기 위해 추가
+import requests
+import re
+import certifi
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_POST, require_GET  # require_GET 추가
+from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render
 from django.conf import settings
 
 
+# --- 헬퍼 함수: detailIntro2 API 호출 및 정보 추출 ---
+def _get_detail_intro_info(api_key, ca_bundle_path, content_id, content_type_id):
+    """
+    detailIntro2 API를 호출하여 contentTypeId에 따른 상세 정보를 추출합니다.
+    Args:
+        api_key (str): TourAPI 인증키
+        ca_bundle_path (str): certifi CA 번들 경로
+        content_id (str): 콘텐츠 ID
+        content_type_id (int): 콘텐츠 타입 ID
+    Returns:
+        dict: { '한글 레이블': '값', ... } 형태의 추가 정보 딕셔너리
+    """
+    intro_details_result = {}
+    detail_intro_api_url = "http://apis.data.go.kr/B551011/KorService2/detailIntro2"
+    params = {
+        'serviceKey': api_key,
+        'MobileOS': 'ETC',
+        'MobileApp': 'Sumteuyeo',
+        'contentId': content_id,
+        'contentTypeId': content_type_id,
+        '_type': 'json'
+    }
+
+    try:
+        print(f"Attempting to call detailIntro2 API for contentId: {content_id}, contentTypeId: {content_type_id}...")
+        response = requests.get(detail_intro_api_url, params=params, timeout=5, verify=ca_bundle_path)
+        response.raise_for_status()
+        data = response.json()
+        print(f"detailIntro2 API call successful for contentId: {content_id}.")
+
+        if data['response']['header']['resultCode'] == '0000':
+            items = data['response']['body'].get('items', {}).get('item', [])
+            if items:
+                item = items[0] if isinstance(items, list) and items else (items if isinstance(items, dict) else None)
+
+                if item:
+                    # API 응답 필드명과 사용자 요청 필드(한글 레이블) 매핑
+
+                    field_mappings_by_type = {
+                        12: {  # 관광지
+                            '수용인원': item.get('accomcount'),
+                            '유모차대여정보': item.get('chkbabycarriage'),
+                            '애완동물동반가능정보': item.get('chkpet'),
+                            '개장일': item.get('opendate'),
+                            '주차시설': item.get('parking'),
+                            '쉬는날': item.get('restdate'),
+                            '이용시간': item.get('usetime')
+                        },
+                        14: {  # 문화시설
+                            '수용인원': item.get('accomcountculture'),
+                            '유모차대여정보': item.get('chkbabycarriageculture'),
+                            '애완동물동반가능정보': item.get('chkpetculture'),
+                            '주차시설': item.get('parkingculture'),
+                            '이용요금': item.get('usefee'),
+                            '이용시간': item.get('usetimeculture')
+                        },
+                        15: {  # 행사/공연/축제
+                            '행사시작일': item.get('eventstartdate'),
+                            '행사종료일': item.get('eventenddate'),
+                            '공연시간': item.get('playtime'),
+                            '이용요금': item.get('usetimefestival')
+                        },
+                        28: {  # 레포츠
+                            '수용인원': item.get('accomcountleports'),
+                            '유모차대여정보': item.get('chkbabycarriageleports'),
+                            '애완동물동반가능정보': item.get('chkpetleports'),
+                            '개장기간': item.get('openperiod'),
+                            '주차시설': item.get('parkingleports'),
+                            '쉬는날': item.get('restdateleports'),
+                            '입장료': item.get('usefeeleports'),
+                            '이용시간': item.get('usetimeleports')
+                        },
+                        32: {  # 숙박
+                            '주차시설': item.get('parkinglodging')
+                        },
+                        38: {  # 쇼핑
+                            '유모차대여정보': item.get('chkbabycarriageshopping'),
+                            '애완동물동반가능정보': item.get('chkpetshopping'),
+                            '영업시간': item.get('opentime'),
+                            '주차시설': item.get('parkingshopping'),
+                            '쉬는날': item.get('restdateshopping')
+                        },
+                        39: {  # 음식점
+                            '대표메뉴': item.get('firstmenu'),
+                            '어린이놀이방여부': item.get('kidsplayfacility'),
+                            '주차시설': item.get('parkingfood'),
+                            '쉬는날': item.get('restdatefood')
+                        }
+                    }
+
+                    current_type_mappings = field_mappings_by_type.get(content_type_id, {})
+                    for label, value in current_type_mappings.items():
+                        if value and str(value).strip():  # 값이 존재하고 공백이 아닌 경우만 포함
+                            intro_details_result[label] = str(value).strip()
+        else:
+            intro_error_msg = data['response']['header'].get('resultMsg', '소개 정보 API 오류')
+            print(f"TourAPI Error (detailIntro2 for contentId {content_id}): {intro_error_msg}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling detailIntro2 API for contentId {content_id}: {e}")
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from detailIntro2 for contentId {content_id}: {e}")
+    except Exception as e:
+        print(f"Unexpected error in _get_detail_intro_info for contentId {content_id}: {e}")
+
+    return intro_details_result
+
+
 # --- Helper Function: 주변 관광지 목록 가져오기 (Lazy Loading 적용) ---
 def get_nearby_places_list(latitude, longitude, api_key):
-    """
-    주어진 위도, 경도를 기반으로 TourAPI(locationBasedList1)를 호출하여
-    주변 관광지 기본 정보 리스트(contentid, 통합 주소, 전화번호 포함)를 반환합니다.
-    상세 정보(개요, 홈페이지)는 포함하지 않습니다.
-    requests.get 호출 시 verify 경로를 명시합니다.
-
-    Args:
-        latitude (float): 사용자 위도
-        longitude (float): 사용자 경도
-        api_key (str): TourAPI 인증키
-
-    Returns:
-        tuple: (places_list, error_message)
-               성공 시 (list, None), 실패 시 ([], str) 형태
-    """
     places_summary_list = []
     error_message = None
-
     try:
         ca_bundle_path = certifi.where()
     except Exception as e:
@@ -39,13 +131,12 @@ def get_nearby_places_list(latitude, longitude, api_key):
     location_api_url = "https://apis.data.go.kr/B551011/KorService1/locationBasedList1"
     location_params = {
         'serviceKey': api_key, 'MobileOS': 'ETC', 'MobileApp': 'Sumteuyeo',
-        'mapX': longitude, 'mapY': latitude, 'radius': 20000,  # 반경 20km
-        'listYN': 'Y', 'arrange': 'E',  # 거리순 정렬
-        'contentTypeId': 12,  # 관광지 타입
-        'numOfRows': 20,  # 가져올 아이템 수
+        'mapX': longitude, 'mapY': latitude, 'radius': 20000,
+        'listYN': 'Y', 'arrange': 'E',
+        'contentTypeId': 12,  # 기본적으로 관광지(12)를 검색하나, API는 다양한 타입을 반환할 수 있음
+        'numOfRows': 20,
         '_type': 'json'
     }
-
     response_loc = None
     try:
         print("Attempting to call locationBasedList1 API (with explicit verify path)...")
@@ -71,27 +162,21 @@ def get_nearby_places_list(latitude, longitude, api_key):
             for item in items:
                 addr1 = item.get('addr1', '')
                 addr2 = item.get('addr2', '')
-
-                # addr1과 addr2를 합쳐서 하나의 addr 필드로 만듭니다.
-                # 두 주소 필드가 모두 있을 경우 공백으로 연결하고, 한쪽만 있거나 없으면 있는 값만 사용합니다.
-                # 양쪽 모두 공백이거나 None일 경우 빈 문자열이 됩니다.
                 address_parts = []
-                if addr1 and addr1.strip(): # None이거나 공백 문자열이 아닌 경우
+                if addr1 and addr1.strip():
                     address_parts.append(addr1.strip())
-                if addr2 and addr2.strip(): # None이거나 공백 문자열이 아닌 경우
+                if addr2 and addr2.strip():
                     address_parts.append(addr2.strip())
                 full_address = " ".join(address_parts)
 
                 places_summary_list.append({
                     'contentid': item.get('contentid'),
                     'title': item.get('title', '이름 없음'),
-                    'addr': full_address,  # 수정된 부분: 통합된 주소
-                    'tel': item.get('tel', ''),  # 추가된 부분: 전화번호
+                    'addr': full_address,
+                    'tel': item.get('tel', ''),
                     'firstimage': item.get('firstimage', ''),
-                    # 필요하다면 locationBasedList1에서 제공하는 다른 기본 정보 추가 가능
-                    # 예: 'mapx': item.get('mapx'), 'mapy': item.get('mapy')
+                    'contenttypeid': item.get('contenttypeid')  # 상세 정보 조회 시 필요
                 })
-
         return places_summary_list, None
 
     except requests.exceptions.SSLError as e:
@@ -120,12 +205,9 @@ def get_nearby_places_list(latitude, longitude, api_key):
         return [], error_message
 
 
-# --- 새로운 뷰 함수: 특정 관광지의 상세 정보 가져오기 ---
-@require_GET  # GET 요청으로 상세 정보 조회
+# --- 새로운 뷰 함수: 특정 관광지의 상세 정보 가져오기 (detailCommon1 + detailIntro2) ---
+@require_GET
 def get_place_detail_view(request, content_id):
-    """
-    주어진 content_id에 해당하는 관광지의 상세 정보(개요, 홈페이지)를 반환합니다.
-    """
     try:
         TOUR_API_KEY = settings.TOUR_API_KEY
         if not TOUR_API_KEY:
@@ -140,52 +222,42 @@ def get_place_detail_view(request, content_id):
         print(f"Error getting certifi path: {e}")
         return JsonResponse({'status': 'error', 'message': 'certifi CA 번들 경로 오류'}, status=500)
 
-    detail_api_url = "https://apis.data.go.kr/B551011/KorService1/detailCommon1"
-    detail_params = {
-        'serviceKey': TOUR_API_KEY,
-        'MobileOS': 'ETC',
-        'MobileApp': 'Sumteuyeo',
-        'contentId': content_id,
-        '_type': 'json',
-        'defaultYN': 'Y',  # 기본 정보 조회
-        'firstImageYN': 'N',  # 대표 이미지는 이미 목록에서 받음 (필요시 Y)
-        'areacodeYN': 'N',
-        'catcodeYN': 'N',
-        'addrinfoYN': 'N',  # 주소 정보는 이미 목록에서 받음 (필요시 Y)
-        'mapinfoYN': 'N',  # 지도 정보는 이미 목록에서 받음 (필요시 Y)
-        'overviewYN': 'Y'  # 개요 정보 조회
-    }
-
     overview = ''
     homepage_url = ''
-    response_detail = None
-    response_detail_text = ''
+    tel_number = ''
+    content_type_id_str = None
+    intro_data = {}
+
+    # 1. detailCommon1 호출
+    detail_common_api_url = "https://apis.data.go.kr/B551011/KorService1/detailCommon1"
+    common_params = {
+        'serviceKey': TOUR_API_KEY, 'MobileOS': 'ETC', 'MobileApp': 'Sumteuyeo',
+        'contentId': content_id, '_type': 'json', 'defaultYN': 'Y',
+        'firstImageYN': 'N', 'areacodeYN': 'N', 'catcodeYN': 'N',
+        'addrinfoYN': 'N', 'mapinfoYN': 'N', 'overviewYN': 'Y'
+    }
+    response_common = None  # detailCommon1의 응답 객체용
+    response_common_text = ''  # detailCommon1의 응답 텍스트용
 
     try:
         print(f"Attempting to call detailCommon1 API for contentId: {content_id} (with explicit verify path)...")
-        response_detail = requests.get(
-            detail_api_url,
-            params=detail_params,
-            timeout=5,
-            verify=ca_bundle_path
-        )
-        response_detail_text = response_detail.text
-        response_detail.raise_for_status()
+        response_common = requests.get(detail_common_api_url, params=common_params, timeout=5, verify=ca_bundle_path)
+        response_common_text = response_common.text
+        response_common.raise_for_status()
+        api_data_common = response_common.json()
 
-        print(f"  ContentId {content_id} - Status Code: {response_detail.status_code}")
-        # print(f"  ContentId {content_id} - Response Text Preview: {response_detail_text[:200]}")
+        if api_data_common['response']['header']['resultCode'] == '0000':
+            items_common = api_data_common['response']['body'].get('items', {})
+            item_common = items_common.get('item')
+            if item_common and isinstance(item_common, list):
+                item_common = item_common[0] if item_common else None
 
-        api_data_detail = response_detail.json()
+            if item_common and isinstance(item_common, dict):
+                overview = item_common.get('overview', '')
+                homepage_raw = item_common.get('homepage', '')
+                tel_number = item_common.get('tel', '')
+                content_type_id_str = item_common.get('contenttypeid')
 
-        if api_data_detail['response']['header']['resultCode'] == '0000':
-            detail_items_data = api_data_detail['response']['body'].get('items', {})
-            detail_item = detail_items_data.get('item')
-            if detail_item and isinstance(detail_item, list):
-                detail_item = detail_item[0] if detail_item else None
-
-            if detail_item and isinstance(detail_item, dict):
-                overview = detail_item.get('overview', '')
-                homepage_raw = detail_item.get('homepage', '')
                 if homepage_raw:
                     match = re.search(r'href=[\'"]?([^\'" >]+)', homepage_raw, re.IGNORECASE)
                     if match:
@@ -198,42 +270,56 @@ def get_place_detail_view(request, content_id):
                             homepage_url = homepage_raw.split()[0] if homepage_raw.split() else ''
                     else:
                         homepage_url = ''
-
-                return JsonResponse({
-                    'status': 'success',
-                    'contentid': content_id,
-                    'overview': overview,
-                    'homepage': homepage_url
-                })
             else:
-                return JsonResponse({'status': 'error', 'message': '상세 정보를 찾을 수 없습니다.'}, status=404)
-
+                print(f"detailCommon1: No item found for contentId {content_id} or item format error.")
         else:
-            detail_error = api_data_detail['response']['header'].get('resultMsg', '상세 정보 API 오류')
-            print(
-                f"TourAPI Warning (detailCommon1 for contentId {content_id}, resultCode {api_data_detail['response']['header']['resultCode']}): {detail_error}")
-            return JsonResponse({'status': 'error', 'message': f'상세 정보 API 오류: {detail_error}'},
-                                status=502)
+            common_error = api_data_common['response']['header'].get('resultMsg', '공통 정보 API 오류')
+            print(f"TourAPI Error (detailCommon1 for contentId {content_id}): {common_error}")
+            # detailCommon1 실패 시, contenttypeid를 알 수 없으므로 intro 정보는 못 가져옴.
+            # 하지만 overview, tel 등 일부 정보는 실패 메시지와 함께 반환할 수도 있음.
+            # 여기서는 일단 빈 값으로 두고 아래에서 intro 정보만 추가 시도.
 
     except requests.exceptions.SSLError as e:
         print(f"!!! SSLError occurred (detailCommon1 for contentId {content_id}): {e}")
-        return JsonResponse({'status': 'error', 'message': 'SSL 인증서 검증 오류 (상세정보)'}, status=502)
+        return JsonResponse({'status': 'error', 'message': 'SSL 인증서 검증 오류 (공통정보)'}, status=502)
     except requests.exceptions.Timeout:
         print(f"API 요청 시간 초과 (detailCommon1 for contentId {content_id})")
-        return JsonResponse({'status': 'error', 'message': '상세 정보 요청 시간 초과'}, status=504)
+        return JsonResponse({'status': 'error', 'message': '공통 정보 요청 시간 초과'}, status=504)
     except requests.exceptions.RequestException as e:
         print(f"API 요청 오류 (detailCommon1 for contentId {content_id}): {e}")
-        if response_detail is not None:
-            print(f"  Response Status Code was: {response_detail.status_code}")
-        return JsonResponse({'status': 'error', 'message': '상세 정보 요청 중 네트워크 오류'}, status=502)
+        if response_common is not None: print(
+            f"  Response Status Code (detailCommon1) was: {response_common.status_code}")
+        return JsonResponse({'status': 'error', 'message': '공통 정보 요청 중 네트워크 오류'}, status=502)
     except json.JSONDecodeError:
         print(f"JSON Decode Error (detailCommon1 for contentId {content_id})")
-        if response_detail is not None:
-            print(f"Received non-JSON response text: {response_detail_text}")
-        return JsonResponse({'status': 'error', 'message': '상세 정보 API 응답 형식 오류'}, status=502)
-    except Exception as e:
-        print(f"Unexpected error processing detail for contentId {content_id}: {e}")
-        return JsonResponse({'status': 'error', 'message': '상세 정보 처리 중 알 수 없는 서버 오류'}, status=500)
+        if response_common is not None: print(
+            f"Received non-JSON response text (detailCommon1): {response_common_text[:200]}")
+        return JsonResponse({'status': 'error', 'message': '공통 정보 API 응답 형식 오류'}, status=502)
+    except Exception as e:  # detailCommon1 호출 또는 처리 중 기타 예외
+        print(f"Unexpected error during detailCommon1 processing for contentId {content_id}: {e}")
+        # 여기서 return JsonResponse를 하면 detailIntro2 호출 기회가 없음.
+        # content_type_id_str이 None으로 유지되어 intro_data가 비게 됨. 이는 의도된 동작일 수 있음.
+
+    # 2. contenttypeid가 있다면 detailIntro2 호출
+    if content_type_id_str:
+        try:
+            content_type_id_int = int(content_type_id_str)
+            intro_data = _get_detail_intro_info(TOUR_API_KEY, ca_bundle_path, content_id, content_type_id_int)
+        except ValueError:
+            print(f"Invalid contentTypeId format: {content_type_id_str} for contentId: {content_id}")
+    else:
+        print(
+            f"Cannot fetch intro details because contentTypeId is missing for contentId: {content_id} (detailCommon1 might have failed or not provided it).")
+
+    # 최종 응답 조합 (detailCommon1이 실패했더라도, 기본값들과 빈 intro_data로 응답 시도)
+    return JsonResponse({
+        'status': 'success',  # detailCommon1에서 오류가 나도 부분 성공으로 간주할지, 아니면 여기서도 error로 할지 결정 필요
+        'contentid': content_id,
+        'overview': overview,
+        'tel': tel_number,
+        'homepage': homepage_url,
+        'intro_details': intro_data
+    })
 
 
 @ensure_csrf_cookie
@@ -253,7 +339,7 @@ def receive_location(request):
 
         try:
             TOUR_API_KEY = settings.TOUR_API_KEY
-            if not TOUR_API_KEY: raise AttributeError
+            if not TOUR_API_KEY: raise AttributeError("TOUR_API_KEY not found in settings")
         except AttributeError:
             error_msg = "settings.py에 TOUR_API_KEY가 정의되지 않았거나 비어있습니다."
             print(f"설정 오류: {error_msg}")
