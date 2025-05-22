@@ -170,33 +170,38 @@ if __name__ == '__main__':
     print(f"  총 {len(texts_for_embedding)}개의 유효한 요약에 대해 임베딩을 생성합니다...")
 
     # 6. 임베딩 생성
-    # model 변수는 스크립트 상단에서 SentenceTransformer로 초기화되었습니다.
     embeddings = model.encode(texts_for_embedding, convert_to_numpy=True, show_progress_bar=True)
     print("임베딩 생성 완료.")
 
     # 7. FAISS 인덱스 생성 및 저장
-    if embeddings.ndim == 1:  # 단일 임베딩인 경우를 위해 차원 확장 (보통은 2D 배열)
+    if embeddings.ndim == 1:  # 단일 임베딩인 경우를 위해 차원 확장
         embeddings = np.expand_dims(embeddings, axis=0)
 
-    if embeddings.shape[0] == 0:  # 임베딩 결과가 없는 경우
+    if embeddings.shape[0] == 0:
         print("생성된 임베딩이 없습니다. FAISS 인덱스를 만들 수 없습니다.")
         exit()
 
     dimension = embeddings.shape[1]
-    print(f"FAISS 인덱스를 생성합니다 (차원: {dimension})...")
-    index = faiss.IndexFlatL2(dimension)  # L2 거리(유클리드 거리) 기반의 기본 인덱스
-    index.add(embeddings)  # 생성된 임베딩들을 인덱스에 추가
-    print("FAISS 인덱스에 임베딩 추가 완료.")
+    print(f"FAISS HNSW 인덱스를 생성합니다 (차원: {dimension})...")
 
+    # HNSW 인덱스 생성 (M은 그래프에서 각 노드가 연결할 이웃 개수)
+    index = faiss.IndexHNSWFlat(dimension, 32)
+
+    # efSearch 파라미터 설정 (탐색 품질 조정용)
+    index.hnsw.efSearch = 64  # 추천: 32~128 사이에서 튜닝
+
+    index.add(embeddings)  # 임베딩 추가
+    print("FAISS HNSW 인덱스에 임베딩 추가 완료.")
+
+    # 인덱스 저장
     try:
         faiss.write_index(index, faiss_index_output_file)
-        print(f"FAISS 인덱스를 '{faiss_index_output_file}' 파일로 성공적으로 저장했습니다.")
+        print(f"FAISS HNSW 인덱스를 '{faiss_index_output_file}' 파일로 성공적으로 저장했습니다.")
     except Exception as e:
         print(f"오류: FAISS 인덱스 '{faiss_index_output_file}' 저장 실패: {e}")
         exit()
 
-    # 8. FAISS 인덱스 순서와 contentid 매핑 정보 저장
-    # 이 맵은 FAISS 검색 결과(숫자 인덱스)를 실제 contentid로 변환하는 데 사용됩니다.
+    # contentid ↔ FAISS 인덱스 순서 매핑 저장
     print(f"FAISS 인덱스-ContentID 맵을 '{faiss_id_map_output_file}' 파일로 저장합니다...")
     try:
         with open(faiss_id_map_output_file, 'w', encoding='utf-8') as f:
