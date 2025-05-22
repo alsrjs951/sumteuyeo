@@ -1,18 +1,21 @@
 import os
-import openai
-from dotenv import load_dotenv
-from django.conf import settings
-from django.core.cache import cache
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.views import View
-from langdetect import detect
-import re
 import json
+import re
 import faiss
 import numpy as np
+import openai
+import httpx
+from dotenv import load_dotenv
+from langdetect import detect
 from googletrans import Translator
 from sentence_transformers import SentenceTransformer
+from django.conf import settings
+from django.core.cache import cache
+from django.http import JsonResponse
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import classonlymethod
+from asgiref.sync import sync_to_async
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -28,10 +31,7 @@ FORBIDDEN_PATTERNS = [
 ]
 
 def is_malicious(text):
-    for pattern in FORBIDDEN_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE):
-            return True
-    return False
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in FORBIDDEN_PATTERNS)
 
 def is_travel_related(text):
     keywords = ["여행", "코스", "추천", "일정", "맛집", "가고 싶어", "명소"]
@@ -39,9 +39,11 @@ def is_travel_related(text):
 
 translator = Translator()
 
+@sync_to_async
 def translate_to_korean(text):
     return translator.translate(text, dest="ko").text
 
+@sync_to_async
 def translate_to_original(text, dest):
     return translator.translate(text, dest=dest).text
 
@@ -58,10 +60,36 @@ def get_user_profile(user_id):
         "preferred_regions": ["서울", "경기도"]
     }
 
-def get_personalized_recommendations(query, user_profile, top_n=5):
+@sync_to_async
+def embed_query(query):
+    return model.encode([query])
+
+@sync_to_async
+def search_faiss(query_vec, top_n):
+    return faiss_index.search(query_vec, top_n * 5)
+
+def format_as_cards(items):
+    return [{
+        "title": item["title"],
+        "contentid": item["contentid"],
+        "category": f"{item['cat1']} > {item['cat2']} > {item['cat3']}",
+        "overview": item["overview"][:200] + "...",
+        "reason": f"'{item['cat3']}' 관련 장소이고, 선호도 및 지역 기반 추천입니다."
+    } for item in items]
+
+def generate_schedule(recommendations, days=2):
+    schedule = {}
+    per_day = max(1, len(recommendations) // days)
+    for i in range(days):
+        start = i * per_day
+        end = start + per_day
+        schedule[f"Day {i+1}"] = recommendations[start:end]
+    return schedule
+
+@sync_to_async
+def get_recommendations(query, user_profile, top_n=5):
     query_vec = model.encode([query])
     D, I = faiss_index.search(query_vec, top_n * 5)
-
     scored_results = []
     for idx in I[0]:
         item = spot_data[str(idx)]
@@ -75,34 +103,27 @@ def get_personalized_recommendations(query, user_profile, top_n=5):
         if any(region in item.get("overview", "") for region in user_profile.get("preferred_regions", [])):
             score += 0.15
         scored_results.append((item, score))
-
     ranked = sorted(scored_results, key=lambda x: -x[1])[:top_n]
     return [item for item, _ in ranked]
 
-def format_as_cards(items):
-    cards = []
-    for item in items:
-        cards.append({
-            "title": item["title"],
-            "contentid": item["contentid"],
-            "category": f"{item['cat1']} > {item['cat2']} > {item['cat3']}",
-            "overview": item["overview"][:200] + "...",
-            "reason": f"'{item['cat3']}' 관련 장소이고, 선호도 및 지역 기반 추천입니다."
-        })
-    return cards
+async def call_openai_gpt(messages):
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {openai.api_key}"},
+            json={"model": "gpt-3.5-turbo", "messages": messages},
+            timeout=15
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
 
-def generate_schedule(recommendations, days=2):
-    schedule = {}
-    per_day = max(1, len(recommendations) // days)
-    for i in range(days):
-        start = i * per_day
-        end = start + per_day
-        schedule[f"Day {i+1}"] = recommendations[start:end]
-    return schedule
+class ChatbotAsyncView(View):
+    @classonlymethod
+    def as_view(cls, **initkwargs):
+        view = super().as_view(**initkwargs)
+        return csrf_exempt(view)
 
-
-class ChatbotView(View):
-    def post(self, request):
+    async def post(self, request):
         data = json.loads(request.body)
         user_input = data.get("message", "")
         user_id = data.get("user_id", "anonymous")
@@ -115,7 +136,7 @@ class ChatbotView(View):
         lang = detect(user_input)
         if lang != "ko":
             original_lang = lang
-            user_input = translate_to_korean(user_input)
+            user_input = await translate_to_korean(user_input)
         else:
             original_lang = "ko"
 
@@ -127,34 +148,30 @@ class ChatbotView(View):
             if not is_travel_related(user_input):
                 result = "저는 여행 관련 추천만 도와드릴 수 있어요. 예: '서울 2박 3일 여행 코스 추천해줘'"
             else:
-                prompt = f"{SYSTEM_PROMPT}\n사용자: {user_input}\nAI:"
                 try:
-                    completion = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": SYSTEM_PROMPT},
-                            {"role": "user", "content": user_input}
-                        ]
-                    )
-                    result = completion.choices[0].message.content
+                    messages = [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_input}
+                    ]
+                    result = await call_openai_gpt(messages)
                     cache.set(cache_key, result, timeout=3600)
                 except Exception:
                     return JsonResponse({"response": "GPT 호출 중 오류가 발생했습니다."}, status=500)
 
         user_profile = get_user_profile(user_id)
-        recommendations = get_personalized_recommendations(user_input, user_profile)
+        recommendations = await get_recommendations(user_input, user_profile)
         cards = format_as_cards(recommendations)
         schedule = generate_schedule(recommendations)
 
         if original_lang != "ko":
-            result = translate_to_original(result, dest=original_lang)
+            result = await translate_to_original(result, dest=original_lang)
             for card in cards:
-                card["title"] = translate_to_original(card["title"], dest=original_lang)
-                card["overview"] = translate_to_original(card["overview"], dest=original_lang)
-                card["reason"] = translate_to_original(card["reason"], dest=original_lang)
+                card["title"] = await translate_to_original(card["title"], dest=original_lang)
+                card["overview"] = await translate_to_original(card["overview"], dest=original_lang)
+                card["reason"] = await translate_to_original(card["reason"], dest=original_lang)
             for day in schedule:
                 for i in range(len(schedule[day])):
-                    schedule[day][i]["title"] = translate_to_original(schedule[day][i]["title"], dest=original_lang)
+                    schedule[day][i]["title"] = await translate_to_original(schedule[day][i]["title"], dest=original_lang)
 
         return JsonResponse({
             "response": result,
