@@ -1,3 +1,27 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth import get_user_model
+from pgvector.django import VectorField
 
-# Create your models here.
+User = get_user_model()
+
+class UserPreferenceProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preferences')
+    # 4개 메인 카테고리별 484차원 벡터 (pgvector)
+    accommodation = VectorField(dimensions=484, null=True, blank=True)     # 숙박
+    festival_event = VectorField(dimensions=484, null=True, blank=True)    # 축제/공연/행사
+    experience = VectorField(dimensions=484, null=True, blank=True)        # 체험관광+역사+레저+자연+쇼핑+문화
+    food = VectorField(dimensions=484, null=True, blank=True)              # 음식
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_preference_profile'
+        indexes = [
+            models.Index(fields=['user']),
+        ]
+
+class CategoryHierarchy(models.Model):
+    code = models.CharField(max_length=10, unique=True)  # 예: AC01
+    name = models.CharField(max_length=50)               # 예: 숙박 > 호텔
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    embedding = ArrayField(models.FloatField(), size=100)  # 카테고리 임베딩

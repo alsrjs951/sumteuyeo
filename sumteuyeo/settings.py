@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'apps.items.apps.ItemsConfig',
     'apps.interactions.apps.InteractionsConfig',
     'apps.recommender.apps.RecommenderConfig',
+    'pgvector.django',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -146,5 +148,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#APi인증키값
+# TourAPI 인증키값
 TOUR_API_KEY = env('TOUR_API_KEY')
+
+# OpenAI 인증키값
+OPENAI_API_KEY = env('OPENAI_API_KEY')
