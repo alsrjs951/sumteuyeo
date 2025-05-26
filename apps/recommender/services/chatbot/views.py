@@ -6,11 +6,11 @@ import json
 from langdetect import detect
 from django.core.cache import cache
 
-from chatbot.constants import SYSTEM_PROMPT
-from chatbot.utils.filtering import is_malicious, is_travel_related
-from chatbot.services.translation import translate_to_korean, translate_to_original
-from chatbot.services.gpt_service import call_openai_gpt
-from chatbot.services.recommendation import (
+from .constants import SYSTEM_PROMPT
+from .utils.filtering import is_malicious, is_travel_related
+from .services.translation import translate_to_korean, translate_to_original
+from .services.gpt_service import call_openai_gpt
+from .services.recommendation import (
     get_user_profile,
     get_recommendations,
     format_as_cards,
