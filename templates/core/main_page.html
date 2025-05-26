@@ -9,14 +9,20 @@
 
     <style>
         /* 기본 스타일 */
+        @font-face {
+            font-family: 'KOTRAHOPE';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2110@1.0/KOTRAHOPE.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'KOTRAHOPE';
             margin: 0;
         }
 
         /* 헤더 */
         .app-header {
-            background-color: white;
+            background: linear-gradient(to top, #FFFFFF, #b2e0fd);
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
@@ -25,12 +31,11 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            position: sticky; /* 헤더 고정 */
         }
         .app-header .logo-title {
             font-size: 1.5em;
             font-weight: bold;
-            color: #333;
+            color: #FF8888;
         }
         .auth-buttons {
             display: flex;
@@ -39,7 +44,7 @@
         }
         .auth-button {
             padding: 0.5rem 1rem;
-            background-color: #4a5568;
+            background-color: #5fc2ff;
             color: white;
             border: none;
             border-radius: 0.375rem;
@@ -49,7 +54,7 @@
             cursor: pointer;
         }
         .auth-button:hover {
-            background-color: #2d3748;
+            background-color: #3fb5ff;
         }
 
         /* 프로필 영역 및 드롭다운 메뉴 스타일 추가 */
@@ -63,7 +68,7 @@
             transition: background-color 0.2s ease;
         }
         .profile-area:hover {
-            background-color: #f0f0f0;
+            background-color: #82cfff;
         }
         .profile-icon {
             font-size: 1.2em; /* 아이콘 크기 */
@@ -118,54 +123,17 @@
 
         /* 현재 위치 표시줄 스타일 */
         .current-location-bar {
-            background-color: #f8f9fa;
+            background-color: transparent;
             padding: 10px 15px;
-            text-align: center;
+            margin-top: -10px;
+            text-align: left;
             font-size: 0.9em;
             color: #555;
-            border-bottom: 1px solid #e9ecef;
+
         }
         .current-location-bar .location-icon {
             margin-right: 5px;
             color: #007bff;
-        }
-
-        /* 검색창 스타일 */
-        .search-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 12px 15px;
-        }
-        .search-bar input[type="text"] {
-            flex-grow: 1;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            max-width: 700px;
-            min-width: 200px;
-            font-size: 16px;
-            height: 20px;
-            box-sizing: content-box;
-        }
-        .search-bar .text-search-btn {
-            padding: 0 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            white-space: nowrap;
-            height: 42px;
-            box-sizing: border-box;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .search-bar .text-search-btn:hover {
-            background-color: #0056b3;
         }
 
         .gpsbtn, .placebtn {
@@ -189,31 +157,11 @@
             color: #ffffff;
         }
 
-        /* Pink Screen */
-        .pink-screen {
-            width: 100%;
-            min-height: 250px;
-            background-color: #FBE2D5;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            padding: 2rem;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .pink {
             text-align: center;
-        }
-        .blue {
-            color: #257ab0;
-            font-size: 1.1rem;
+            color: #FF8888;
+            font-size: 2rem;
             line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        .big {
-            font-weight: bold;
-            font-size: 2.5rem;
-            line-height: 1.3;
-            color: #333;
         }
 
         #currentStatus, #resultOutput {
@@ -306,8 +254,8 @@
         .slider-controls {
             position: absolute;
             top: 50%;
-            left: -10px;
-            right: -10px;
+            left: 0px;
+            right: 0px;
             transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
@@ -418,7 +366,7 @@
         }
         #modal1 .modal_body p#itemDetailOverview {
             white-space: pre-wrap;
-            background-color: #f8f9fa;
+            background-color: #ffffff;
             padding: 10px;
             border-radius: 4px;
             margin-top: 5px;
@@ -615,11 +563,142 @@
         #signupmodal .modal_body {
             max-width: 480px;
         }
+
+        /* AI 챗봇 및 주변 UI 스타일 */
+        .ai-chatbot-enhanced-search-bar {
+            display: flex; /* [cite: 126] */
+            align-items: flex-start; /* 상단 정렬 */ /* [cite: 126] */
+            padding: 15px 20px; /* [cite: 127] */
+            gap: 10px; /* 버튼과 챗봇 사이 간격 */ /* [cite: 127] */
+            background-color: #ffffff; /* [cite: 128] */
+            top: 30px; /* 헤더 높이에 맞춰 조정 (기존 70px에서 60px로 변경하여 위로 올림) */
+            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */          
+        }
+
+        .location-control-buttons {
+            display: flex; /* [cite: 132] */
+            gap: 8px; /* [cite: 132] */
+            margin-top: -13px;
+            padding-top: 4px; /* 입력 필드와 시각적 정렬 */
+        }
+
+        .ai-chatbot-container {
+            flex-grow: 1; /* [cite: 134] */
+            display: flex; /* [cite: 134] */
+            flex-direction: column; /* [cite: 134] */
+            border: 1px solid #ced4da; /* [cite: 135] */
+            border-radius: 8px; /* [cite: 135] */
+            background-color: #ffffff; /* [cite: 135] */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* 수정: 그림자 약간 더 부드럽게 */
+            transition: max-height 0.4s ease-in-out, box-shadow 0.3s ease-in-out; /* box-shadow 전환 추가 */
+            max-height: 42px; /* 초기에는 입력창 높이만큼만 (패딩/보더 포함) */ /* [cite: 136] */
+            margin-top: -10px;
+            overflow: hidden; /* 내부 콘텐츠가 넘칠 경우 숨김 (확장 애니메이션에 중요) */ /* [cite: 137] */
+        }
+
+        .ai-chatbot-container.active {
+            max-height: 700px; /* 수정: 높이 약간 늘림 */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08); /* 수정: 활성화 시 그림자 개선 */
+        }
+
+        .ai-chatbot-input-wrapper {
+            display: flex; /* [cite: 140] */
+            align-items: center; /* [cite: 140] */
+            padding: 0 10px 0 15px; /* 수정: 오른쪽 패딩 조정 */
+            height: 40px; /* 입력창 부분 고정 높이 */ /* [cite: 141] */
+            cursor: pointer; /* [cite: 142] */
+            border-bottom: 1px solid transparent; /* 추가: 비활성 시 하단 구분선 투명 */
+            transition: border-color 0.3s ease; /* [cite: 144] */
+        }
+
+        .ai-chatbot-container.active .ai-chatbot-input-wrapper {
+            border-bottom-color: #dee2e6; /* 활성화 시 구분선 색상 */
+        }
+
+        #aiChatbotInput {
+            flex-grow: 1; /* [cite: 146] */
+            border: none; /* [cite: 146] */
+            padding: 10px 0; /* 내부 패딩 */ /* [cite: 147] */
+            font-size: 0.95em; /* [cite: 147] */
+            outline: none; /* [cite: 147] */
+            background-color: transparent; /* 부모 배경색 사용 */ /* [cite: 147] */
+            height: 100%; /* 래퍼 높이 채움 */ /* [cite: 148] */
+            line-height: 1.5; /* 추가: 입력 텍스트 수직 정렬 개선 */
+        }
+
+        #aiChatbotInput::placeholder {
+            color: #888; /* 수정: placeholder 색상 약간 연하게 */
+        }
+
+        .ai-chatbot-send-btn {
+            background: none; /* [cite: 150] */
+            border: none; /* [cite: 150] */
+            color: #007bff; /* [cite: 150] */
+            font-size: 1.2em; /* 수정: 아이콘 크기 약간 키움 */
+            padding: 8px 10px; /* 클릭 영역 */ /* [cite: 151] */
+            cursor: pointer; /* [cite: 152] */
+            margin-left: 8px; /* 수정: 입력창과의 간격 조정 */
+            border-radius: 5px; /* 버튼 모양 (옵션) */ /* [cite: 153] */
+            transition: background-color 0.2s ease, color 0.2s ease; /* [cite: 154] */
+            line-height: 1; /* 추가: 아이콘 수직 정렬 */
+            margin-top: 3.5px;
+        }
+
+        .ai-chatbot-send-btn:hover {
+            color: #0056b3; /* [cite: 155] */
+            background-color: #e9ecef; /* 마우스 오버 시 배경색 (옵션) */ /* [cite: 155] */
+        }
+
+        .ai-chatbot-display-area {
+            flex-grow: 1; /* 컨테이너 내에서 남은 공간을 모두 차지하도록 */ /* [cite: 157] */
+            overflow-y: auto; /* 메시지가 많아지면 스크롤 */ /* [cite: 158] */
+            background-color: #f9f9f9; /* 채팅 메시지 영역 배경색 */ /* [cite: 159] */
+            /* border-top: 1px solid #e0e0e0; */ /* 입력창과의 구분선은 input-wrapper로 이동 */
+            padding: 0 15px; /* 비활성 시에는 패딩 없음 */ /* [cite: 161] */
+            visibility: hidden; /* 초기에는 내용 숨김 */ /* [cite: 162] */
+            opacity: 0; /* 초기에는 투명 */ /* [cite: 163] */
+            transition: padding 0.3s ease-out, visibility 0s linear 0.3s, opacity 0.3s ease-out; /* [cite: 164] */
+        }
+
+        .ai-chatbot-container.active .ai-chatbot-display-area {
+            padding: 15px; /* 수정: 패딩을 대폭 줄여서 메시지가 너무 가운데로 몰리는 현상 해결 */
+            visibility: visible; /* 활성화 시 내용 보이게 */ /* [cite: 166] */
+            opacity: 1; /* 활성화 시 불투명 */ /* [cite: 167] */
+            transition: padding 0.3s ease-out, visibility 0s linear 0s, opacity 0.3s ease-out; /* [cite: 168] */
+        }
+
+        /* 채팅 메시지 예시 스타일 */
+        .chat-message {
+            padding: 10px 15px; /* 수정: 패딩 조정으로 가독성 향상 */
+            margin-bottom: 12px; /* 수정: 메시지 간 간격 조정 */
+            border-radius: 20px; /* 메시지 말풍선 둥글게 */ /* [cite: 169] */ /* 수정: 더 둥글게 */
+            max-width: 85%; /* 메시지 최대 너비 */ /* [cite: 170] */
+            line-height: 1.45; /* 수정: 줄 간격 조정 */
+            word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */ /* [cite: 171] */
+            font-size: 0.92em; /* 수정: 폰트 크기 미세 조정 */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08); /* [cite: 172] */ /* 수정: 그림자 부드럽게 */
+        }
+        .chat-message:last-child {
+            margin-bottom: 0; /* [cite: 173] */
+        }
+        .chat-message.user { /* 사용자 메시지 */
+            background-color: #007bff; /* [cite: 174] */
+            color: white; /* [cite: 174] */
+            margin-left: auto; /* 오른쪽 정렬 */ /* [cite: 174] */
+            border-bottom-right-radius: 8px; /* 말풍선 꼬리 모양처럼 */ /* [cite: 175] */ /* 수정: 꼬리 모양 더 자연스럽게 */
+        }
+        .chat-message.bot { /* 챗봇 메시지 */
+            background-color: #e9ecef; /* [cite: 176] */
+            color: #333; /* [cite: 176] */
+            margin-right: auto; /* 왼쪽 정렬 */ /* [cite: 176] */
+            border-bottom-left-radius: 8px; /* [cite: 177] */ /* 수정: 꼬리 모양 더 자연스럽게 */
+        }
     </style>
 </head>
 <body>
     <header class="app-header">
         <div class="logo-title">숨트여</div>
+        <div class="pink">북적이지 않아 더 좋은,<br >감성 한 스푼 여행지</div>
         <div class="auth-buttons">
             <button id="signupButton" class="auth-button">회원가입</button>
             <button id="loginButton" class="auth-button">로그인</button>
@@ -643,8 +722,6 @@
     <div id="currentLocationDisplay" class="current-location-bar">
         <i class="fas fa-map-marker-alt location-icon"></i> 현재 기준 위치: <span id="currentLocationText">위치 정보 불러오는 중...</span>
     </div>
-
-    <div id="currentStatus"></div> <div id="resultOutput"></div>
 
     <div id="placemodal" class="modal">
         <div class="modal_body">
@@ -691,16 +768,21 @@
 
     {% csrf_token %}
 
-    <div class="search-bar">
-        <button class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정"><i class="fas fa-map-marker-alt"></i></button>
-        <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
-        <input id="userSearchInput" type="text" placeholder="어디 가고 싶으신가요? 어떤 분위기를 원하시나요?">
-        <button class="text-search-btn" id="mainSearchButton">검색</button>
-    </div>
+    <div class="ai-chatbot-enhanced-search-bar">
+        <div class="location-control-buttons">
+            <button class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정"><i class="fas fa-map-marker-alt"></i></button>
+            <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
+        </div>
 
-    <div class="pink-screen">
-        <div class="blue">주말에 어디 가지?<br>이번주 부산 핫플은?</div>
-        <div class="big">대충 검색해도 나오는<br>정확한 관광지 정보</div>
+        <div id="aiChatbotContainer" class="ai-chatbot-container">
+            <div id="aiChatbotInputWrapper" class="ai-chatbot-input-wrapper" tabindex="0">
+                <input type="text" id="aiChatbotInput" placeholder="AI 챗봇에게 여행지를 추천받아보세요!">
+                <button id="aiChatbotSendButton" class="ai-chatbot-send-btn" aria-label="전송"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <div id="aiChatbotDisplayArea" class="ai-chatbot-display-area">
+                <div class="chat-message bot">안녕하세요! 부산 여행에 대해 무엇이든 물어보세요. 예: "해운대 근처 맛집 추천해줘"</div>
+            </div>
+        </div>
     </div>
 
     <div id="modal1" class="modal">
@@ -712,9 +794,13 @@
             <p id="itemDetailPeriod"></p>
             <div id="itemDetailMapContainer" style="width:100%;height:250px;margin-bottom:15px;border-radius:4px;border: 1px solid #eee;"></div>
             <p id="itemDetailLocation"></p>
-            <div id="itemDetailHomepage" class="homepage-link detail-buttons-container">
-                {/* 홈페이지 링크 및 수정요청 버튼은 JS에서 여기에 추가됨 */}
+            
+            <div id="itemDetailIntroAttributesContainer" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px;">
             </div>
+            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p> 
+            <div id="itemDetailHomepage" class="homepage-link detail-buttons-container">
+            </div>
+
         </div>
     </div>
 
@@ -758,7 +844,8 @@
         const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
         let allPlaces = [], festivalSliderControls = null, touristSliderControls = null;
         let modalMap = null, modalMapMarker = null, modalClickedLatLng = null;
-        let placeInput, userSearchInput, mainSearchButton;
+        //let placeInput, userSearchInput, mainSearchButton;
+        let aiChatbotContainerEl, aiChatbotInputWrapperEl, aiChatbotInputEl, aiChatbotSendButtonEl, aiChatbotDisplayAreaEl;
         let geocoder = null;
         let itemDetailMap = null;
         let itemDetailMapMarker = null;
@@ -809,6 +896,7 @@
             const homepageDiv = document.getElementById('itemDetailHomepage');
             const periodEl = document.getElementById('itemDetailPeriod');
             const locationEl = document.getElementById('itemDetailLocation');
+            const telEl = document.getElementById('itemDetailTel');
 
             // 기간 (listData에 있는 period를 사용하거나, detailData가 있으면 detailData의 period 사용)
             let finalPeriod = listData.period;
@@ -821,6 +909,12 @@
             if (detailData && detailData.addr) finalAddr = detailData.addr; // 백엔드 detailCommon1에 addr이 있다면
             locationEl.innerHTML = finalAddr ? `<strong>위치:</strong> ${finalAddr}` : "";
             locationEl.style.display = locationEl.innerHTML ? 'block' : 'none';
+
+            // 전화번호 (telEl)
+            if (telEl) { // telEl이 HTML에 존재하는 경우에만 처리
+                // openItemDetailModal에서 이미 내용을 설정하므로, 여기서는 내용 유무에 따라 display만 결정
+                telEl.style.display = telEl.innerHTML.trim() ? 'block' : 'none';
+            }
 
             // 홈페이지 및 버튼 컨테이너
             homepageDiv.style.display = homepageDiv.innerHTML.trim() !== "" ? 'flex' : 'none';
@@ -934,114 +1028,195 @@
         }
 
         async function openItemDetailModal(itemDataFromList) {
-            if (!itemDataFromList || !itemDetailModal) return;
-
+            if (!itemDataFromList || !itemDetailModal) return; // [cite: 280]
             // --- 로딩 시작 시 기본 정보 우선 표시 ---
-            currentDetailItemId = itemDataFromList.title; // 찜하기 기능 등에 사용
-            currentDetailItemContentId = itemDataFromList.contentid; // 상세 정보 API 호출에 사용
+            currentDetailItemId = itemDataFromList.title; // [cite: 281]
+            currentDetailItemContentId = itemDataFromList.contentid; // [cite: 282]
 
-            document.getElementById('itemDetailImage').src = itemDataFromList.firstimage || itemDataFromList.image || "https://via.placeholder.com/400x200?text=No+Image";
-            document.getElementById('itemDetailTitle').textContent = itemDataFromList.title || "상세 정보";
+            document.getElementById('itemDetailImage').src = itemDataFromList.firstimage || // [cite: 283]
+                itemDataFromList.image || "https://via.placeholder.com/400x200?text=No+Image"; // [cite: 283]
+            document.getElementById('itemDetailTitle').textContent = itemDataFromList.title || "상세 정보"; // [cite: 283]
             
-            // 초기에는 로딩 메시지 또는 기본 정보만 표시
-            const overviewEl = document.getElementById('itemDetailOverview');
-            const homepageDiv = document.getElementById('itemDetailHomepage');
-            const periodEl = document.getElementById('itemDetailPeriod');
-            const locationEl = document.getElementById('itemDetailLocation');
-            const mapContainer = document.getElementById('itemDetailMapContainer');
-
-            overviewEl.textContent = "상세 정보를 불러오는 중..."; // 로딩 메시지
-            homepageDiv.innerHTML = ""; // 초기화
-            periodEl.innerHTML = itemDataFromList.period ? `<strong>기간:</strong> ${itemDataFromList.period}` : ""; // period는 목록에 있을 수도, 없을 수도 있음
-            locationEl.innerHTML = itemDataFromList.addr ? `<strong>위치:</strong> ${itemDataFromList.addr}` : (itemDataFromList.location ? `<strong>위치:</strong> ${itemDataFromList.location}` : "");
+            const overviewEl = document.getElementById('itemDetailOverview'); // [cite: 284]
+            const homepageDiv = document.getElementById('itemDetailHomepage'); // [cite: 284]
+            const periodEl = document.getElementById('itemDetailPeriod'); // [cite: 285]
+            const locationEl = document.getElementById('itemDetailLocation'); // [cite: 285]
+            const telEl = document.getElementById('itemDetailTel'); // [cite: 285]
+            const mapContainer = document.getElementById('itemDetailMapContainer'); // [cite: 285]
             
-            // 지도 초기화 (또는 숨김)
-            mapContainer.style.display = 'none';
-            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
+            // =======================================================================
+            // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 추가된 부분 시작 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+            // =======================================================================
+            const introAttributesContainerEl = document.getElementById('itemDetailIntroAttributesContainer');
+            if (introAttributesContainerEl) {
+                introAttributesContainerEl.innerHTML = ''; // 이전 내용 초기화
+                introAttributesContainerEl.style.display = 'none'; // 기본적으로 숨김
+            }
+            // =======================================================================
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 추가된 부분 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+            // =======================================================================
 
-            openModal(itemDetailModal); // 모달을 먼저 열고 내용 로드
+            overviewEl.textContent = "상세 정보를 불러오는 중..."; // [cite: 285]
+            homepageDiv.innerHTML = ""; // [cite: 286]
+            if (telEl) telEl.innerHTML = ""; // [cite: 287]
+            
+            // periodEl 초기 설정: itemDataFromList.period가 있다면 사용. 없다면 빈 문자열.
+            // intro_details에 더 상세한 정보가 있으므로, 이 부분의 중요도는 낮아질 수 있습니다.
+            periodEl.innerHTML = itemDataFromList.period ? `<strong>기간:</strong> ${itemDataFromList.period}` : ""; // [cite: 288]
+            
+            locationEl.innerHTML = itemDataFromList.addr ? // [cite: 288]
+                `<strong>위치:</strong> ${itemDataFromList.addr}` : (itemDataFromList.location ? `<strong>위치:</strong> ${itemDataFromList.location}` : ""); // [cite: 288]
+            
+            mapContainer.style.display = 'none'; // [cite: 289]
+            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 289]
 
-            // --- 상세 정보 API 호출 ---
-            if (!currentDetailItemContentId) {
-                overviewEl.textContent = "상세 정보를 불러올 수 없습니다. (ID 없음)";
-                console.error("openItemDetailModal: itemDataFromList에 contentid가 없습니다.");
-                updateDetailModalUIElementsVisibility(itemDataFromList, null); // UI 업데이트
-                return;
+            openModal(itemDetailModal);
+
+            if (telEl) { // [cite: 290]
+                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") { // [cite: 290]
+                    const telLink = document.createElement('a'); // [cite: 290]
+                    telLink.href = `tel:${itemDataFromList.tel.replace(/-/g, "")}`; // [cite: 290]
+                    telLink.textContent = itemDataFromList.tel; // [cite: 291]
+                    telEl.innerHTML = `<strong>연락처:</strong> `; // [cite: 291]
+                    telEl.appendChild(telLink); // [cite: 291]
+                } else {
+                    telEl.innerHTML = `<strong>연락처:</strong> 정보 없음`; // [cite: 292]
+                }
             }
 
-            const detailedData = await fetchPlaceDetail(currentDetailItemContentId);
+            if (!currentDetailItemContentId) { // [cite: 294]
+                overviewEl.textContent = "상세 정보를 불러올 수 없습니다. (ID 없음)"; // [cite: 294]
+                console.error("openItemDetailModal: itemDataFromList에 contentid가 없습니다."); // [cite: 294]
+                // introAttributesContainerEl도 숨김 처리 (이미 위에서 초기화 시 숨겨짐)
+                if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
+                updateDetailModalUIElementsVisibility(itemDataFromList, null); // [cite: 295]
+                return; // [cite: 295]
+            }
+
+            const detailedData = await fetchPlaceDetail(currentDetailItemContentId); // [cite: 296]
+            console.log("서버로부터 받은 상세 정보 (detailedData):", detailedData); // [cite: 296]
 
             if (detailedData) {
-                // API로부터 받은 상세 정보로 모달 내용 업데이트
-                overviewEl.textContent = detailedData.overview || "자세한 설명이 없습니다.";
-                
-                homepageDiv.innerHTML = ""; // 이전 내용 삭제
-                if (detailedData.homepage) {
-                    const homepageUrl = detailedData.homepage; // 백엔드에서 이미 정제된 URL을 제공한다고 가정
-                    if (homepageUrl) {
-                        const link = Object.assign(document.createElement('a'), { 
-                            href: homepageUrl, 
-                            textContent: "홈페이지 방문", 
-                            target: "_blank", 
-                            rel: "noopener noreferrer" 
-                        });
-                        homepageDiv.appendChild(link);
+                overviewEl.textContent = detailedData.overview || "자세한 설명이 없습니다."; // [cite: 297]
+
+                if (detailedData.addr && detailedData.addr.trim() !== "") { // [cite: 298]
+                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`; // [cite: 298]
+                }
+
+                // =======================================================================
+                // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 지울 부분 (또는 수정될 부분) ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+                // =======================================================================
+                // 아래 `detailedData.period`를 직접 사용하는 부분은 intro_details로 대체되므로 주석 처리하거나 삭제합니다.
+                // intro_details에서 '이용시간', '행사기간' 등 더 구체적인 정보를 표시할 것이기 때문입니다.
+                /*
+                if (detailedData.period && detailedData.period.trim() !== "") { // 백엔드가 period를 준다면 [cite: 299]
+                    periodEl.innerHTML = `<strong>기간:</strong> ${detailedData.period}`; [cite: 299]
+                }
+                */
+                // =======================================================================
+                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 지울 부분 (또는 수정될 부분) 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+                // =======================================================================
+
+                if (telEl) { // [cite: 300]
+                    if (detailedData.tel && detailedData.tel.trim() !== "") { // [cite: 300]
+                        const telLink = document.createElement('a'); // [cite: 300]
+                        telLink.href = `tel:${detailedData.tel.replace(/-/g, "")}`; // [cite: 300]
+                        telLink.textContent = detailedData.tel; // [cite: 301]
+                        telEl.innerHTML = `<strong>연락처:</strong> `; // [cite: 301]
+                        telEl.appendChild(telLink); // [cite: 301]
                     } else {
-                         // 홈페이지 정보는 있지만 URL이 아닌 경우 (예: 전화번호 등 텍스트) 처리도 가능
-                         const p = document.createElement('p');
-                         p.innerHTML = `<strong>홈페이지/문의:</strong> 정보 없음`; // 또는 detailedData.homepage_text 같은 필드가 있다면 사용
-                         homepageDiv.appendChild(p);
+                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`; // [cite: 302]
+                    }
+                    // telEl.style.display = 'block'; // updateDetailModalUIElementsVisibility에서 최종 처리 [cite: 303]
+                }
+                
+                homepageDiv.innerHTML = ""; // [cite: 304]
+                if (detailedData.homepage) { // [cite: 305]
+                    const homepageUrl = detailedData.homepage; // [cite: 305]
+                    if (homepageUrl) { // [cite: 306]
+                        const link = Object.assign(document.createElement('a'), { // [cite: 306]
+                            href: homepageUrl, // [cite: 306]
+                            textContent: "홈페이지 방문", // [cite: 306]
+                            target: "_blank", // [cite: 306]
+                            rel: "noopener noreferrer" // [cite: 306]
+                        }); // [cite: 307]
+                        homepageDiv.appendChild(link); // [cite: 307]
+                    } else {
+                         const p = document.createElement('p'); // [cite: 308]
+                         p.innerHTML = `<strong>홈페이지/문의:</strong> 정보 없음`; // [cite: 308]
+                         homepageDiv.appendChild(p); // [cite: 309]
                     }
                 }
 
-                const locationAddressForMap = detailedData.addr || itemDataFromList.addr || ""; // 상세주소 우선, 없으면 목록 주소 사용
-                 if (locationAddressForMap && geocoder) {
-                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
-                    mapContainer.style.display = 'none'; // 일단 숨기고 검색 후 표시
-                    geocoder.addressSearch(locationAddressForMap, function(result, status) {
-                        if (status === kakao.maps.services.Status.OK && result.length > 0) {
-                            const coords = result[0];
-                            displayItemMapOnDetailModal(mapContainer, parseFloat(coords.y), parseFloat(coords.x));
-                        } else {
-                            mapContainer.style.display = 'none'; // 실패 시 숨김
-                            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
-                            console.warn(`상세 모달 지도 주소변환 실패: ${locationAddressForMap}`);
+                // =======================================================================
+                // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 추가된 부분 시작 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+                // =======================================================================
+                // intro_details (추가 정보) 처리
+                if (introAttributesContainerEl && detailedData.intro_details && Object.keys(detailedData.intro_details).length > 0) {
+                    let introHtml = '<h4><i class="fas fa-info-circle"></i> 추가 정보</h4><ul style="list-style-type: none; padding-left: 0;">';
+                    for (const [label, value] of Object.entries(detailedData.intro_details)) {
+                        if (value && String(value).trim()) {
+                            introHtml += `<li style="margin-bottom: 6px;"><strong>${label}:</strong> ${value}</li>`;
                         }
-                    });
+                    }
+                    introHtml += '</ul>';
+                    introAttributesContainerEl.innerHTML = introHtml;
+                    introAttributesContainerEl.style.display = 'block';
+                } else if (introAttributesContainerEl) {
+                    introAttributesContainerEl.style.display = 'none'; // 내용 없으면 숨김
+                }
+                // =======================================================================
+                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 추가된 부분 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+                // =======================================================================
+
+                const locationAddressForMap = detailedData.addr || // [cite: 310]
+                    itemDataFromList.addr || ""; // [cite: 310]
+                 if (locationAddressForMap && geocoder) { // [cite: 311]
+                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 311]
+                    mapContainer.style.display = 'none'; // [cite: 311]
+                    geocoder.addressSearch(locationAddressForMap, function(result, status) { // [cite: 311]
+                        if (status === kakao.maps.services.Status.OK && result.length > 0) { // [cite: 312]
+                            const coords = result[0]; // [cite: 312]
+                            displayItemMapOnDetailModal(mapContainer, parseFloat(coords.y), parseFloat(coords.x)); // [cite: 312]
+                        } else {
+                            mapContainer.style.display = 'none'; // [cite: 312]
+                            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 313]
+                            console.warn(`상세 모달 지도 주소변환 실패: ${locationAddressForMap}`); // [cite: 313]
+                        }
+                    }); // [cite: 314]
                 } else {
-                    mapContainer.style.display = 'none';
-                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
+                    mapContainer.style.display = 'none'; // [cite: 315]
+                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 315]
                 }
 
-            } else {
-                overviewEl.textContent = "상세 정보를 불러오는데 실패했습니다.";
-                // 지도도 숨김 처리
-                mapContainer.style.display = 'none';
-                if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
+            } else { // detailedData 로드 실패 시
+                overviewEl.textContent = "상세 정보를 불러오는데 실패했습니다."; // [cite: 316]
+                mapContainer.style.display = 'none'; // [cite: 317]
+                if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 317]
+                // introAttributesContainerEl도 숨김 처리
+                if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
             }
 
-            // 수정요청 버튼 추가 (항상 마지막에 추가되도록)
-            const editButton = Object.assign(document.createElement('button'), {
-                type: 'button',
-                id: 'editInfoRequestButton',
-                className: 'detail-modal-button',
-                textContent: '관광정보 수정요청'
-            });
-            editButton.onclick = () => {
-                // itemName 대신 contentid 또는 title 사용
-                window.location.href = `a.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`;
-            };
-            homepageDiv.appendChild(editButton); // homepageDiv가 아니라 다른 컨테이너에 넣을 수도 있음
+            const editButton = Object.assign(document.createElement('button'), { // [cite: 318]
+                type: 'button', // [cite: 318]
+                id: 'editInfoRequestButton', // [cite: 318]
+                className: 'detail-modal-button', // [cite: 318]
+                textContent: '관광정보 수정요청' // [cite: 318]
+            }); // [cite: 319]
+            editButton.onclick = () => { // [cite: 319]
+                window.location.href = `a.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`; // [cite: 320]
+            }; // [cite: 320]
+            homepageDiv.appendChild(editButton); // [cite: 320]
 
-            updateDetailModalUIElementsVisibility(itemDataFromList, detailedData); // UI 요소 표시 여부 최종 결정
+            updateDetailModalUIElementsVisibility(itemDataFromList, detailedData); // [cite: 321] // 이 함수는 periodEl, locationEl 등의 최종 표시 여부를 결정합니다.
             
-            const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
-            if (modalHeartIconEl) {
-                if (isLoggedIn && currentDetailItemId) { // currentDetailItemId 사용 확인
-                    modalHeartIconEl.style.display = 'inline-block';
-                    updateModalHeartIcon(currentDetailItemId);
+            const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden'); // [cite: 322]
+            if (modalHeartIconEl) { // [cite: 322]
+                if (isLoggedIn && currentDetailItemId) { // [cite: 323]
+                    modalHeartIconEl.style.display = 'inline-block'; // [cite: 323]
+                    updateModalHeartIcon(currentDetailItemId); // [cite: 323]
                 } else {
-                    modalHeartIconEl.style.display = 'none';
+                    modalHeartIconEl.style.display = 'none'; // [cite: 324]
                 }
             }
         }
@@ -1346,7 +1521,14 @@
                     }
                     
                     // 카드 HTML 생성. item.addr 또는 item.location 사용.
-                    const cardHTML = `${heartIconHTML}<img src="${item.firstimage||item.image||'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title||''}"><div class="info"><h3>${item.title||''}</h3><p>${item.addr||item.location||'주소 정보 없음'}</p></div>`;
+                    const cardHTML = `
+                    ${heartIconHTML}
+                    <img src="${item.firstimage || item.image || 'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title || ''}">
+                    <div class="info">
+                        <h3>${item.title || ''}</h3>
+                        <p>${item.addr || item.location || '주소 정보 없음'}</p>
+                        ${item.tel ? `<p class="tel-info"><i class="fas fa-phone-alt"></i> ${item.tel}</p>` : '<p class="tel-info"><i class="fas fa-phone-alt"></i> 연락처 정보 없음</p>'}
+                    </div>`;
                     
                     [festivalSliderEl, touristSliderEl].forEach(sliderEl => {
                         const cardEl = Object.assign(document.createElement('div'), { className: 'card', innerHTML: cardHTML });
@@ -1520,6 +1702,191 @@
 
             modalHeartIconEl=document.getElementById('modalHeartIcon');
             wishlistItemsContainerEl=document.getElementById('wishlistItemsContainer');
+
+            aiChatbotContainerEl = document.getElementById('aiChatbotContainer');
+            aiChatbotInputWrapperEl = document.getElementById('aiChatbotInputWrapper');
+            aiChatbotInputEl = document.getElementById('aiChatbotInput');
+            aiChatbotSendButtonEl = document.getElementById('aiChatbotSendButton');
+            aiChatbotDisplayAreaEl = document.getElementById('aiChatbotDisplayArea');
+
+            // --- DOMContentLoaded 이벤트 리스너 내부에 AI 챗봇 기능 로직 추가 ---
+
+            if (aiChatbotInputWrapperEl) {
+                aiChatbotInputWrapperEl.addEventListener('click', (event) => {
+                    // 입력 필드나 전송 버튼을 클릭한 경우가 아니면 (즉, wrapper의 빈 공간을 클릭) 확장/축소
+                    if (event.target === aiChatbotInputWrapperEl) {
+                        if (!aiChatbotContainerEl.classList.contains('active')) {
+                            aiChatbotContainerEl.classList.add('active');
+                            aiChatbotInputEl.focus();
+                        }
+                        // 필요하다면, 이미 열려있을 때 wrapper 클릭 시 닫는 로직 추가 가능
+                        // else {
+                        //    aiChatbotContainerEl.classList.remove('active');
+                        // }
+                    }
+                });
+            }
+
+            if (aiChatbotInputEl) {
+                aiChatbotInputEl.addEventListener('focus', () => { // 입력 필드에 포커스될 때도 확장
+                    if (!aiChatbotContainerEl.classList.contains('active')) {
+                        aiChatbotContainerEl.classList.add('active');
+                    }
+                });
+                aiChatbotInputEl.addEventListener('click', (event) => { // 입력 필드 클릭 시 이벤트 전파 중단
+                    event.stopPropagation();
+                    if (!aiChatbotContainerEl.classList.contains('active')) {
+                        aiChatbotContainerEl.classList.add('active');
+                    }
+                });
+                aiChatbotInputEl.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // 기본 Enter 동작(줄바꿈 등) 방지
+                        if (aiChatbotSendButtonEl) aiChatbotSendButtonEl.click();
+                    }
+                });
+            }
+
+            if (aiChatbotSendButtonEl) {
+                aiChatbotSendButtonEl.addEventListener('click', async (event) => {
+                    event.stopPropagation(); // 이벤트 전파 중단 (외부 클릭으로 닫히는 것 방지) [cite: 525]
+                    const messageText = aiChatbotInputEl.value.trim();
+                    if (messageText) {
+                        // 사용자 메시지 표시 [cite: 526, 527]
+                        const userMessageDiv = document.createElement('div');
+                        userMessageDiv.classList.add('chat-message', 'user');
+                        userMessageDiv.textContent = messageText;
+                        aiChatbotDisplayAreaEl.appendChild(userMessageDiv);
+                        aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+
+                        const originalUserInput = messageText; // 원본 사용자 입력 저장
+                        aiChatbotInputEl.value = ''; // 입력창 비우기 [cite: 527]
+
+                        try {
+                            // "AI가 답변을 생각하고 있어요..." 메시지 표시
+                            const typingIndicatorDiv = document.createElement('div');
+                            typingIndicatorDiv.classList.add('chat-message', 'bot', 'typing-indicator');
+                            typingIndicatorDiv.textContent = "AI가 답변을 생각하고 있어요...";
+                            aiChatbotDisplayAreaEl.appendChild(typingIndicatorDiv);
+                            aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+
+                            const csrf = getCookie('csrftoken'); // getCookie 함수는 이미 있다고 가정
+                            if (!csrf) {
+                                console.error("CSRF 토큰을 찾을 수 없습니다.");
+                                throw new Error("요청에 필요한 인증 정보가 부족합니다.");
+                            }
+                            
+                            // 실제 챗봇 API 엔드포인트 (이전에 urls.py 수정하면서 /api/chatbot/chat/ 로 가정했었음)
+                            const actualChatbotPath = '/api/chatbot/chat/'; 
+                            const fullUrlToFetch = `${API_BASE_URL}${actualChatbotPath}`;
+                            console.log("챗봇 API 호출 URL:", fullUrlToFetch);
+
+                            const response = await fetch(fullUrlToFetch, { 
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrf
+                                },
+                                body: JSON.stringify({ message: originalUserInput }) 
+                            });
+
+                            typingIndicatorDiv.remove(); // "생각 중" 메시지 제거
+
+                            if (!response.ok) {
+                                let errorMsg = `챗봇 서버 응답 오류 (상태: ${response.status})`;
+                                try {
+                                    const errorData = await response.json();
+                                    errorMsg = errorData.error || errorData.message || errorData.response || errorMsg; // 백엔드에서 'response' 키로 에러 메시지를 줄 수도 있음
+                                } catch (e) {
+                                    // JSON 파싱 실패 시, 기본 오류 메시지 사용
+                                }
+                                throw new Error(errorMsg);
+                            }
+
+                            const data = await response.json();
+                            
+                            // ▼▼▼ 백엔드 응답 키에 맞춰 수정 ▼▼▼
+                            const botTextResponse = data.response;       // 기본 텍스트 답변
+                            const recommendationsData = data.recommendations; // 추천 카드 데이터
+                            const scheduleData = data.schedule;           // 일정 데이터
+
+                            let contentDisplayed = false;
+
+                            // 1. 기본 텍스트 답변 표시
+                            if (botTextResponse && String(botTextResponse).trim()) {
+                                const botMessageDiv = document.createElement('div');
+                                botMessageDiv.classList.add('chat-message', 'bot');
+                                botMessageDiv.textContent = botTextResponse;
+                                aiChatbotDisplayAreaEl.appendChild(botMessageDiv);
+                                contentDisplayed = true;
+                            }
+
+                            // 2. 추천 카드 정보 표시 (예시: 간단한 텍스트로 표시)
+                            // 실제로는 HTML로 카드를 만들어서 표시해야 합니다.
+                            if (recommendationsData && Array.isArray(recommendationsData) && recommendationsData.length > 0) {
+                                const recWrapperDiv = document.createElement('div');
+                                recWrapperDiv.classList.add('chat-message', 'bot', 'recommendations-wrapper');
+                                
+                                let recHtml = '<strong><i class="fas fa-map-marked-alt"></i> 추천 장소:</strong><ul>';
+                                recommendationsData.forEach(card => {
+                                    // card 객체에 title, overview, reason 등이 있다고 가정 (views.py의 format_as_cards 결과)
+                                    recHtml += `<li><strong>${card.title || '제목 없음'}</strong>: ${card.overview || card.reason || '설명 없음'}</li>`;
+                                });
+                                recHtml += '</ul>';
+                                recWrapperDiv.innerHTML = recHtml;
+                                aiChatbotDisplayAreaEl.appendChild(recWrapperDiv);
+                                contentDisplayed = true;
+                            }
+
+                            // 3. 일정 정보 표시 (예시: 간단한 텍스트로 표시)
+                            // 실제로는 HTML로 일정을 보기 좋게 만들어 표시해야 합니다.
+                            if (scheduleData) { // scheduleData가 객체이거나 내용이 있는 배열일 수 있음
+                                const scheduleDiv = document.createElement('div');
+                                scheduleDiv.classList.add('chat-message', 'bot', 'schedule-details');
+                                // scheduleData의 구조에 따라 표시 방법을 결정합니다.
+                                // 예시: scheduleData가 { "Day 1": [...], "Day 2": [...] } 형태일 경우
+                                let scheduleHtml = '<strong><i class="fas fa-calendar-alt"></i> 추천 일정:</strong>';
+                                if (typeof scheduleData === 'object' && Object.keys(scheduleData).length > 0) {
+                                    scheduleHtml += '<ul>';
+                                    for (const day in scheduleData) {
+                                        scheduleHtml += `<li><strong>${day}</strong>: `;
+                                        if (Array.isArray(scheduleData[day])) {
+                                            scheduleHtml += scheduleData[day].map(item => item.title || '활동').join(' → ');
+                                        } else {
+                                            scheduleHtml += JSON.stringify(scheduleData[day]); // 단순 문자열로 표시
+                                        }
+                                        scheduleHtml += '</li>';
+                                    }
+                                    scheduleHtml += '</ul>';
+                                } else if (typeof scheduleData === 'string' && scheduleData.trim()) {
+                                    scheduleHtml += `<p>${scheduleData}</p>`;
+                                } else {
+                                    scheduleHtml += `<p>자세한 일정 정보는 생성되지 않았습니다.</p>`; // 또는 scheduleData를 그대로 보여줌
+                                    // scheduleHtml += `<pre>${JSON.stringify(scheduleData, null, 2)}</pre>`;
+                                }
+                                scheduleDiv.innerHTML = scheduleHtml;
+                                aiChatbotDisplayAreaEl.appendChild(scheduleDiv);
+                                contentDisplayed = true;
+                            }
+                            
+                            // 만약 아무런 유효한 내용도 표시되지 않았다면 "유효한 답변 없음" 처리
+                            if (!contentDisplayed) {
+                                throw new Error("챗봇으로부터 유효한 표시 가능 콘텐츠를 받지 못했습니다.");
+                            }
+
+                        } catch (error) {
+                            console.error("AI 챗봇 통신 오류:", error);
+                            const errorMessageDiv = document.createElement('div');
+                            errorMessageDiv.classList.add('chat-message', 'bot', 'error-message-chat');
+                            errorMessageDiv.textContent = `죄송합니다. 챗봇과 대화 중 문제가 발생했습니다. (${error.message})`;
+                            aiChatbotDisplayAreaEl.appendChild(errorMessageDiv);
+                        }
+                        
+                        aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+                    }
+                    aiChatbotInputEl.focus(); // 메시지 전송 후에도 입력창에 포커스 유지 [cite: 531]
+                });
+            }
             
             const gpsButton = document.getElementById('gpsButton');
             if(gpsButton) {
@@ -1582,6 +1949,48 @@
                     if (profileAreaEl && !profileAreaEl.contains(event.target) && !profileDropdownEl.contains(event.target)) {
                         profileDropdownEl.classList.remove('active');
                     }
+                }
+                // AI 챗봇 외부 클릭 시 닫기
+                if (aiChatbotContainerEl && aiChatbotContainerEl.classList.contains('active')) {
+                    const isClickInsideChatbot = aiChatbotContainerEl.contains(event.target);
+                    const locationButtonsContainer = document.querySelector('.location-control-buttons');
+                    const isClickInsideLocationButtons = locationButtonsContainer ? locationButtonsContainer.contains(event.target) : false;
+                    
+                    // 챗봇 영역도 아니고, 위치 버튼 영역도 아니라면 닫기
+                    if (!isClickInsideChatbot && !isClickInsideLocationButtons) {
+                        // 모달이 열려있거나, 모달을 여는 버튼 클릭 시에는 챗봇을 닫지 않도록 예외처리 (옵션)
+                        let clickedOnModalRelated = false;
+                        let targetElement = event.target;
+                        while (targetElement != null) {
+                            if (targetElement.classList && (
+                                targetElement.classList.contains('modal') || // [cite: 69]
+                                targetElement.classList.contains('modal_body') || // [cite: 72]
+                                targetElement.id === 'signupButton' || // [cite: 128] (예시)
+                                targetElement.id === 'loginButton' || // [cite: 128] (예시)
+                                targetElement.id === 'placeSearchOpenButton' // [cite: 135] (예시)
+                            )) {
+                                clickedOnModalRelated = true;
+                                break;
+                            }
+                            targetElement = targetElement.parentElement;
+                        }
+
+                        if (!clickedOnModalRelated) {
+                            aiChatbotContainerEl.classList.remove('active');
+                        }
+                    }
+                }
+
+                // 기존 프로필 드롭다운 닫기 로직 [cite: 409, 410]
+                if (profileDropdownEl && profileDropdownEl.classList.contains('active')) {
+                    if (profileAreaEl && !profileAreaEl.contains(event.target) && !profileDropdownEl.contains(event.target)) {
+                        profileDropdownEl.classList.remove('active');
+                    }
+                }
+
+                // 기존 모달 외부 클릭 시 닫기 로직 [cite: 409]
+                if (event.target.classList.contains('modal') && event.target.classList.contains('open')) {
+                    closeModal(event.target);
                 }
             });
             if(placeInput) placeInput.onkeydown = handlePlaceInputEnter;

@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('apps.core.urls')),
     path('api/', include('apps.recommender.urls')),
     path('api/auth/', include('apps.users.urls', namespace='users_api')),
+    path('api/chatbot/', include('apps.recommender.services.chatbot.urls')),
 ]
