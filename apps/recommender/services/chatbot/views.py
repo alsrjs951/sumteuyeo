@@ -6,17 +6,14 @@ import json
 from langdetect import detect
 from django.core.cache import cache
 
-
 from .constants import SYSTEM_PROMPT
 from .utils.filtering import is_malicious, is_travel_related
 from .services.translation import translate_to_korean, translate_to_original
 from .services.gpt_service import call_openai_gpt
 from .services.recommendation.formatter import format_as_cards, generate_schedule
 from .services.recommendation.recommender import get_recommendations
-from .services.recommendation.score import score_item
 from .services.recommendation.profile import get_user_profile
-
-
+from .services.recommendation.score import score_item
 
 class ChatbotAsyncView(View):
     @classonlymethod
