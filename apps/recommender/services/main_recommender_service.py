@@ -15,7 +15,7 @@ def recommend_for_user_1(user_id: int) -> list:
         user_vector = np.array(profile.experience, dtype=np.float32)  # 관광지 카테고리 기준
         
         # 2. 유사 콘텐츠 검색 (최대 30개)
-        similar_contents = FeatureService.find_similar_spots(user_vector, 30)
+        similar_contents = FeatureService.find_similar_spots(user_vector, max_results=30)
         
         # 3. 추천 결과 가공
         recommendations = [
