@@ -7,11 +7,6 @@ import time
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-
-from typing import Optional
-from django.conf import settings
-from items.models import ContentSummarize
-
 def get_summarize_content(content_id: int, content_type_id: int) -> Optional[str]:
     """
     content_id에 대한 요약문 반환 함수

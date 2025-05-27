@@ -153,3 +153,6 @@ TOUR_API_KEY = env('TOUR_API_KEY')
 
 # OpenAI 인증키값
 OPENAI_API_KEY = env('OPENAI_API_KEY')
+
+# 상호작용 최대 개수
+USER_INTERACTION_LIMIT = 1000
