@@ -8,6 +8,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import render
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from recommender.services.main_recommender_service import recommend_for_user_1
 
 
 # --- 헬퍼 함수: detailIntro2 API 호출 및 정보 추출 ---
@@ -370,3 +372,14 @@ def receive_location(request):
     except Exception as e:
         print(f"Unexpected error in receive_location view: {e}")
         return JsonResponse({'status': 'error', 'message': '서버 처리 중 오류가 발생했습니다.'}, status=500)
+
+
+@login_required
+@require_GET
+def get_recommend_for_user_1(request):
+    user_id = request.user.id
+    recommendations = recommend_for_user_1(user_id)
+    return JsonResponse({
+        'count': len(recommendations),
+        'results': recommendations
+    })
