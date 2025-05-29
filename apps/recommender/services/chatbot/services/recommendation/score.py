@@ -1,13 +1,44 @@
-def score_item(item, user_profile):
-    score = 1.0
-    if item["cat3"] in user_profile["liked_cat3"]:
-        score += 0.3
-    if user_profile["location"] in item.get("overview", ""):
-        score += 0.2
-    if item["title"] in user_profile["visited"]:
-        score -= 0.5
-    if any(region in item.get("overview", "") for region in user_profile["preferred_regions"]):
-        score += 0.25
+# 점수 계산에 사용할 가중치 설정
+weight_config = {
+    "base": 1.0,
+    "liked_category": 0.2,
+    "visited_penalty": -0.3,
+    "location_match": 0.1,
+    "region_match": 0.15,
+    "keyword_category_match": 0.3,
+    "keyword_in_text": 0.2
+}
 
-    # 가중치 기반 점수 정규화
-    return round(score, 3)
+
+def core_item_score(item, user_profile, intent=None, keywords=None):
+    """
+    하나의 관광 아이템에 대해 사용자 프로파일과 입력 의도/키워드 기반 점수를 계산합니다.
+    """
+    score = weight_config["base"]
+
+    # 사용자 선호도 반영
+    if item["lclsSystm3"] in user_profile["liked_lclsSystm3"]:
+        score += weight_config["liked_category"]
+    if item["title"] in user_profile["visited"]:
+        score += weight_config["visited_penalty"]
+    if user_profile["location"] in item.get("overview", ""):
+        score += weight_config["location_match"]
+    if any(region in item.get("overview", "") for region in user_profile.get("preferred_regions", [])):
+        score += weight_config["region_match"]
+
+    # intent 기반 필터 (해당 intent가 아닌 경우 None 반환하여 제외)
+    if intent == "recommend_food" and item["lclsSystm1"] != "음식":
+        return None
+    if intent == "recommend_shopping" and item["lclsSystm2"] != "쇼핑":
+        return None
+    if intent == "recommend_nature" and item["lclsSystm3"] not in ["산", "바다", "공원", "계곡", "자연경관"]:
+        return None
+
+    # 키워드 기반 가중치
+    if keywords:
+        if item["lclsSystm3"] in keywords:
+            score += weight_config["keyword_category_match"]
+        if any(kw in item.get("overview", "") for kw in keywords):
+            score += weight_config["keyword_in_text"]
+
+    return score

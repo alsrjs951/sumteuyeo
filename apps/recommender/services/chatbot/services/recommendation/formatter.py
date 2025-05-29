@@ -7,6 +7,7 @@ def format_as_cards(items):
         "reason": f"'{item['cat3']}' 관련 장소이고, 선호도 및 지역 기반 추천입니다."
     } for item in items]
 
+'''
 def generate_schedule(recommendations, days=2):
     schedule = {}
     per_day = max(1, len(recommendations) // days)
@@ -15,3 +16,4 @@ def generate_schedule(recommendations, days=2):
         end = start + per_day
         schedule[f"Day {i+1}"] = recommendations[start:end]
     return schedule
+'''
