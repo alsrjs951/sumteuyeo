@@ -22,8 +22,8 @@ chatbot_service_dir = os.path.dirname(current_file_dir)
 faiss_file_path = os.path.join(chatbot_service_dir, "data", "spot_index.faiss")
 
 # JSON 메타데이터 파일 경로 구성
-# 예: C:\Users\User\Desktop\django\sumteuyeo\apps\recommender\services\chatbot\data\spot_metadata.json
-metadata_file_path = os.path.join(chatbot_service_dir, "data", "spot_metadata.json")
+# 예: C:\Users\User\Desktop\django\sumteuyeo\apps\recommender\services\chatbot\data\persistent_spot_summaries.json
+metadata_file_path = os.path.join(chatbot_service_dir, "data", "persistent_spot_summaries.json")
 
 # 디버깅을 위해 실제 경로 출력 (서버 실행 시 터미널에서 확인 가능)
 print(f"Attempting to read Faiss index from: {faiss_file_path}")

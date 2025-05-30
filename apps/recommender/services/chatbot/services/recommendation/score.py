@@ -17,7 +17,7 @@ def core_item_score(item, user_profile, intent=None, keywords=None):
     score = weight_config["base"]
 
     # 사용자 선호도 반영
-    if item["lclsSystm3"] in user_profile["liked_lclsSystm3"]:
+    if item["lclsSystm3"] in user_profile["liked_lcls3"]:
         score += weight_config["liked_category"]
     if item["title"] in user_profile["visited"]:
         score += weight_config["visited_penalty"]
