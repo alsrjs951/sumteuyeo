@@ -1,8 +1,19 @@
-from ...utils.embedding import model, faiss_index, get_spot_data
+from ...utils.embedding import model, faiss_index
 from asgiref.sync import sync_to_async
 from .score import core_item_score
+from django.conf import settings
+import json
+import os
 
-spot_data = get_spot_data()
+DATA_DIR = os.path.join(settings.BASE_DIR, 'apps', 'recommender', 'services', 'chatbot', 'data')
+
+# 요약 정보만 로드 (index용)
+with open(os.path.join(DATA_DIR, "persistent_spot_summaries.json"), "r", encoding="utf-8") as f:
+    summaries = json.load(f)
+
+# 메타데이터 로드 (점수 계산용)
+with open(os.path.join(DATA_DIR, "spot_metadata.json"), "r", encoding="utf-8") as f:
+    metadata = json.load(f)
 
 @sync_to_async
 def get_recommendations(query, user_profile, intent=None, keywords=None, top_n=5):
@@ -15,11 +26,11 @@ def get_recommendations(query, user_profile, intent=None, keywords=None, top_n=5
 
     if intent == "recommend_quiet":
         # 혼잡도(congestion_ratio)가 낮은 순으로 정렬
-        quiet_spots = sorted(
-            spot_data,
-            key=lambda x: x.get("congestion_ratio", 1.0)
+        items = sorted(
+            metadata.items(),
+            key=lambda x: x[1].get("congestion_ratio", 1.0)
         )
-        for item in quiet_spots:
+        for contentid, item in items:
             if item["title"] in user_profile.get("visited", []):
                 continue
             score = 1.0 - item.get("congestion_ratio", 1.0)  # 낮을수록 점수 높게
@@ -32,8 +43,12 @@ def get_recommendations(query, user_profile, intent=None, keywords=None, top_n=5
         query_vec = model.encode([query])
         D, I = faiss_index.search(query_vec, top_n * 5)
 
+        content_ids = list(summaries.keys())
         for idx in I[0]:
-            item = spot_data[idx]
+            contentid = content_ids[idx]
+            item = metadata.get(contentid)
+            if not item:
+                continue
             score = core_item_score(item, user_profile, intent=intent, keywords=keywords)
             if score is not None:
                 scored_results.append((item, score))

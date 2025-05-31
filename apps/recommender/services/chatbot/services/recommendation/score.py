@@ -1,4 +1,3 @@
-# 점수 계산에 사용할 가중치 설정
 weight_config = {
     "base": 1.0,
     "liked_category": 0.2,
@@ -8,7 +7,6 @@ weight_config = {
     "keyword_category_match": 0.3,
     "keyword_in_text": 0.2
 }
-
 
 def core_item_score(item, user_profile, intent=None, keywords=None):
     """
@@ -27,16 +25,16 @@ def core_item_score(item, user_profile, intent=None, keywords=None):
         score += weight_config["region_match"]
 
     # intent 기반 필터 (해당 intent가 아닌 경우 None 반환하여 제외)
-    if intent == "recommend_food" and item["lclsSystm1"] != "음식":
+    if intent == "recommend_food" and item.get("lclsSystm1") != "음식":
         return None
-    if intent == "recommend_shopping" and item["lclsSystm2"] != "쇼핑":
+    if intent == "recommend_shopping" and item.get("lclsSystm2") != "쇼핑":
         return None
-    if intent == "recommend_nature" and item["lclsSystm3"] not in ["산", "바다", "공원", "계곡", "자연경관"]:
+    if intent == "recommend_nature" and item.get("lclsSystm3") not in ["산", "바다", "공원", "계곡", "자연경관"]:
         return None
 
     # 키워드 기반 가중치
     if keywords:
-        if item["lclsSystm3"] in keywords:
+        if item.get("lclsSystm3") in keywords:
             score += weight_config["keyword_category_match"]
         if any(kw in item.get("overview", "") for kw in keywords):
             score += weight_config["keyword_in_text"]
