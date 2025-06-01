@@ -34,6 +34,10 @@ def core_item_score(item, user_profile, intent=None, keywords=None):
 
     # 키워드 기반 가중치
     if keywords:
+        # 튜플 목록일 경우 문자열만 추출
+        if isinstance(keywords[0], tuple):
+            keywords = [kw[0] for kw in keywords]
+
         if item.get("lclsSystm3") in keywords:
             score += weight_config["keyword_category_match"]
         if any(kw in item.get("overview", "") for kw in keywords):

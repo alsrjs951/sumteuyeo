@@ -4,7 +4,6 @@ import os
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from asgiref.sync import sync_to_async
-from django.conf import settings # Django 설정을 사용하기 위해 추가
 
 # SentenceTransformer 모델 로드
 model = SentenceTransformer("snunlp/KR-SBERT-V40K-klueNLI-augSTS")
