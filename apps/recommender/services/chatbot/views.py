@@ -86,7 +86,7 @@ class ChatbotAsyncView(View):
             for card in cards:
                 card["title"] = await translate_to_original(card["title"], dest=original_lang)
                 card["overview"] = await translate_to_original(card["overview"], dest=original_lang)
-                card["reason"] = await translate_to_original(card["reason"], dest=original_lang)
+                #card["reason"] = await translate_to_original(card["reason"], dest=original_lang)
             # ✨ 일정 추천도 있다면 아래 부분 주석 해제
             # for day in schedule:
             #     for i in range(len(schedule[day])):
