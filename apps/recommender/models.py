@@ -1,11 +1,11 @@
 from django.db import models
 from pgvector.django import VectorField, HnswIndex
 from sentence_transformers import SentenceTransformer
-from items.services.tourapi import get_summarize_tourist_spot
+from apps.items.services.tourapi import get_summarize_content
 from functools import lru_cache
 import numpy as np
 import joblib
-from items.models import ContentDetailCommon
+from apps.items.models import ContentDetailCommon
 from sklearn.preprocessing import normalize
 
 
@@ -35,7 +35,7 @@ class ContentFeature(models.Model):
         return cls._category_encoders[level]
 
     def get_text_embedding(self):
-        summary_text = get_summarize_tourist_spot(self.detail.contentid, self.detail.contenttypeid)
+        summary_text = get_summarize_content(self.detail.contentid, self.detail.contenttypeid)
         return self.get_text_model().encode(summary_text)
 
     def get_category_embedding(self):

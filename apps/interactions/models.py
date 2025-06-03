@@ -44,7 +44,7 @@ class ContentInteraction(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content_id = models.CharField(max_length=50)
+    content_id = models.PositiveIntegerField()
     action_type = models.CharField(max_length=20, choices=ACTION_CHOICES)
     
     # 찜 상태 추적
@@ -61,6 +61,7 @@ class ContentInteraction(models.Model):
         indexes = [
             models.Index(fields=['user', 'content_id', 'action_type']),
             models.Index(fields=['action_type', 'timestamp']),
+            models.Index(fields=['content_id']),
         ]
 
     def __str__(self):

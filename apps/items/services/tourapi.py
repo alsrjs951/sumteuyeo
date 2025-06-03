@@ -1,9 +1,13 @@
 from openai import OpenAI
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from django.conf import settings
-from items.models import ContentSummarize
+from apps.items.models import ContentSummarize
 import requests
 import time
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
@@ -156,3 +160,57 @@ def get_tourapi_detail(
             return None
 
     return None
+
+def get_nearby_content_ids(user_lat: float, user_lng: float, radius_km: int = 20) -> List[int]:
+    """
+    TourAPI locationBasedList1을 호출하여 최대 5만개까지 주변 콘텐츠 ID 리스트 반환
+    """
+    base_url = "http://apis.data.go.kr/B551011/KorService1/locationBasedList1"
+    service_key = settings.TOUR_API_KEY
+    radius_meters = radius_km * 1000
+    all_content_ids = []
+    num_of_rows = 50000
+    max_pages = 1
+
+    for page_no in range(1, max_pages + 1):
+        params = {
+            'serviceKey': service_key,
+            'MobileOS': 'ETC',
+            'MobileApp': 'sumteuyeo',
+            '_type': 'json',
+            'mapX': user_lng,
+            'mapY': user_lat,
+            'radius': radius_meters,
+            'pageNo': page_no,
+            'numOfRows': num_of_rows,
+            'arrange': 'E'
+        }
+        try:
+            response = requests.get(base_url, params=params, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+            items = data.get('response', {}).get('body', {}).get('items', {})
+            if not items:
+                break
+            item_list = items.get('item', [])
+            if isinstance(item_list, dict):
+                item_list = [item_list]
+            page_content_ids = [
+                int(item['contentid']) for item in item_list if item.get('contentid')
+            ]
+            if not page_content_ids:
+                break
+            all_content_ids.extend(page_content_ids)
+            logger.info(f"페이지 {page_no}: {len(page_content_ids)}개 콘텐츠 수집, 누적 {len(all_content_ids)}개")
+            # 마지막 페이지인지 확인
+            total_count = data.get('response', {}).get('body', {}).get('totalCount', 0)
+            if page_no * num_of_rows >= total_count:
+                break
+            time.sleep(0.2)  # 호출 제한 대응
+        except Exception as e:
+            logger.error(f"페이지 {page_no} 처리 실패: {str(e)}")
+            break
+
+    # 중복 제거
+    unique_content_ids = list(set(all_content_ids))
+    return unique_content_ids

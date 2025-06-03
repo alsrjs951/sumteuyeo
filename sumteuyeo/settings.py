@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import environ
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -101,6 +102,34 @@ DATABASES = {
     }
 }
 
+LOG_DIR = os.path.join(BASE_DIR, 'management', 'log')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'logfile.log'),  # 원하는 경로로 변경
+            'encoding': 'utf-8',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {  # root logger
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -156,3 +185,11 @@ OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 # 상호작용 최대 개수
 USER_INTERACTION_LIMIT = 1000
+
+CELERY_BEAT_SCHEDULE = {
+    'update_global_profile': {
+        'task': 'users.tasks.update_global_profile_task',
+        'schedule': crontab(hour=2, minute=30),
+        'options': {'queue': 'batch'}
+    }
+}

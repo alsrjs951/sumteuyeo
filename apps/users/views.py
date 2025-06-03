@@ -6,6 +6,12 @@ from django.contrib.auth.forms import AuthenticationForm # Django 기본 로그�
 from django.views.decorators.http import require_POST # POST 요청만 허용하는 데코레이터
 from django.views.decorators.http import require_GET # GET 요청만 허용
 from django.db import IntegrityError # 데이터베이스 레벨 오류 처리용
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from datetime import datetime
+from django.db.models import Prefetch
+from apps.recommender.services.theme_recommender import ThemeRecommender
 
 # 회원가입 폼 (forms.Form 상속 버전)
 from .forms import UserSignupAPIForm
@@ -129,3 +135,56 @@ def check_auth_status(request):
     else:
         # 로그아웃 상태일 경우
         return JsonResponse({'isAuthenticated': False})
+
+class MainRecommendationAPI(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        # 1. 사용자 상태 확인
+        user = request.user
+        user_id = user.id if user.is_authenticated else None
+        current_month = datetime.now().month
+
+        # 2. 추천 엔진 호출 (기존 로직 재활용)
+        recommendation_rows = ThemeRecommender.generate_recommendation_rows(
+            user_id=user_id, 
+            month=current_month
+        )
+
+        # 3. 데이터 직렬화 최적화
+        serialized_sections = []
+        for section_key, section_data in recommendation_rows.items():
+            # 섹션별 아이템 처리
+            items = [
+                self._serialize_content(item) 
+                for item in section_data['items']
+            ]
+            
+            serialized_sections.append({
+                "section_type": section_key,
+                "title": section_data['title'],
+                "items": items
+            })
+
+        return Response({"sections": serialized_sections}, status=status.HTTP_200_OK)
+
+    def _serialize_content(self, content_feature):
+        """ContentFeature 객체 직렬화"""
+        detail = content_feature.detail  # ContentDetailCommon 객체
+        return {
+            "content_id": detail.contentid,
+            "title": detail.title,
+            "summary": (detail.overview[:150] + "...") if detail.overview else "",
+            "main_image": detail.firstimage or detail.firstimage2,
+            "category": detail.lclsSystm3,
+            "position": {
+                "lat": detail.mapy,
+                "lng": detail.mapx
+            },
+            "metadata": {
+                "content_type": detail.contenttypeid,
+                "area_code": detail.areacode,
+                "rating": getattr(content_feature, 'score', None),
+                "similarity": round(float(getattr(content_feature, 'similarity', 0)), 4)
+            }
+        }
