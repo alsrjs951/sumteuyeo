@@ -22,7 +22,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-# .env 파일 읽기
+# .env 파일 읽기 (BASE_DIR 바로 아래에 .env 파일이 있다고 가정)
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
@@ -33,11 +33,14 @@ env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
-print(f"--- Loaded DEBUG: {DEBUG} ---") # DEBUG 값 확인용 출력 추가
+# DEBUG 값은 .env 파일에서 False로 설정해야 합니다 (프로덕션 환경).
+# DEBUG = env('DEBUG')
+# print(f"--- Loaded DEBUG: {DEBUG} ---") # DEBUG 값 확인용 출력 (프로덕션에서는 제거하거나 로깅으로 대체 권장)
 
+# ALLOWED_HOSTS는 .env 파일에 EC2 퍼블릭 IP 및 연결된 도메인을 설정해야 합니다.
+# 예: ALLOWED_HOSTS=your_ec2_public_ip,your_domain.com
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-print(f"--- Loaded ALLOWED_HOSTS: {ALLOWED_HOSTS} ---") # ALLOWED_HOSTS 값 확인용 출력 추가
+print(f"--- Loaded ALLOWED_HOSTS: {ALLOWED_HOSTS} ---") # ALLOWED_HOSTS 값 확인용 출력
 
 # Application definition
 
@@ -45,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.sessions', # Redis 세션 사용 시에도 필요
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.core.apps.CoreConfig',
@@ -53,11 +56,12 @@ INSTALLED_APPS = [
     'apps.items.apps.ItemsConfig',
     'apps.interactions.apps.InteractionsConfig',
     'apps.recommender.apps.RecommenderConfig',
+    # 'django_redis', # django-redis를 캐시/세션 백엔드로만 사용하는 경우 INSTALLED_APPS에 필수는 아님
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', # 세션 미들웨어
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -87,64 +91,99 @@ WSGI_APPLICATION = 'sumteuyeo.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# AWS RDS for MySQL 설정으로 변경
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB_NAME'),
         'USER': env('POSTGRES_DB_USER'),
         'PASSWORD': env('POSTGRES_DB_PASSWORD'),
-        'HOST': env('POSTGRES_DB_HOST', default='localhost'),
-        'PORT': env('POSTGRES_DB_PORT', default='5432'),
+        'HOST': env('POSTGRES_DB_HOST'), # RDS 엔드포인트
+        'PORT': env('POSTGRES_DB_PORT', cast=int, default=3306),
+        'OPTIONS': {
+            #'charset': 'utf8mb4', # MySQL에서 한글 및 이모지 지원을 위해 권장
+            # RDS SSL 연결이 필요하다면 여기에 SSL 옵션 추가
+            # 'ssl': {'ca': '/path/to/your/rds-ca-2019-root.pem'} # 예시, AWS RDS 문서 참조
+        },
     }
 }
+
+# Cache (AWS ElastiCache for Redis 사용)
+# https://django-redis-docs.readthedocs.io/en/latest/setup.html#setting-up-django-redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"redis://{env('REDIS_HOST', default='127.0.0.1')}:{env.int('REDIS_PORT', default=6379)}/1",  # Redis DB 1번을 캐시용으로 사용
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PASSWORD": env('REDIS_PASSWORD', default=None), # ElastiCache Redis에 암호 설정 시 주석 해제
+            # ElastiCache for Redis가 '전송 중 암호화(TLS)'를 사용한다면,
+            # LOCATION에 "rediss://" 스킴을 사용하고 추가 SSL 옵션이 필요할 수 있습니다.
+            # 예: "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None} 또는 특정 인증서 경로 설정
+        }
+    }
+}
+
+# Session Engine (Redis 사용)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default" # 위 CACHES 설정의 'default' 사용
 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ko-kr' # 한국어 설정으로 변경 권장
+TIME_ZONE = 'Asia/Seoul'    # 한국 시간대로 변경 권장
 
 USE_I18N = True
-
-USE_TZ = True
+USE_TZ = True # 데이터베이스에는 UTC로 저장하고, 템플릿 등에서 TIME_ZONE에 맞춰 보여줌
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = 'static/' # 각 앱의 static 폴더 및 STATICFILES_DIRS에 있는 정적 파일을 위한 URL 프리픽스
 
-STATIC_URL = 'static/'
-
+# 개발 중에 사용할 정적 파일들이 위치한 추가 경로 (프로덕션에서는 collectstatic 사용)
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# 프로덕션 환경에서 collectstatic 명령 실행 시 정적 파일들이 모일 최상위 경로
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# Media files (User-uploaded files)
+# 사용자가 업로드하는 파일을 처리하기 위한 설정 (필요시)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles' # 사용자가 업로드한 파일이 저장될 실제 서버 경로
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#APi인증키값
+# API 인증키값
 TOUR_API_KEY = env('TOUR_API_KEY')
+
+# 프로덕션 환경을 위한 추가 보안 설정 (선택 사항이지만 권장)
+# if not DEBUG:
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+#     SECURE_HSTS_SECONDS = 31536000  # 1 year
+#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#     SECURE_HSTS_PRELOAD = True
+#     # X_FRAME_OPTIONS = 'DENY' # MIDDLEWARE에 이미 XFrameOptionsMiddleware가 있음
+#     SECURE_CONTENT_TYPE_NOSNIFF = True
+#     SECURE_BROWSER_XSS_FILTER = True
