@@ -3,333 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>축제 및 관광 정보</title>
+    <title>숨은 트렌디한 여행지</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <style>
+        /* 기본 스타일 */
+        @font-face {
+            font-family: 'KOTRAHOPE';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2110@1.0/KOTRAHOPE.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
         body {
-            font-family: sans-serif;
+            font-family: 'KOTRAHOPE';
             margin: 0;
-            padding: 0;
-            background-color: white;
         }
 
-        .header {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
+        /* 헤더 */
+        .app-header {
+            background: linear-gradient(to top, #FFFFFF, #b2e0fd);
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
-
-        .header h1 {
-            margin: 0;
+        .app-header .logo-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FF8888;
         }
-
-        .header .auth-buttons button {
-            background: none;
+        .auth-buttons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center; /* 버튼 수직 정렬 */
+        }
+        .auth-button {
+            padding: 0.5rem 1rem;
+            background-color: #5fc2ff;
             color: white;
             border: none;
-            padding: 8px 12px;
-            margin-left: 10px;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
             cursor: pointer;
-            font-size: 16px;
+        }
+        .auth-button:hover {
+            background-color: #3fb5ff;
         }
 
-        .header .auth-buttons button:hover {
-            text-decoration: underline;
+        /* 프로필 영역 및 드롭다운 메뉴 스타일 추가 */
+        .profile-area {
+            position: relative; /* 드롭다운 기준점 */
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease;
         }
-
-        .search-bar {
+        .profile-area:hover {
+            background-color: #82cfff;
+        }
+        .profile-icon {
+            font-size: 1.2em; /* 아이콘 크기 */
+            color: #333;
+            margin-right: 8px;
+        }
+        #loginUserDisplay {
+            font-size: 0.875rem;
+            color: #333;
+            font-weight: 500;
+        }
+        .profile-dropdown-menu {
+            display: none; /* 초기 숨김 */
+            position: absolute;
+            top: 100%; /* 프로필 영역 바로 아래 */
+            right: 0;
             background-color: white;
-            padding: 15px 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            z-index: 1001; /* 다른 요소 위에 표시 */
+            list-style: none;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem; /* 프로필 영역과의 간격 */
+        }
+        .profile-dropdown-menu.active { /* 드롭다운 표시 클래스 */
+            display: block;
+        }
+        .profile-dropdown-menu li a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+        .profile-dropdown-menu li a:hover {
+            background-color: #f5f5f5;
+        }
+        .profile-dropdown-menu li a i { /* 메뉴 아이템 아이콘 */
+            margin-right: 10px;
+            width: 16px; /* 아이콘 공간 확보 */
             text-align: center;
         }
-
-        .search-bar input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 70%;
-            max-width: 600px;
-            font-size: 16px;
+        .dropdown-divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 0.5rem 0;
         }
 
-        .search-bar button {
+
+        /* 현재 위치 표시줄 스타일 */
+        .current-location-bar {
+            background-color: transparent;
             padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            margin-top: -10px;
+            text-align: left;
+            font-size: 0.9em;
+            color: #555;
+
+        }
+        .current-location-bar .location-icon {
+            margin-right: 5px;
+            color: #007bff;
+        }
+
+        .gpsbtn, .placebtn {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 16px;
-            margin-left: 10px;
+            font-size: 19px;
+            background-color: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .gpsbtn:hover, .placebtn:hover {
+            background-color: #007bff;
+            color: #ffffff;
         }
 
-        .search-bar button:hover {
-            background-color: #0056b3;
+        .pink {
+            text-align: center;
+            color: #FF8888;
+            font-size: 2rem;
+            line-height: 1.6;
         }
 
+        #currentStatus, #resultOutput {
+            display: none !important;
+        }
+
+        /* 카테고리 섹션 및 슬라이더 */
         .category-section {
-            padding: 20px;
+            padding: 10px 20px 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
         }
-
-        .category-title {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            padding-left: 10px;
-        }
-
         .slider-container {
             position: relative;
             overflow: hidden;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 30px; /* 화살표 공간 확보 */
+            margin: 20px auto;
+            padding: 0 30px;
         }
-
+        .category-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: left;
+            color: #333;
+        }
         .slider {
             display: flex;
             transition: transform 0.5s ease-in-out;
         }
-
         .card {
+            position: relative;
             flex: 0 0 auto;
-            width: 300px;
+            width: calc(33.333% - 20px);
+            min-width: 280px;
+            max-width: 300px;
             margin: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             background-color: white;
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
         }
-
         .card:hover {
-            transform: scale(1.05);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 4px 8px 15px rgba(0,0,0,0.15);
         }
-
         .card img {
             width: 100%;
-            height: auto;
+            height: 180px;
+            object-fit: cover;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
         }
-
         .info {
             padding: 15px;
             text-align: left;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 100px;
         }
-
         .info h3 {
             margin-top: 0;
-            margin-bottom: 5px;
-            font-size: 1.2em;
-        }
-
-        .info p {
             margin-bottom: 8px;
+            font-size: 1.2em;
+            color: #333;
+            line-height: 1.3;
+            height: calc(1.2em * 1.3 * 2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .info p {
+            margin-bottom: 30px;
             font-size: 0.9em;
             color: #555;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .slider-controls {
             position: absolute;
             top: 50%;
-            left: 0;
-            right: 0;
+            left: 0px;
+            right: 0px;
             transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
             padding: 0;
             z-index: 10;
+            pointer-events: none;
         }
-
         .slider-controls button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #666;
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
             cursor: pointer;
-            padding: 5px;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .slider-controls button:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .slider-controls button:disabled {
+            background-color: rgba(0,0,0,0.1);
+            border-color: rgba(0,0,0,0.05);
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
+        /* 모달 공통 스타일 */
         .modal {
             display: none;
             position: fixed;
-            z-index: 100; /* 화살표보다 높은 z-index */
+            z-index: 1001;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
         }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            border-radius: 8px;
-            position: relative;
+        .modal.open {
+            display: flex;
         }
-
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal-body {
-            padding: 20px 0;
-        }
-
-        .auth-form input[type="text"],
-        .auth-form input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        .auth-form button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
+        .modal_body {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px 30px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
+            position: relative;
+            box-sizing: border-box;
+        }
+        #placemodal .modal_body {
+            max-width: 600px;
+        }
+        .modal-close-btn-custom {
+            position:absolute;
+            top:15px;
+            right:20px;
+            font-size:28px;
+            font-weight: lighter;
+            cursor:pointer;
+            color: #888;
+            line-height: 1;
+            padding: 5px;
+        }
+        .modal-close-btn-custom:hover {
+            color: #333;
         }
 
-        .auth-form button:hover {
+        #modal1 .modal_body h2#itemDetailTitle {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.2rem;
+            color: #333;
+            text-align: center;
+            line-height: 1.4;
+            padding-right: 30px;
+        }
+        #modal1 .modal_body img#itemDetailImage {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 0.375rem;
+            margin-bottom: 1.2rem;
+        }
+        #modal1 .modal_body p {
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #555;
+            text-align: left;
+        }
+        #modal1 .modal_body p strong {
+            color: #333;
+            margin-right: 8px;
+        }
+        #modal1 .modal_body p#itemDetailOverview {
+            white-space: pre-wrap;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        #modal1 .modal_body .detail-buttons-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #modal1 .modal_body div#itemDetailHomepage.homepage-link a,
+        #modal1 .modal_body button.detail-modal-button {
+            display: inline-block;
+            padding: 8px 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        #modal1 .modal_body div#itemDetailHomepage.homepage-link a {
+             background-color: #007bff;
+        }
+        #modal1 .modal_body div#itemDetailHomepage.homepage-link a:hover {
             background-color: #0056b3;
         }
-
-        .auth-form h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            text-align: center;
+        #modal1 .modal_body button#editInfoRequestButton.detail-modal-button {
+            background-color: #6c757d;
         }
-        /* 회원가입/로그인 버튼 */
-        .auth-buttons {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            display: flex;
-            gap: 0.75rem; /* 버튼 사이 간격 */
-            z-index: 10; /* 다른 요소 위에 오도록 */
-        }
-
-        .auth-button {
-            padding: 0.5rem 1rem;
-            background-color: #4a5568; /* 회색 배경 */
-            color: white;
-            border-radius: 0.375rem; /* rounded-md */
-            font-size: 0.875rem; /* text-sm */
-            text-decoration: none; /* 링크 밑줄 제거 */
-            transition: background-color 0.2s ease;
-            cursor: pointer; /* 버튼임을 명확히 */
-        }
-
-        .auth-button:hover {
-            background-color: #2d3748; /* 더 어두운 회색 */
-        }
-
-        /* --- 모달 스타일 --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            max-height: 80vh; /* 내용 많을 시 스크롤 */
-            overflow-y: auto; /* 내용 많을 시 스크롤 */
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.75rem;
-            font-size: 1.75rem;
-            font-weight: bold;
-            color: #9ca3af;
-            cursor: pointer;
-            border: none;
-            background: none;
-            line-height: 1;
-        }
-
-        .modal-close:hover {
-            color: #1f2937;
+        #modal1 .modal_body button#editInfoRequestButton.detail-modal-button:hover {
+            background-color: #5a6268;
         }
 
         .modal-title {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
+            margin-top: 0;
             text-align: center;
+            color: #333;
         }
-
-        /* 로그인/회원가입 폼 스타일 */
         .modal-form label {
             display: block;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.3rem;
             font-size: 0.875rem;
             font-weight: 500;
             color: #374151;
+            text-align: left;
         }
-
         .modal-form input {
             display: block;
-            width: 95%;
-            padding: 0.75rem;
+            width: 100%;
+            padding: 0.8rem;
             border: 1px solid #d1d5db;
             border-radius: 0.375rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             font-size: 0.95rem;
+            box-sizing: border-box;
+            line-height: 1.5;
         }
-
         .modal-form input:focus {
             outline: none;
             border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
         }
-
         .modal-form button[type="submit"] {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.8rem;
             background-color: #4a5568;
             color: white;
             border: none;
@@ -339,543 +447,1579 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
             margin-top: 0.5rem;
+            line-height: 1.5;
         }
-
         .modal-form button[type="submit"]:hover {
             background-color: #2d3748;
         }
-
-        .pink-screen {
-            width: 100%;
-            height: 350px; /* 이미지와 비슷하게 높이 조정 */
-            background-color: #FBE2D5;
-            margin-top: 1rem;      /* 검색창과의 간격 */
-            margin-bottom: 1rem;   /* 슬라이더와의 간격 (예시) */
-            padding: 2rem;         /* 안쪽 여백 추가 */
-            box-sizing: border-box;/* 패딩을 포함하여 크기 계산 */
-            display: flex;         /* Flexbox 사용 */
-            flex-direction: column;/* 세로 방향 정렬 */
-            justify-content: center;/* 세로 중앙 정렬 (선택 사항) */
-        }
-
-        .blue {
-            color: #257ab0; /* 이미지의 색상과 비슷하게 조정 (파란색보다는 회색 계열) */
-            font-size: 1.1rem; /* 글자 크기 조정 */
-            line-height: 1.6;  /* 줄 간격 조정 */
-            margin-bottom: 1rem; /* 아래쪽 큰 글씨와의 간격 */
-            text-align: center;
-        }
-
-        .big {
-            font-weight: bold;
-            font-size: 2.5rem; /* 글자 크기 조정 */
-            line-height: 1.3;  /* 줄 간격 조정 (여러 줄일 경우) */
-            color: #333;       /* 글자 색상 (기본 검정색 또는 진한 회색) */
-            text-align: center;
-        }
-
-        /* p 태그 사용 시 기본 마진 제거 */
-        .blue p, .big p {
-             margin: 0;
-        }
-
-        .sumteuyeo {
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85em;
             text-align: left;
+            display: block;
+            min-height: 1.3em;
+            margin-top: -0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        #modal_map_container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #placemodal .modal-form button[type="button"] {
+            width: auto;
+            padding: 10px 25px;
+            font-size: 0.95rem;
+        }
+        #placemodal .modal-form button[type="button"]:hover {
+            background-color: #2d3748;
+        }
+
+        #modal1 .modal_body .heart-icon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            position: sticky;
+            bottom: 25px;
+            float: right;
+            margin-right: 5px;
+            padding: 5px;
+            display: none;
+            z-index: 10;
+        }
+        #modal1 .modal_body .heart-icon.active {
+            color: #ff4757;
+            transform: scale(1.1);
+        }
+
+        .card .card-heart-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.6rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 4px rgba(0,0,0,0.6);
+            z-index: 5;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .card .card-heart-icon:hover {
+            transform: scale(1.15);
+        }
+        .card .card-heart-icon.active {
+            color: #ff4757;
+        }
+
+        #wishlistModal .modal_body {
+            max-width: 700px;
+        }
+        #wishlistModal .wishlist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        #wishlistModal .wishlist-item:last-child {
+            border-bottom: none;
+        }
+        #wishlistModal .wishlist-item:hover {
+            background-color: #f9f9f9;
+        }
+        #wishlistModal .wishlist-item img {
+            width: 100px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+        #wishlistModal .wishlist-item-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.15em;
+            color: #333;
+        }
+        #wishlistModal .wishlist-item-info p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+        #wishlistModal .empty-wishlist-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+            font-size: 1.1em;
+        }
+
+        #loginmodal .modal_body,
+        #signupmodal .modal_body {
+            max-width: 480px;
+        }
+
+        /* AI 챗봇 및 주변 UI 스타일 */
+        .ai-chatbot-enhanced-search-bar {
+            display: flex; /* [cite: 126] */
+            align-items: flex-start; /* 상단 정렬 */ /* [cite: 126] */
+            padding: 15px 20px; /* [cite: 127] */
+            gap: 10px; /* 버튼과 챗봇 사이 간격 */ /* [cite: 127] */
+            background-color: #ffffff; /* [cite: 128] */
+            top: 30px; /* 헤더 높이에 맞춰 조정 (기존 70px에서 60px로 변경하여 위로 올림) */
+            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */          
+        }
+
+        .location-control-buttons {
+            display: flex; /* [cite: 132] */
+            gap: 8px; /* [cite: 132] */
+            margin-top: -13px;
+            padding-top: 4px; /* 입력 필드와 시각적 정렬 */
+        }
+
+        .ai-chatbot-container {
+            flex-grow: 1; /* [cite: 134] */
+            display: flex; /* [cite: 134] */
+            flex-direction: column; /* [cite: 134] */
+            border: 1px solid #ced4da; /* [cite: 135] */
+            border-radius: 8px; /* [cite: 135] */
+            background-color: #ffffff; /* [cite: 135] */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* 수정: 그림자 약간 더 부드럽게 */
+            transition: max-height 0.4s ease-in-out, box-shadow 0.3s ease-in-out; /* box-shadow 전환 추가 */
+            max-height: 42px; /* 초기에는 입력창 높이만큼만 (패딩/보더 포함) */ /* [cite: 136] */
+            margin-top: -10px;
+            overflow: hidden; /* 내부 콘텐츠가 넘칠 경우 숨김 (확장 애니메이션에 중요) */ /* [cite: 137] */
+        }
+
+        .ai-chatbot-container.active {
+            max-height: 700px; /* 수정: 높이 약간 늘림 */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08); /* 수정: 활성화 시 그림자 개선 */
+        }
+
+        .ai-chatbot-input-wrapper {
+            display: flex; /* [cite: 140] */
+            align-items: center; /* [cite: 140] */
+            padding: 0 10px 0 15px; /* 수정: 오른쪽 패딩 조정 */
+            height: 40px; /* 입력창 부분 고정 높이 */ /* [cite: 141] */
+            cursor: pointer; /* [cite: 142] */
+            border-bottom: 1px solid transparent; /* 추가: 비활성 시 하단 구분선 투명 */
+            transition: border-color 0.3s ease; /* [cite: 144] */
+        }
+
+        .ai-chatbot-container.active .ai-chatbot-input-wrapper {
+            border-bottom-color: #dee2e6; /* 활성화 시 구분선 색상 */
+        }
+
+        #aiChatbotInput {
+            flex-grow: 1; /* [cite: 146] */
+            border: none; /* [cite: 146] */
+            padding: 10px 0; /* 내부 패딩 */ /* [cite: 147] */
+            font-size: 0.95em; /* [cite: 147] */
+            outline: none; /* [cite: 147] */
+            background-color: transparent; /* 부모 배경색 사용 */ /* [cite: 147] */
+            height: 100%; /* 래퍼 높이 채움 */ /* [cite: 148] */
+            line-height: 1.5; /* 추가: 입력 텍스트 수직 정렬 개선 */
+        }
+
+        #aiChatbotInput::placeholder {
+            color: #888; /* 수정: placeholder 색상 약간 연하게 */
+        }
+
+        .ai-chatbot-send-btn {
+            background: none; /* [cite: 150] */
+            border: none; /* [cite: 150] */
+            color: #007bff; /* [cite: 150] */
+            font-size: 1.2em; /* 수정: 아이콘 크기 약간 키움 */
+            padding: 8px 10px; /* 클릭 영역 */ /* [cite: 151] */
+            cursor: pointer; /* [cite: 152] */
+            margin-left: 8px; /* 수정: 입력창과의 간격 조정 */
+            border-radius: 5px; /* 버튼 모양 (옵션) */ /* [cite: 153] */
+            transition: background-color 0.2s ease, color 0.2s ease; /* [cite: 154] */
+            line-height: 1; /* 추가: 아이콘 수직 정렬 */
+            margin-top: 3.5px;
+        }
+
+        .ai-chatbot-send-btn:hover {
+            color: #0056b3; /* [cite: 155] */
+            background-color: #e9ecef; /* 마우스 오버 시 배경색 (옵션) */ /* [cite: 155] */
+        }
+
+        .ai-chatbot-display-area {
+            flex-grow: 1; /* 컨테이너 내에서 남은 공간을 모두 차지하도록 */ /* [cite: 157] */
+            overflow-y: auto; /* 메시지가 많아지면 스크롤 */ /* [cite: 158] */
+            background-color: #f9f9f9; /* 채팅 메시지 영역 배경색 */ /* [cite: 159] */
+            /* border-top: 1px solid #e0e0e0; */ /* 입력창과의 구분선은 input-wrapper로 이동 */
+            padding: 0 15px; /* 비활성 시에는 패딩 없음 */ /* [cite: 161] */
+            visibility: hidden; /* 초기에는 내용 숨김 */ /* [cite: 162] */
+            opacity: 0; /* 초기에는 투명 */ /* [cite: 163] */
+            transition: padding 0.3s ease-out, visibility 0s linear 0.3s, opacity 0.3s ease-out; /* [cite: 164] */
+        }
+
+        .ai-chatbot-container.active .ai-chatbot-display-area {
+            padding: 15px; /* 수정: 패딩을 대폭 줄여서 메시지가 너무 가운데로 몰리는 현상 해결 */
+            visibility: visible; /* 활성화 시 내용 보이게 */ /* [cite: 166] */
+            opacity: 1; /* 활성화 시 불투명 */ /* [cite: 167] */
+            transition: padding 0.3s ease-out, visibility 0s linear 0s, opacity 0.3s ease-out; /* [cite: 168] */
+        }
+
+        /* 채팅 메시지 예시 스타일 */
+        .chat-message {
+            padding: 10px 15px; /* 수정: 패딩 조정으로 가독성 향상 */
+            margin-bottom: 12px; /* 수정: 메시지 간 간격 조정 */
+            border-radius: 20px; /* 메시지 말풍선 둥글게 */ /* [cite: 169] */ /* 수정: 더 둥글게 */
+            max-width: 85%; /* 메시지 최대 너비 */ /* [cite: 170] */
+            line-height: 1.45; /* 수정: 줄 간격 조정 */
+            word-wrap: break-word; /* 긴 단어 자동 줄바꿈 */ /* [cite: 171] */
+            font-size: 0.92em; /* 수정: 폰트 크기 미세 조정 */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08); /* [cite: 172] */ /* 수정: 그림자 부드럽게 */
+        }
+        .chat-message:last-child {
+            margin-bottom: 0; /* [cite: 173] */
+        }
+        .chat-message.user { /* 사용자 메시지 */
+            background-color: #007bff; /* [cite: 174] */
+            color: white; /* [cite: 174] */
+            margin-left: auto; /* 오른쪽 정렬 */ /* [cite: 174] */
+            border-bottom-right-radius: 8px; /* 말풍선 꼬리 모양처럼 */ /* [cite: 175] */ /* 수정: 꼬리 모양 더 자연스럽게 */
+        }
+        .chat-message.bot { /* 챗봇 메시지 */
+            background-color: #e9ecef; /* [cite: 176] */
+            color: #333; /* [cite: 176] */
+            margin-right: auto; /* 왼쪽 정렬 */ /* [cite: 176] */
+            border-bottom-left-radius: 8px; /* [cite: 177] */ /* 수정: 꼬리 모양 더 자연스럽게 */
         }
     </style>
 </head>
 <body>
-    <img src class="sumteuyeo" alt="숨트여 로고">
-    <div class="auth-buttons">
-        <a href="#" class="auth-button" data-modal-target="signupModal">회원가입</a>
-        <a href="#" class="auth-button" data-modal-target="loginModal">로그인</a>
+    <header class="app-header">
+        <div class="logo-title">숨트여</div>
+        <div class="pink">북적이지 않아 더 좋은,<br >감성 한 스푼 여행지</div>
+        <div class="auth-buttons">
+            <button id="signupButton" class="auth-button">회원가입</button>
+            <button id="loginButton" class="auth-button">로그인</button>
+
+            <div id="profileArea" class="profile-area hidden">
+                <i class="fas fa-user-circle profile-icon"></i>
+                <span id="loginUserDisplay"></span>
+                <ul id="profileDropdown" class="profile-dropdown-menu">
+                    <li><a href="#" id="myInfoLink"><i class="fas fa-user-cog"></i> 내 정보</a></li>
+                    <li><a href="#" id="wishlistFromDropdownLink"><i class="fas fa-heart"></i> 찜 목록</a></li>
+                    <li><a href="#" id="settingsLink"><i class="fas fa-cog"></i> 설정</a></li>
+                    <li class="dropdown-divider"></li>
+                    <li><a href="#" id="logoutFromDropdownLink"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
+                </ul>
+            </div>
+            
+            <button id="logoutButton" class="auth-button hidden">로그아웃</button>
+        </div>
+    </header>
+
+    <div id="currentLocationDisplay" class="current-location-bar">
+        <i class="fas fa-map-marker-alt location-icon"></i> 현재 기준 위치: <span id="currentLocationText">위치 정보 불러오는 중...</span>
     </div>
-    
-    <div class="modal-overlay" id="signupModal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="닫기">&times;</button>
+
+    <div id="placemodal" class="modal">
+        <div class="modal_body">
+            <h2 class="modal-title">기준 위치 변경</h2>
+            <div id="modal_map_container"></div>
+            <div class="modal-form" style="text-align:center;">
+                <input type="text" id="placeInput" placeholder="장소 검색 또는 지도에서 우클릭">
+                <button type="button" id="setPlaceFromModalButton" class="auth-button">선택한 위치로 설정</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="signupmodal" class="modal">
+        <div class="modal_body">
+            <span class="modal-close-btn-custom" onclick="closeModal(signupModal)">&times;</span>
             <h2 class="modal-title">회원가입</h2>
             <form class="modal-form" id="signupForm">
                 <div><label for="signupId">아이디</label><input type="text" id="signupId" name="signupId" required></div>
+                <span id="usernameError" class="error-message"></span>
                 <div><label for="signupPassword">비밀번호</label><input type="password" id="signupPassword" name="signupPassword" required></div>
+                <span id="passwordError" class="error-message"></span>
                 <div><label for="signupPasswordConfirm">비밀번호 확인</label><input type="password" id="signupPasswordConfirm" name="signupPasswordConfirm" required></div>
+                <span id="passwordConfirmError" class="error-message"></span>
                 <div><label for="signupEmail">이메일</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+                <span id="emailError" class="error-message"></span>
                 <button type="submit">가입하기</button>
             </form>
         </div>
     </div>
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="닫기">&times;</button>
+
+    <div id="loginmodal" class="modal">
+        <div class="modal_body">
+            <span class="modal-close-btn-custom" onclick="closeModal(loginModal)">&times;</span>
             <h2 class="modal-title">로그인</h2>
             <form class="modal-form" id="loginForm">
                 <div><label for="loginId">아이디</label><input type="text" id="loginId" name="loginId" required></div>
+                <span id="loginIdError" class="error-message"></span>
                 <div><label for="loginPassword">비밀번호</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+                <span id="loginPasswordError" class="error-message"></span>
                 <button type="submit">로그인</button>
             </form>
         </div>
     </div>
 
-    <div class="search-bar">
-        <input type="text" placeholder="축제 또는 관광지를 검색하세요">
-        <button>검색</button>
+    {% csrf_token %}
+
+    <div class="ai-chatbot-enhanced-search-bar">
+        <div class="location-control-buttons">
+            <button class="gpsbtn" id="gpsButton" aria-label="현재 위치로 기준 설정"><i class="fas fa-map-marker-alt"></i></button>
+            <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
+        </div>
+
+        <div id="aiChatbotContainer" class="ai-chatbot-container">
+            <div id="aiChatbotInputWrapper" class="ai-chatbot-input-wrapper" tabindex="0">
+                <input type="text" id="aiChatbotInput" placeholder="AI 챗봇에게 여행지를 추천받아보세요!">
+                <button id="aiChatbotSendButton" class="ai-chatbot-send-btn" aria-label="전송"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <div id="aiChatbotDisplayArea" class="ai-chatbot-display-area">
+                <div class="chat-message bot">안녕하세요! 부산 여행에 대해 무엇이든 물어보세요. 예: "해운대 근처 맛집 추천해줘"</div>
+            </div>
+        </div>
     </div>
 
-    <div class="pink-screen">
-        <div class="blue">
-            주말에 어디 가지?<br>
-            다음주 남구에서 열리는 축제는?
-        </div>
-        <div class="big">
-            대충 검색해도 나오는<br>
-            정확한 축제 정보
+    <div id="modal1" class="modal">
+        <div class="modal_body">
+            <i class="fas fa-heart heart-icon" id="modalHeartIcon" title="찜하기"></i>
+            <img id="itemDetailImage" src="" alt="상세 이미지">
+            <h2 id="itemDetailTitle">상세 정보</h2>
+            <p id="itemDetailOverview"></p>
+            <p id="itemDetailPeriod"></p>
+            <div id="itemDetailMapContainer" style="width:100%;height:250px;margin-bottom:15px;border-radius:4px;border: 1px solid #eee;"></div>
+            <p id="itemDetailLocation"></p>
+            
+            <div id="itemDetailIntroAttributesContainer" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px;">
+            </div>
+            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p> 
+            <div id="itemDetailHomepage" class="homepage-link detail-buttons-container">
+            </div>
+
         </div>
     </div>
 
     <div class="category-section">
-        
         <div class="slider-container">
-            <h2 class="category-title">이번 주말 놓치면 안 될 축제</h2>
-            <div class="slider" id="festivalSlider">
-                
-                <div class="card" data-modal="festivalModal1">
-                    <img src="bul.png" alt="봄꽃 축제">
-                    <div class="info">
-                        <h3>봄꽃 축제</h3>
-                        <p>아름다운 봄꽃을 만끽하세요!</p>
-                        <p>기간: 2025.04.20 - 2025.04.30</p>
-                        <p>위치: [임의의 장소 1]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="festivalModal2">
-                    <img src="bul.png" alt="[신나는 여름 축제]">
-                    <div class="info">
-                        <h3>[신나는 여름 축제]</h3>
-                        <p>더위를 잊게 해줄 시원한 축제!</p>
-                        <p>기간: 2025.07.15 - 2025.07.20</p>
-                        <p>위치: [임의의 장소 2]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="festivalModal3">
-                    <img src="bul.png" alt="가을 단풍 축제">
-                    <div class="info">
-                        <h3>가을 단풍 축제</h3>
-                        <p>붉게 물든 단풍을 감상하세요.</p>
-                        <p>기간: 2025.10.25 - 2025.11.05</p>
-                        <p>위치: [임의의 장소 3]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="festivalModal4">
-                    <img src="bul.png" alt="겨울 빛 축제">
-                    <div class="info">
-                        <h3>겨울 빛 축제</h3>
-                        <p>화려한 불빛으로 가득한 밤!</p>
-                        <p>기간: 2025.12.20 - 2026.01.05</p>
-                        <p>위치: [임의의 장소 4]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="festivalModal5">
-                    <img src="bul.png" alt="[지역 특산물 축제]">
-                    <div class="info">
-                        <h3>[지역 특산물 축제]</h3>
-                        <p>싱싱한 특산물을 맛보세요!</p>
-                        <p>기간: 2025.05.10 - 2025.05.15</p>
-                        <p>위치: [임의의 장소 5]</p>
-                    </div>
-                </div>
-            </div>
+            <h2 class="category-title">당신을 위한 추천</h2>
+            <div class="slider" id="festivalSlider"></div>
             <div class="slider-controls">
-                <button onclick="prevSlide('festivalSlider')">&#10094;</button>
-                <button onclick="nextSlide('festivalSlider')">&#10095;</button>
+                <button id="festivalPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
+                <button id="festivalNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
             </div>
         </div>
     </div>
 
     <div class="category-section">
-        
         <div class="slider-container">
-            <h2 class="category-title">색다른 매력이 있는 관광 명소</h2>
-            <div class="slider" id="touristSlider">
-                <div class="card" data-modal="touristModal1">
-                    <img src="bul.png" alt="[멋진 자연 경관]">
-                    <div class="info">
-                        <h3>[멋진 자연 경관]</h3>
-                        <p>숨 막히는 자연의 아름다움.</p>
-                        <p>추천 방문 시기: 봄, 여름</p>
-                        <p>위치: [임의의 장소 A]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="touristModal2">
-                    <img src="bul.png" alt="[유명한 역사 유적지]">
-                    <div class="info">
-                        <h3>[유명한 역사 유적지]</h3>
-                        <p>역사의 숨결을 느껴보세요.</p>
-                        <p>추천 방문 시기: 가을</p>
-                        <p>위치: [임의의 장소 B]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="touristModal3">
-                    <img src="bul.png" alt="[활기 넘치는 도시 명소]">
-                    <div class="info">
-                        <h3>[활기 넘치는 도시 명소]</h3>
-                        <p>다양한 즐길 거리가 있는 곳.</p>
-                        <p>추천 방문 시기: 연중</p>
-                        <p>위치: [임의의 장소 C]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="touristModal4">
-                    <img src="bul.png" alt="[아름다운 해변]">
-                    <div class="info">
-                        <h3>[아름다운 해변]</h3>
-                        <p>푸른 바다와 하얀 백사장.</p>
-                        <p>추천 방문 시기: 여름</p>
-                        <p>위치: [임의의 장소 D]</p>
-                    </div>
-                </div>
-                <div class="card" data-modal="touristModal5">
-                    <img src="bul.png" alt="[조용한 휴식 공간]">
-                    <div class="info">
-                        <h3>[조용한 휴식 공간]</h3>
-                        <p>일상에서 벗어나 편안한 시간을.</p>
-                        <p>추천 방문 시기: 봄, 가을</p>
-                        <p>위치: [임의의 장소 E]</p>
-                    </div>
-                </div>
-            </div>
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
+            <div class="slider" id="touristSlider"></div>
             <div class="slider-controls">
-                <button onclick="prevSlide('touristSlider')">&#10094;</button>
-                <button onclick="nextSlide('touristSlider')">&#10095;</button>
+                <button id="touristPrevBtn" aria-label="이전 관광지 보기">&#10094;</button>
+                <button id="touristNextBtn" aria-label="다음 관광지 보기">&#10095;</button>
             </div>
         </div>
     </div>
 
-    <div id="signupModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <form class="auth-form">
-                <h2>회원가입</h2>
-                <input type="text" placeholder="이름">
-                <input type="text" placeholder="이메일">
-                <input type="password" placeholder="비밀번호">
-                <input type="password" placeholder="비밀번호 확인">
-                <button type="submit">가입하기</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <form class="auth-form">
-                <h2>로그인</h2>
-                <input type="text" placeholder="이메일">
-                <input type="password" placeholder="비밀번호">
-                <button type="submit">로그인</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="festivalModal1" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>봄꽃 축제 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="봄꽃 축제 크게 보기" style="width: 100%;">
-                <p>아름다운 봄꽃 축제에 오신 것을 환영합니다!</p>
-                <p>다양한 종류의 봄꽃을 감상하고, 맛있는 음식과 즐거운 공연을 즐기세요.</p>
-                <p><b>기간:</b> 2025년 4월 20일 - 4월 30일</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>문의:</b> [연락처 정보]</p>
-                </div>
-        </div>
-    </div>
-
-    <div id="festivalModal2" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[신나는 여름 축제] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[신나는 여름 축제] 크게 보기" style="width: 100%;">
-                <p>시원한 여름을 만끽할 수 있는 신나는 축제!</p>
-                <p>물놀이, 공연, 먹거리 등 다양한 즐길 거리가 준비되어 있습니다.</p>
-                <p><b>기간:</b> 2025년 7월 15일 - 7월 20일</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>문의:</b> [연락처 정보]</p>
-                </div>
-        </div>
-    </div>
-
-    <div id="festivalModal3" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>가을 단풍 축제 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="가을 단풍 축제 크게 보기" style="width: 100%;">
-                <p>붉게 물든 단풍의 아름다움을 느껴보세요.</p>
-                <p>단풍길 걷기, 사진 촬영 대회 등 다양한 프로그램이 준비되어 있습니다.</p>
-                <p><b>기간:</b> 2025년 10월 25일 - 11월 5일</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>문의:</b> [연락처 정보]</p>
+    <div id="wishlistModal" class="modal">
+        <div class="modal_body">
+            <h2 class="modal-title">나의 찜 목록</h2>
+            <div id="wishlistItemsContainer">
+                <p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>
             </div>
         </div>
     </div>
 
-    <div id="festivalModal4" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>겨울 빛 축제 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="겨울 빛 축제 크게 보기" style="width: 100%;">
-                <p>화려한 불빛들이 만들어내는 환상적인 겨울 축제!</p>
-                <p>아름다운 조명과 다양한 겨울 액티비티를 즐겨보세요.</p>
-                <p><b>기간:</b> 2025년 12월 20일 - 2026년 1월 5일</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>문의:</b> [연락처 정보]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="festivalModal5" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[지역 특산물 축제] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[지역 특산물 축제] 크게 보기" style="width: 100%;">
-                <p>지역의 신선하고 맛있는 특산물을 맛볼 수 있는 기회!</p>
-                <p>특산물 판매, 요리 시연, 체험 행사 등 다채로운 프로그램이 준비되어 있습니다.</p>
-                <p><b>기간:</b> 2025년 5월 10일 - 5월 15일</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>문의:</b> [연락처 정보]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="touristModal1" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[멋진 자연 경관] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[멋진 자연 경관] 크게 보기" style="width: 100%;">
-                <p>숨 막히는 자연의 아름다움을 만끽하세요.</p>
-                <p>울창한 숲, 맑은 계곡, 멋진 산봉우리 등 잊을 수 없는 풍경이 여러분을 기다립니다.</p>
-                <p><b>추천 방문 시기:</b> 봄, 여름</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>정보:</b> [추가 정보 링크]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="touristModal2" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[유명한 역사 유적지] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[유명한 역사 유적지] 크게 보기" style="width: 100%;">
-                <p>오랜 역사와 문화를 간직한 유적지를 탐방하며 과거로의 시간 여행을 떠나보세요.</p>
-                <p>웅장한 건축물과 흥미로운 이야기를 통해 역사의 발자취를 느껴볼 수 있습니다.</p>
-                <p><b>추천 방문 시기:</b> 가을</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>정보:</b> [추가 정보 링크]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="touristModal3" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[활기 넘치는 도시 명소] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[활기 넘치는 도시 명소] 크게 보기" style="width: 100%;">
-                <p>다양한 볼거리, 먹거리, 즐길 거리가 가득한 도시 명소에서 활기찬 에너지를 느껴보세요.</p>
-                <p>쇼핑, 맛집 탐방, 문화 체험 등 다채로운 활동을 즐길 수 있습니다.</p>
-                <p><b>추천 방문 시기:</b> 연중</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>정보:</b> [추가 정보 링크]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="touristModal4" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[아름다운 해변] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[아름다운 해변] 크게 보기" style="width: 100%;">
-                <p>푸른 바다와 넓은 백사장에서 여유로운 휴식을 즐겨보세요.</p>
-                <p>해수욕, 해양 스포츠, 해변 산책 등 다양한 활동을 즐길 수 있습니다.</p>
-                <p><b>추천 방문 시기:</b> 여름</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>정보:</b> [추가 정보 링크]</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="touristModal5" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>[조용한 휴식 공간] 상세 정보</h2>
-            <div class="modal-body">
-                <img src="bul.png" alt="[조용한 휴식 공간] 크게 보기" style="width: 100%;">
-                <p>일상의 번잡함에서 벗어나 조용하고 평화로운 시간을 보내세요.</p>
-                <p>아늑한 분위기 속에서 책을 읽거나 명상을 하며 심신의 안정을 찾을 수 있습니다.</p>
-                <p><b>추천 방문 시기:</b> 봄, 가을</p>
-                <p><b>위치:</b> [상세 위치 정보]</p>
-                <p><b>정보:</b> [추가 정보 링크]</p>
-            </div>
-        </div>
-    </div>
-
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
-        function setupSlider(sliderId) {
-            const slider = document.getElementById(sliderId);
-            const cards = slider.querySelectorAll('.card');
-            let currentIndex = 0;
-            const cardWidth = cards[0].offsetWidth + 20;
-            const visibleCount = 3;
+        let ps = null, targetLat = null, targetLon = null, targetPlaceName = "알 수 없음";
+        let isInitialLoadGpsAttempt = true; 
+        let isGpsButtonClicked = false; // GPS 버튼 클릭에 의한 요청인지 식별하는 플래그
 
-            function updateSlider() {
+        const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
+        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null;
+        let modalMap = null, modalMapMarker = null, modalClickedLatLng = null;
+        //let placeInput, userSearchInput, mainSearchButton;
+        let aiChatbotContainerEl, aiChatbotInputWrapperEl, aiChatbotInputEl, aiChatbotSendButtonEl, aiChatbotDisplayAreaEl;
+        let geocoder = null;
+        let itemDetailMap = null;
+        let itemDetailMapMarker = null;
+        let signupModal, loginModal, itemDetailModal, placeSearchModal, wishlistModal;
+        let signupForm, loginForm, signupButton, loginButton, logoutButton;
+        let loginUserDisplayEl, profileAreaEl, profileDropdownEl, wishlistFromDropdownLink;
+        let signupIdEl, signupPasswordEl, signupPasswordConfirmEl, signupEmailEl;
+        let usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl;
+        let loginIdInputEl, loginPasswordInputEl, loginIdErrorEl, loginPasswordErrorEl;
+        let wishlist = [], modalHeartIconEl, wishlistItemsContainerEl, currentDetailItemId = null;
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+        let openedDetailFromWishlist = false;
+        let currentLoggedInUsername = null;
+        let csrfToken = null;
+        let currentLocationTextEl;
+
+        // --- 지연 로딩을 위한 상세 정보 가져오기 함수 ---
+        async function fetchPlaceDetail(contentId) {
+            if (!contentId) {
+                console.error("fetchPlaceDetail: contentId가 없습니다.");
+                return null;
+            }
+            try {
+                // 로딩 상태 표시 (옵션) - 모달 내부에 로딩 스피너나 메시지를 표시할 수 있습니다.
+                // 예: document.getElementById('itemDetailOverview').textContent = "상세 정보를 불러오는 중...";
+                
+                const response = await fetch(`${API_BASE_URL}/api/place-detail/${contentId}/`); // CSRF 토큰은 GET 요청이므로 필수는 아님 (백엔드 설정에 따라 다름)
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: `상세 정보 로딩 실패 (HTTP ${response.status})` }));
+                    throw new Error(errorData.message || `상세 정보 로딩 실패 (HTTP ${response.status})`);
+                }
+                const data = await response.json();
+                if (data.status === 'success') {
+                    return data; // { status: 'success', contentid, overview, homepage }
+                } else {
+                    throw new Error(data.message || '상세 정보를 가져오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('fetchPlaceDetail 에러:', error);
+                // 에러 처리 UI (옵션)
+                // 예: document.getElementById('itemDetailOverview').textContent = "상세 정보를 불러오는데 실패했습니다.";
+                return null;
+            }
+        }
+
+        function updateDetailModalUIElementsVisibility(listData, detailData) {
+            const overviewEl = document.getElementById('itemDetailOverview');
+            const homepageDiv = document.getElementById('itemDetailHomepage');
+            const periodEl = document.getElementById('itemDetailPeriod');
+            const locationEl = document.getElementById('itemDetailLocation');
+            const telEl = document.getElementById('itemDetailTel');
+
+            // 기간 (listData에 있는 period를 사용하거나, detailData가 있으면 detailData의 period 사용)
+            let finalPeriod = listData.period;
+            if (detailData && detailData.period) finalPeriod = detailData.period; // 백엔드 detailCommon1에 period가 있다면
+            periodEl.innerHTML = finalPeriod ? `<strong>기간:</strong> ${finalPeriod}` : "";
+            periodEl.style.display = periodEl.innerHTML ? 'block' : 'none';
+
+            // 위치 (listData에 있는 addr을 사용하거나, detailData가 있으면 detailData의 addr 사용)
+            let finalAddr = listData.addr || listData.location;
+            if (detailData && detailData.addr) finalAddr = detailData.addr; // 백엔드 detailCommon1에 addr이 있다면
+            locationEl.innerHTML = finalAddr ? `<strong>위치:</strong> ${finalAddr}` : "";
+            locationEl.style.display = locationEl.innerHTML ? 'block' : 'none';
+
+            // 전화번호 (telEl)
+            if (telEl) { // telEl이 HTML에 존재하는 경우에만 처리
+                // openItemDetailModal에서 이미 내용을 설정하므로, 여기서는 내용 유무에 따라 display만 결정
+                telEl.style.display = telEl.innerHTML.trim() ? 'block' : 'none';
+            }
+
+            // 홈페이지 및 버튼 컨테이너
+            homepageDiv.style.display = homepageDiv.innerHTML.trim() !== "" ? 'flex' : 'none';
+
+            // 개요 (항상 표시되도록 설정, 내용이 없으면 "설명 없음" 등으로 표시됨)
+            overviewEl.style.display = 'block';
+        }
+
+
+        function getWishlistStorageKey() {
+            if (currentLoggedInUsername) {
+                return `touristWishlist_${currentLoggedInUsername}`;
+            }
+            return null;
+        }
+
+        function loadWishlist() {
+            const key = getWishlistStorageKey();
+            wishlist = [];
+            if (key) {
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    try {
+                        const parsedList = JSON.parse(stored);
+                        if (Array.isArray(parsedList)) {
+                            wishlist = parsedList;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing wishlist from localStorage:", e);
+                    }
+                }
+            }
+        }
+
+        function saveWishlist() {
+            const key = getWishlistStorageKey();
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(wishlist));
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function setupSlider(sliderId, prevBtnId, nextBtnId) {
+            const slider = document.getElementById(sliderId), prevBtn = document.getElementById(prevBtnId), nextBtn = document.getElementById(nextBtnId);
+            if (!slider || !prevBtn || !nextBtn) return null;
+            let cards = slider.querySelectorAll('.card'), currentIndex = 0;
+            const cardMargin = cards.length > 0 ? (parseFloat(window.getComputedStyle(cards[0]).marginLeft) + parseFloat(window.getComputedStyle(cards[0]).marginRight)) : 20;
+            let cardWidth = cards.length > 0 ?
+            cards[0].offsetWidth + cardMargin : 0;
+
+            function updateUISlider() {
+                if (cards.length === 0) {
+                    slider.style.transform = 'translateX(0px)';
+                    prevBtn.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    return;
+                }
+                cardWidth = cards[0].offsetWidth + cardMargin;
+                const containerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
+                const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
                 slider.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+                prevBtn.classList.toggle('hidden', cards.length <= visibleCount && currentIndex === 0);
+                nextBtn.classList.toggle('hidden', cards.length <= visibleCount && currentIndex >= cards.length - visibleCount);
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex >= cards.length - visibleCount;
             }
-
-            function nextSlide() {
-                if (currentIndex < cards.length - visibleCount) {
-                    currentIndex++;
-                    updateSlider();
-                }
-            }
-
-            function prevSlide() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
-                }
-            }
-
-            updateSlider();
-
-            return { nextSlide, prevSlide };
+            prevBtn.onclick = () => { if (currentIndex > 0) { currentIndex--; updateUISlider(); } };
+            nextBtn.onclick = () => {
+                const containerWidth = slider.parentElement.offsetWidth - (parseFloat(window.getComputedStyle(slider.parentElement).paddingLeft) + parseFloat(window.getComputedStyle(slider.parentElement).paddingRight));
+                const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
+                if (currentIndex < cards.length - visibleCount) { currentIndex++; updateUISlider(); }
+            };
+            window.addEventListener('resize', debounce(updateUISlider, 250));
+            updateUISlider();
+            return { reinit: () => { cards = slider.querySelectorAll('.card'); currentIndex = 0; updateUISlider(); } };
         }
 
-        const festivalSliderControls = setupSlider('festivalSlider');
-        const touristSliderControls = setupSlider('touristSlider');
 
-        function nextSlide(sliderId) {
-            if (sliderId === 'festivalSlider') {
-                festivalSliderControls.nextSlide();
-            } else if (sliderId === 'touristSlider') {
-                touristSliderControls.nextSlide();
-            }
+        function debounce(func, wait) {
+            let timeout;
+            return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); };
         }
 
-        function prevSlide(sliderId) {
-            if (sliderId === 'festivalSlider') {
-                festivalSliderControls.prevSlide();
-            } else if (sliderId === 'touristSlider') {
-                touristSliderControls.prevSlide();
+        function openModal(modalEl) { if (modalEl) { modalEl.classList.add("open"); document.body.style.overflow = 'hidden'; } }
+
+        function closeModal(modalEl) {
+            if (modalEl) {
+                const wasItemDetailModal = modalEl === itemDetailModal;
+                const wasOpen = modalEl.classList.contains('open');
+                modalEl.classList.remove("open");
+                const form = modalEl.querySelector('form');
+                if (form) { form.reset();
+                    if (form.id === 'signupForm' || form.id === 'loginForm') { clearAuthErrors(); } }
+                if (document.querySelectorAll('.modal.open').length === 0) { document.body.style.overflow = ''; }
+                if (wasItemDetailModal && wasOpen && openedDetailFromWishlist) { openWishlistModal(); openedDetailFromWishlist = false; }
             }
         }
 
-        // 모달창 관련 JavaScript
-        const cardModals = document.querySelectorAll('.card');
-        const modals = document.querySelectorAll('.modal');
-        const closeButtons = document.querySelectorAll('.close-button');
-        const authButtons = document.querySelectorAll('.auth-buttons button'); // 회원가입/로그인 버튼 추가
+        async function openItemDetailModal(itemDataFromList) {
+            if (!itemDataFromList || !itemDetailModal) return; // [cite: 280]
+            // --- 로딩 시작 시 기본 정보 우선 표시 ---
+            currentDetailItemId = itemDataFromList.title; // [cite: 281]
+            currentDetailItemContentId = itemDataFromList.contentid; // [cite: 282]
 
-        // 축제/관광지 카드 클릭 이벤트 (기존과 동일)
-        cardModals.forEach(card => {
-            card.addEventListener('click', () => {
-                const modalId = card.dataset.modal;
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'block';
+            document.getElementById('itemDetailImage').src = itemDataFromList.firstimage || // [cite: 283]
+                itemDataFromList.image || "https://via.placeholder.com/400x200?text=No+Image"; // [cite: 283]
+            document.getElementById('itemDetailTitle').textContent = itemDataFromList.title || "상세 정보"; // [cite: 283]
+            
+            const overviewEl = document.getElementById('itemDetailOverview'); // [cite: 284]
+            const homepageDiv = document.getElementById('itemDetailHomepage'); // [cite: 284]
+            const periodEl = document.getElementById('itemDetailPeriod'); // [cite: 285]
+            const locationEl = document.getElementById('itemDetailLocation'); // [cite: 285]
+            const telEl = document.getElementById('itemDetailTel'); // [cite: 285]
+            const mapContainer = document.getElementById('itemDetailMapContainer'); // [cite: 285]
+            
+            // =======================================================================
+            // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 추가된 부분 시작 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+            // =======================================================================
+            const introAttributesContainerEl = document.getElementById('itemDetailIntroAttributesContainer');
+            if (introAttributesContainerEl) {
+                introAttributesContainerEl.innerHTML = ''; // 이전 내용 초기화
+                introAttributesContainerEl.style.display = 'none'; // 기본적으로 숨김
+            }
+            // =======================================================================
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 추가된 부분 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+            // =======================================================================
+
+            overviewEl.textContent = "상세 정보를 불러오는 중..."; // [cite: 285]
+            homepageDiv.innerHTML = ""; // [cite: 286]
+            if (telEl) telEl.innerHTML = ""; // [cite: 287]
+            
+            // periodEl 초기 설정: itemDataFromList.period가 있다면 사용. 없다면 빈 문자열.
+            // intro_details에 더 상세한 정보가 있으므로, 이 부분의 중요도는 낮아질 수 있습니다.
+            periodEl.innerHTML = itemDataFromList.period ? `<strong>기간:</strong> ${itemDataFromList.period}` : ""; // [cite: 288]
+            
+            locationEl.innerHTML = itemDataFromList.addr ? // [cite: 288]
+                `<strong>위치:</strong> ${itemDataFromList.addr}` : (itemDataFromList.location ? `<strong>위치:</strong> ${itemDataFromList.location}` : ""); // [cite: 288]
+            
+            mapContainer.style.display = 'none'; // [cite: 289]
+            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 289]
+
+            openModal(itemDetailModal);
+
+            if (telEl) { // [cite: 290]
+                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") { // [cite: 290]
+                    const telLink = document.createElement('a'); // [cite: 290]
+                    telLink.href = `tel:${itemDataFromList.tel.replace(/-/g, "")}`; // [cite: 290]
+                    telLink.textContent = itemDataFromList.tel; // [cite: 291]
+                    telEl.innerHTML = `<strong>연락처:</strong> `; // [cite: 291]
+                    telEl.appendChild(telLink); // [cite: 291]
+                } else {
+                    telEl.innerHTML = `<strong>연락처:</strong> 정보 없음`; // [cite: 292]
                 }
-            });
-        });
+            }
 
-        // 회원가입/로그인 버튼 클릭 이벤트
-        authButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const modalId = button.dataset.modal;
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'block';
+            if (!currentDetailItemContentId) { // [cite: 294]
+                overviewEl.textContent = "상세 정보를 불러올 수 없습니다. (ID 없음)"; // [cite: 294]
+                console.error("openItemDetailModal: itemDataFromList에 contentid가 없습니다."); // [cite: 294]
+                // introAttributesContainerEl도 숨김 처리 (이미 위에서 초기화 시 숨겨짐)
+                if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
+                updateDetailModalUIElementsVisibility(itemDataFromList, null); // [cite: 295]
+                return; // [cite: 295]
+            }
+
+            const detailedData = await fetchPlaceDetail(currentDetailItemContentId); // [cite: 296]
+            console.log("서버로부터 받은 상세 정보 (detailedData):", detailedData); // [cite: 296]
+
+            if (detailedData) {
+                overviewEl.textContent = detailedData.overview || "자세한 설명이 없습니다."; // [cite: 297]
+
+                if (detailedData.addr && detailedData.addr.trim() !== "") { // [cite: 298]
+                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`; // [cite: 298]
                 }
-            });
-        });
 
-        // 닫기 버튼 클릭 이벤트 (기존과 동일)
-        closeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const modal = button.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
+                // =======================================================================
+                // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 지울 부분 (또는 수정될 부분) ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+                // =======================================================================
+                // 아래 `detailedData.period`를 직접 사용하는 부분은 intro_details로 대체되므로 주석 처리하거나 삭제합니다.
+                // intro_details에서 '이용시간', '행사기간' 등 더 구체적인 정보를 표시할 것이기 때문입니다.
+                /*
+                if (detailedData.period && detailedData.period.trim() !== "") { // 백엔드가 period를 준다면 [cite: 299]
+                    periodEl.innerHTML = `<strong>기간:</strong> ${detailedData.period}`; [cite: 299]
                 }
-            });
-        });
+                */
+                // =======================================================================
+                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 지울 부분 (또는 수정될 부분) 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+                // =======================================================================
 
-        // 창 외부 클릭 이벤트 (기존과 동일)
-        window.addEventListener('click', (event) => {
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+                if (telEl) { // [cite: 300]
+                    if (detailedData.tel && detailedData.tel.trim() !== "") { // [cite: 300]
+                        const telLink = document.createElement('a'); // [cite: 300]
+                        telLink.href = `tel:${detailedData.tel.replace(/-/g, "")}`; // [cite: 300]
+                        telLink.textContent = detailedData.tel; // [cite: 301]
+                        telEl.innerHTML = `<strong>연락처:</strong> `; // [cite: 301]
+                        telEl.appendChild(telLink); // [cite: 301]
+                    } else {
+                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`; // [cite: 302]
+                    }
+                    // telEl.style.display = 'block'; // updateDetailModalUIElementsVisibility에서 최종 처리 [cite: 303]
                 }
-            });
-        });
+                
+                homepageDiv.innerHTML = ""; // [cite: 304]
+                if (detailedData.homepage) { // [cite: 305]
+                    const homepageUrl = detailedData.homepage; // [cite: 305]
+                    if (homepageUrl) { // [cite: 306]
+                        const link = Object.assign(document.createElement('a'), { // [cite: 306]
+                            href: homepageUrl, // [cite: 306]
+                            textContent: "홈페이지 방문", // [cite: 306]
+                            target: "_blank", // [cite: 306]
+                            rel: "noopener noreferrer" // [cite: 306]
+                        }); // [cite: 307]
+                        homepageDiv.appendChild(link); // [cite: 307]
+                    } else {
+                         const p = document.createElement('p'); // [cite: 308]
+                         p.innerHTML = `<strong>홈페이지/문의:</strong> 정보 없음`; // [cite: 308]
+                         homepageDiv.appendChild(p); // [cite: 309]
+                    }
+                }
 
-        // --- 모달 제어 함수 ---
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.add('open');
-            else console.error(`모달 ID '${modalId}'를 찾을 수 없습니다.`);
-        }
+                // =======================================================================
+                // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 추가된 부분 시작 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+                // =======================================================================
+                // intro_details (추가 정보) 처리
+                if (introAttributesContainerEl && detailedData.intro_details && Object.keys(detailedData.intro_details).length > 0) {
+                    let introHtml = '<h4><i class="fas fa-info-circle"></i> 추가 정보</h4><ul style="list-style-type: none; padding-left: 0;">';
+                    for (const [label, value] of Object.entries(detailedData.intro_details)) {
+                        if (value && String(value).trim()) {
+                            introHtml += `<li style="margin-bottom: 6px;"><strong>${label}:</strong> ${value}</li>`;
+                        }
+                    }
+                    introHtml += '</ul>';
+                    introAttributesContainerEl.innerHTML = introHtml;
+                    introAttributesContainerEl.style.display = 'block';
+                } else if (introAttributesContainerEl) {
+                    introAttributesContainerEl.style.display = 'none'; // 내용 없으면 숨김
+                }
+                // =======================================================================
+                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 추가된 부분 끝 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+                // =======================================================================
 
-        function closeModal(modalElement) {
-            if (modalElement) {
-                const inputsToClear = modalElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
-                inputsToClear.forEach(input => { input.value = ''; });
-                modalElement.classList.remove('open');
+                const locationAddressForMap = detailedData.addr || // [cite: 310]
+                    itemDataFromList.addr || ""; // [cite: 310]
+                 if (locationAddressForMap && geocoder) { // [cite: 311]
+                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 311]
+                    mapContainer.style.display = 'none'; // [cite: 311]
+                    geocoder.addressSearch(locationAddressForMap, function(result, status) { // [cite: 311]
+                        if (status === kakao.maps.services.Status.OK && result.length > 0) { // [cite: 312]
+                            const coords = result[0]; // [cite: 312]
+                            displayItemMapOnDetailModal(mapContainer, parseFloat(coords.y), parseFloat(coords.x)); // [cite: 312]
+                        } else {
+                            mapContainer.style.display = 'none'; // [cite: 312]
+                            if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 313]
+                            console.warn(`상세 모달 지도 주소변환 실패: ${locationAddressForMap}`); // [cite: 313]
+                        }
+                    }); // [cite: 314]
+                } else {
+                    mapContainer.style.display = 'none'; // [cite: 315]
+                    if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 315]
+                }
+
+            } else { // detailedData 로드 실패 시
+                overviewEl.textContent = "상세 정보를 불러오는데 실패했습니다."; // [cite: 316]
+                mapContainer.style.display = 'none'; // [cite: 317]
+                if (itemDetailMapMarker) itemDetailMapMarker.setMap(null); // [cite: 317]
+                // introAttributesContainerEl도 숨김 처리
+                if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
+            }
+
+            const editButton = Object.assign(document.createElement('button'), { // [cite: 318]
+                type: 'button', // [cite: 318]
+                id: 'editInfoRequestButton', // [cite: 318]
+                className: 'detail-modal-button', // [cite: 318]
+                textContent: '관광정보 수정요청' // [cite: 318]
+            }); // [cite: 319]
+            editButton.onclick = () => { // [cite: 319]
+                window.location.href = `a.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`; // [cite: 320]
+            }; // [cite: 320]
+            homepageDiv.appendChild(editButton); // [cite: 320]
+
+            updateDetailModalUIElementsVisibility(itemDataFromList, detailedData); // [cite: 321] // 이 함수는 periodEl, locationEl 등의 최종 표시 여부를 결정합니다.
+            
+            const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden'); // [cite: 322]
+            if (modalHeartIconEl) { // [cite: 322]
+                if (isLoggedIn && currentDetailItemId) { // [cite: 323]
+                    modalHeartIconEl.style.display = 'inline-block'; // [cite: 323]
+                    updateModalHeartIcon(currentDetailItemId); // [cite: 323]
+                } else {
+                    modalHeartIconEl.style.display = 'none'; // [cite: 324]
+                }
             }
         }
 
-        // --- 페이지 로드 완료 후 실행 ---
-        document.addEventListener('DOMContentLoaded', (event) => {
-            // DOM 요소 참조 할당
-            const authButtons = document.querySelectorAll('.auth-button[data-modal-target]');
-            const modals = document.querySelectorAll('.modal-overlay');
-            const closeButtons = document.querySelectorAll('.modal-close');
-            const signupForm = document.getElementById('signupForm');
-            const loginForm = document.getElementById('loginForm');
+        function addToWishlist(itemId) { if (!itemId || wishlist.includes(itemId)) return; wishlist.push(itemId); saveWishlist(); updateAllHeartIcons(itemId, true); }
+        function removeFromWishlist(itemId) { if (!itemId) return; const index = wishlist.indexOf(itemId); if (index > -1) { wishlist.splice(index, 1); saveWishlist(); } updateAllHeartIcons(itemId, false); }
+        function isWished(itemId) { return itemId ? wishlist.includes(itemId) : false; }
+        function updateModalHeartIcon(itemId) { if (modalHeartIconEl) { modalHeartIconEl.classList.toggle('active', isWished(itemId)); modalHeartIconEl.title = isWished(itemId) ? '찜 해제' : '찜하기'; } }
+        function updateAllHeartIcons(itemId, isActive) {
+            document.querySelectorAll(`.card[data-item-id="${CSS.escape(itemId)}"] .card-heart-icon`).forEach(heart => { heart.classList.toggle('active', isActive); heart.title = isActive ? '찜 해제' : '찜하기'; });
+            if (itemDetailModal.classList.contains('open') && currentDetailItemId === itemId) { if (profileAreaEl && !profileAreaEl.classList.contains('hidden')) { updateModalHeartIcon(itemId); } }
+        }
+        function toggleWishlistItem() { 
+            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { 
+                alert("로그인이 필요한 기능입니다."); return; 
+            } 
+            if (!currentDetailItemId) { // currentDetailItemId (title) 기준으로 찜하기
+                console.warn("찜하기/해제할 아이템 ID(title)가 없습니다."); return;
+            }
+            isWished(currentDetailItemId) ? removeFromWishlist(currentDetailItemId) : addToWishlist(currentDetailItemId);
+        }
 
-            // 모달 관련 리스너
-            authButtons.forEach(button => { button.addEventListener('click', (e) => { e.preventDefault(); openModal(button.getAttribute('data-modal-target')); }); });
-            closeButtons.forEach(button => { button.addEventListener('click', () => { closeModal(button.closest('.modal-overlay')); }); });
-            modals.forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); });
+        function openWishlistModal() {
+            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { alert("로그인이 필요한 기능입니다."); return; }
+            if (!wishlistItemsContainerEl || !wishlistModal || !allPlaces) return;
+            wishlistItemsContainerEl.innerHTML = '';
+            if (wishlist.length === 0) {
+                wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
+            } else {
+                // allPlaces에서 찜한 아이템 찾기 (item.title 기준)
+                const wishedPlaces = allPlaces.filter(item => item.title && wishlist.includes(item.title));
+                
+                if (wishedPlaces.length === 0 && wishlist.length > 0) {
+                    wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지 정보를 현재 불러올 수 없습니다.\n다시 시도해주세요.</p>';
+                } else if (wishedPlaces.length === 0) {
+                     wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
+                }
 
-            // 폼 제출 리스너
-            if (signupForm) {
-                signupForm.addEventListener('submit', (e) => { /* ... (회원가입 처리 로직) ... */
-                    e.preventDefault();
-                    const signupId = document.getElementById('signupId').value;
-                    const signupPassword = document.getElementById('signupPassword').value;
-                    const signupPasswordConfirm = document.getElementById('signupPasswordConfirm').value;
-                    const signupEmail = document.getElementById('signupEmail').value;
-                    if (signupPassword !== signupPasswordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
-                    console.log('회원가입 시도:', { id: signupId, email: signupEmail });
-                    alert('회원가입 로직 실행 (DB 연결 없음)');
-                    closeModal(signupForm.closest('.modal-overlay'));
+                wishedPlaces.forEach(item => { // 이 item 객체에도 contentid가 있어야 상세보기가 제대로 동작합니다.
+                    const itemEl = Object.assign(document.createElement('div'), { className: 'wishlist-item' });
+                    itemEl.setAttribute('data-item-id', item.title); // DOM ID는 title
+                    itemEl.innerHTML = `<img src="${item.firstimage || item.image || 'https://via.placeholder.com/100x75?text=No+Image'}" alt="${item.title || ''}"><div class="wishlist-item-info"><h4>${item.title||''}</h4><p>${item.addr||item.location||''}</p></div>`;
+                    itemEl.onclick = () => { 
+                        openedDetailFromWishlist = true; 
+                        closeModal(wishlistModal); 
+                        openItemDetailModal(item); // item 객체를 그대로 전달 (contentid 포함 가정)
+                    };
+                    wishlistItemsContainerEl.appendChild(itemEl);
                 });
             }
-            if (loginForm) {
-                loginForm.addEventListener('submit', (e) => { /* ... (로그인 처리 로직) ... */
-                    e.preventDefault();
-                    const loginId = document.getElementById('loginId').value;
-                    console.log('로그인 시도:', { id: loginId });
-                    alert('로그인 로직 실행 (DB 연결 없음)');
-                    closeModal(loginForm.closest('.modal-overlay'));
+            openModal(wishlistModal);
+        }
+
+        function initializeKakaoMaps() {
+            try {
+                ps = new kakao.maps.services.Places();
+                geocoder = new kakao.maps.services.Geocoder();
+                console.log("Kakao Maps services (Places, Geocoder) initialized.");
+                currentLocationTextEl.textContent = "위치 정보 불러오는 중...";
+            } catch (e) {
+                console.error("Kakao Maps Services (Places/Geocoder) error:", e);
+                alert("지도 서비스(장소검색/주소변환)를 초기화할 수 없습니다.");
+                currentLocationTextEl.textContent = "위치 서비스 초기화 실패";
+            }
+        }
+
+        function updateLocationDisplay(lat, lng, namePrefix = "") {
+            console.log(`updateLocationDisplay 호출됨: lat=${lat}, lng=${lng}, namePrefix='${namePrefix}'`);
+            if (!geocoder) {
+                currentLocationTextEl.textContent = namePrefix ? `${namePrefix}` : "주소 변환 서비스 사용 불가";
+                console.warn("Geocoder not available for updateLocationDisplay");
+                if (namePrefix === DEFAULT_PLACE_NAME) targetPlaceName = DEFAULT_PLACE_NAME;
+                else if (namePrefix === "현재 내 위치") targetPlaceName = "현재 내 위치 (주소 서비스 X)";
+                else targetPlaceName = namePrefix;
+                return;
+            }
+            currentLocationTextEl.textContent = `${namePrefix ? namePrefix + " - " : ""}주소 변환 중...`;
+            geocoder.coord2Address(lng, lat, function(result, status) {
+                console.log(`coord2Address 콜백: status=${status}, namePrefix='${namePrefix}'`);
+                if (status === kakao.maps.services.Status.OK && result[0]) {
+                    const roadAddr = result[0].road_address ? result[0].road_address.address_name : '';
+                    const jibunAddr = result[0].address ? result[0].address.address_name : '';
+                    const displayAddr = roadAddr || jibunAddr || "주소 정보 없음";
+                    currentLocationTextEl.textContent = `${namePrefix ? namePrefix + " (" + displayAddr + ")" : displayAddr}`;
+                    targetPlaceName = displayAddr;
+                    console.log(`주소 변환 성공: ${displayAddr}, targetPlaceName 설정: ${targetPlaceName}`);
+                } else {
+                    currentLocationTextEl.textContent = `${namePrefix ? namePrefix + " (주소 변환 실패)" : "주소 변환 실패"}`;
+                    if (namePrefix === DEFAULT_PLACE_NAME) { targetPlaceName = DEFAULT_PLACE_NAME; }
+                    else if (namePrefix === "현재 내 위치") { targetPlaceName = "현재 내 위치 (주소 변환 실패)"; }
+                    else { targetPlaceName = namePrefix; }
+                    console.warn(`주소 변환 실패 for ${namePrefix} (Lat: ${lat}, Lng: ${lng}). Status: ${status}, targetPlaceName 설정: ${targetPlaceName}`);
+                }
+            });
+        }
+
+        function requestCurrentLocation(isUserClick = false) {
+            console.log(`requestCurrentLocation 호출됨. isUserClick: ${isUserClick}, isInitialLoadGpsAttempt: ${isInitialLoadGpsAttempt}`);
+            isGpsButtonClicked = isUserClick; // GPS 버튼 클릭 여부 플래그 설정
+            
+            currentLocationTextEl.textContent = "위치 정보 불러오는 중...";
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, { timeout: 10000 });
+            } else {
+                console.log("GPS 미지원 환경");
+                currentLocationTextEl.textContent = "GPS 미지원 환경";
+                if (isInitialLoadGpsAttempt) { 
+                    setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                    updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME);
+                }
+                isInitialLoadGpsAttempt = false; 
+                if (isGpsButtonClicked) { // 사용자가 버튼을 눌렀는데 GPS 미지원이면 alert
+                     alert("현재 브라우저 또는 기기에서 GPS를 지원하지 않습니다.");
+                }
+                isGpsButtonClicked = false; // 플래그 리셋
+            }
+        }
+
+        function onGeoSuccess(pos) {
+            console.log("onGeoSuccess 호출됨", pos.coords);
+            currentLocationTextEl.textContent = "현재 위치 주소 확인 중...";
+
+            setTargetLocation(pos.coords.latitude, pos.coords.longitude, "현재 내 위치", true);
+            updateLocationDisplay(pos.coords.latitude, pos.coords.longitude, "현재 내 위치");
+            isInitialLoadGpsAttempt = false; 
+            isGpsButtonClicked = false; 
+        }
+
+        function onGeoError(err) {
+            console.warn("onGeoError 호출됨", err);
+            
+            if (err.code === 1) { // PERMISSION_DENIED
+                currentLocationTextEl.textContent = "GPS 권한 거부됨";
+                if (isGpsButtonClicked) { 
+                    retryGpsPermission();
+                } else if (isInitialLoadGpsAttempt) { 
+                    console.log("첫 GPS 시도 시 권한 거부, 기본 위치로 설정합니다.");
+                    setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                    updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 권한 거부됨 (기본 위치: ${DEFAULT_PLACE_NAME})`);
+                }
+            } else { 
+                currentLocationTextEl.textContent = "GPS 오류 발생";
+                 if (isGpsButtonClicked) { 
+                    alert(`위치 정보를 가져오는 데 실패했습니다. (오류 코드: ${err.code})\n네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.`);
+                } else if (isInitialLoadGpsAttempt) { 
+                    console.log("첫 GPS 시도 시 오류, 기본 위치로 설정합니다.");
+                    setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
+                    updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 오류 (기본 위치: ${DEFAULT_PLACE_NAME})`);
+                }
+            }
+            isInitialLoadGpsAttempt = false; 
+            isGpsButtonClicked = false; 
+        }
+
+        function retryGpsPermission() {
+            alert("위치 정보 접근 권한이 필요합니다.\n\n브라우저 설정에서 숨트여의 위치 권한을 '허용'으로 변경해주세요.");
+        }
+
+        function setTargetLocation(lat, lon, name, sendToBackend) {
+            console.log(`setTargetLocation 호출: lat=${lat}, lon=${lon}, name='${name}', sendToBackend=${sendToBackend}`);
+            targetLat = parseFloat(lat);
+            targetLon = parseFloat(lon);
+            targetPlaceName = name; 
+            
+            if (sendToBackend && targetLat != null && targetLon != null){
+                fetchNearbyPlacesData(targetLat, targetLon);
+            }
+        }
+
+        function loadModalMap() {
+            if (!placeSearchModal || !placeSearchModal.classList.contains('open')){ return; }
+            const mapContainer = document.getElementById('modal_map_container');
+            if (!mapContainer) { return; }
+            const center = modalClickedLatLng ||
+            (targetLat && targetLon ? new kakao.maps.LatLng(targetLat, targetLon) : new kakao.maps.LatLng(DEFAULT_LATITUDE, DEFAULT_LONGITUDE));
+            if (modalMap) {
+                modalMap.relayout(); modalMap.setCenter(center);
+                if (modalMapMarker){ modalMapMarker.setPosition(center); }
+                else { modalMapMarker = new kakao.maps.Marker({ position: center, map: modalMap }); }
+            } else {
+                modalMap = new kakao.maps.Map(mapContainer, { center: center, level: 7 });
+                modalMapMarker = new kakao.maps.Marker({ position: center, map: modalMap });
+                kakao.maps.event.addListener(modalMap, 'rightclick', (mouseEvent) => {
+                    modalClickedLatLng = mouseEvent.latLng; modalMapMarker.setPosition(modalClickedLatLng);
+                    placeInput.value = `위도: ${modalClickedLatLng.getLat().toFixed(6)}, 경도: ${modalClickedLatLng.getLng().toFixed(6)}`;
                 });
             }
-        });
+            if (!modalClickedLatLng) modalClickedLatLng = center;
+        }
+
+        function openPlaceSearchModal() {
+            if (placeSearchModal) {
+                placeInput.value = '';
+                modalClickedLatLng = null;
+                isInitialLoadGpsAttempt = false; // 장소 검색 모달 열면 더 이상 초기 GPS 시도 아님
+                currentLocationTextEl.textContent = targetPlaceName || DEFAULT_PLACE_NAME; 
+
+                openModal(placeSearchModal); 
+                setTimeout(loadModalMap, 50);
+            }
+        }
+
+        function handlePlaceInputEnter(event) {
+            if (event.key === 'Enter') { event.preventDefault(); setPlaceFromModal(); }
+        }
+
+        function setPlaceFromModal() {
+            const keyword = placeInput.value.trim();
+            if (keyword && !keyword.startsWith("위도:")) {
+                if (!ps) { alert("장소 검색 서비스가 준비되지 않았습니다."); return; }
+                ps.keywordSearch(keyword, (data, status, pagination) => { 
+                    if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                        const newLat = parseFloat(data[0].y);
+                        const newLng = parseFloat(data[0].x);
+                        const placeNameFromApi = data[0].place_name;
+                        
+                        isInitialLoadGpsAttempt = false; 
+                        setTargetLocation(newLat, newLng, placeNameFromApi, true);
+                        updateLocationDisplay(newLat, newLng, placeNameFromApi);
+                    } else { alert("검색 결과가 없습니다."); }
+                });
+            } else if (modalClickedLatLng) {
+                 const newLat = modalClickedLatLng.getLat();
+                 const newLng = modalClickedLatLng.getLng();
+                 const placeNameFromMap = `지도 선택 지점 (${newLat.toFixed(4)}, ${newLng.toFixed(4)})`;
+
+                 isInitialLoadGpsAttempt = false; 
+                 setTargetLocation(newLat, newLng, placeNameFromMap, true);
+                 updateLocationDisplay(newLat, newLng, placeNameFromMap);
+            } else {
+                alert('검색할 장소를 입력하거나, 지도에서 우클릭해주세요.');
+                return;
+            }
+            closeModal(placeSearchModal);
+        }
+
+
+        async function fetchNearbyPlacesData(lat, lon) {
+            const currentCsrfToken = getCookie('csrftoken');
+            if (!currentCsrfToken) { 
+                console.warn("CSRF 토큰이 없어 서버 요청을 보내지 않습니다. (fetchNearbyPlacesData)"); 
+                allPlaces = []; 
+                renderPlaces(); 
+                return; 
+            }
+            // 이전 데이터 로딩 중 상태 표시 (옵션)
+            document.getElementById('festivalSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
+            document.getElementById('touristSlider').innerHTML = '';
+
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/receive-location/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': currentCsrfToken },
+                    body: JSON.stringify({ latitude: lat, longitude: lon })
+                });
+                if (!response.ok) {
+                    let errorDetail = `서버 요청 실패 (상태: ${response.status})`;
+                    try { const errorJson = await response.json(); errorDetail = errorJson.detail || errorJson.message || errorDetail; } 
+                    catch (e) { /* non-json response */ }
+                    throw new Error(errorDetail);
+                }
+                const result = await response.json();
+                if (result.status === 'success' && Array.isArray(result.places)) {
+                    allPlaces = result.places; // 이 places의 각 item에 contentid가 있어야 함!
+                    renderPlaces();
+                } else { 
+                    throw new Error(result.message || '백엔드 데이터 형식 오류'); 
+                }
+            } catch (error) {
+                console.error('데이터 로딩 실패 (fetchNearbyPlacesData):', error);
+                currentLocationTextEl.textContent = targetPlaceName ? `${targetPlaceName} (데이터 로딩 오류)` : "데이터 로딩 오류";
+                allPlaces = []; 
+                renderPlaces(); // 오류 시 빈 화면 또는 에러 메시지 표시
+            }
+        }
         
+        function renderPlaces() {
+            const festivalSliderEl = document.getElementById('festivalSlider'), touristSliderEl = document.getElementById('touristSlider');
+            if (!festivalSliderEl || !touristSliderEl) return;
+            [festivalSliderEl, touristSliderEl].forEach(el => el.innerHTML = '');
+            const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
+            
+            if (!allPlaces || allPlaces.length === 0) {
+                const msg = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보가 없습니다.</p>';
+                festivalSliderEl.innerHTML = msg; touristSliderEl.innerHTML = msg;
+            } else {
+                allPlaces.forEach(item => { // 이 item 객체에 contentid가 있어야 합니다.
+                    if (!item.contentid) {
+                        console.warn("렌더링 아이템에 contentid가 없습니다:", item.title);
+                        // contentid가 없는 아이템은 상세보기를 할 수 없으므로, 클릭 이벤트를 다르게 처리하거나,
+                        // 아예 렌더링하지 않거나, 사용자에게 알릴 수 있습니다.
+                        // 여기서는 일단 렌더링은 하되, 클릭 시 문제가 발생할 수 있음을 인지합니다.
+                    }
+
+                    const itemIdForWishlist = item.title; // 찜하기는 계속 title 기반으로 (또는 contentid로 통일)
+                    let heartIconHTML = '';
+                    if (isLoggedIn) {
+                        const isItemWished = isWished(itemIdForWishlist);
+                        heartIconHTML = `<i class="fas fa-heart card-heart-icon ${isItemWished ? 'active' : ''}" title="${isItemWished ? '찜 해제' : '찜하기'}"></i>`;
+                    }
+                    
+                    // 카드 HTML 생성. item.addr 또는 item.location 사용.
+                    const cardHTML = `
+                    ${heartIconHTML}
+                    <img src="${item.firstimage || item.image || 'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title || ''}">
+                    <div class="info">
+                        <h3>${item.title || ''}</h3>
+                        <p>${item.addr || item.location || '주소 정보 없음'}</p>
+                        ${item.tel ? `<p class="tel-info"><i class="fas fa-phone-alt"></i> ${item.tel}</p>` : '<p class="tel-info"><i class="fas fa-phone-alt"></i> 연락처 정보 없음</p>'}
+                    </div>`;
+                    
+                    [festivalSliderEl, touristSliderEl].forEach(sliderEl => {
+                        const cardEl = Object.assign(document.createElement('div'), { className: 'card', innerHTML: cardHTML });
+                        cardEl.setAttribute('data-item-id', itemIdForWishlist); // 찜하기 및 UI 업데이트용 ID
+                        
+                        // 클릭 이벤트 핸들러: item 객체 전체를 openItemDetailModal로 전달
+                        cardEl.onclick = (e) => {
+                            if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
+                                e.stopPropagation();
+                                currentDetailItemId = itemIdForWishlist; // 찜하기 로직을 위해 설정
+                                // currentDetailItemContentId = item.contentid; // 필요시 여기서도 설정
+                                toggleWishlistItem(); 
+                                return;
+                            }
+                            openedDetailFromWishlist = false;
+                            // item 객체에는 title, firstimage, addr, 그리고 가장 중요한 contentid가 있어야 합니다.
+                            openItemDetailModal(item); 
+                        };
+                        sliderEl.appendChild(cardEl);
+                    });
+                });
+            }
+            // 슬라이더 UI 업데이트
+            if (festivalSliderControls) festivalSliderControls.reinit();
+            else festivalSliderControls = setupSlider('festivalSlider', 'festivalPrevBtn', 'festivalNextBtn');
+            
+            if (touristSliderControls) touristSliderControls.reinit();
+            else touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
+        }
+
+        function showError(el, msg) { if (el) { el.textContent = msg; el.style.display = 'block'; } }
+        function clearAuthErrors() { [usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl, loginIdErrorEl, loginPasswordErrorEl].forEach(el => { if (el) { el.textContent = ""; el.style.display = 'none'; } }); }
+
+        function updateAuthUI(isLoggedIn, username = '') {
+            if (!signupButton || !loginButton || !profileAreaEl || !loginUserDisplayEl || (profileDropdownEl && !profileDropdownEl) ) {
+                console.error("Auth UI elements (or profileDropdownEl) not found for updateAuthUI");
+                return;
+            }
+            signupButton.classList.toggle('hidden', isLoggedIn);
+            loginButton.classList.toggle('hidden', isLoggedIn);
+
+            profileAreaEl.classList.toggle('hidden', !isLoggedIn);
+            if (isLoggedIn) {
+                loginUserDisplayEl.textContent = username;
+            } else {
+                if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+            }
+
+            if(logoutButton) logoutButton.classList.add('hidden');
+            renderPlaces(); 
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            clearAuthErrors();
+            const username = signupIdEl.value.trim(), pwd1 = signupPasswordEl.value, pwd2 = signupPasswordConfirmEl.value, email = signupEmailEl.value.trim();
+            const csrf = getCookie('csrftoken');
+            if (!csrf) { alert('CSRF 토큰 오류'); return; }
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/signup/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ username, password_1: pwd1, password_2: pwd2, email }) });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    alert(data.message || '회원가입 성공! 로그인해주세요.');
+                    closeModal(signupModal);
+                } else {
+                    if (data.errors) {
+                        if(data.errors.username){ showError(usernameError, data.errors.username.join(' ')); }
+                        if(data.errors.password_1){ showError(passwordErrorEl, data.errors.password_1.join(' ')); }
+                        if(data.errors.password_2){ showError(passwordConfirmErrorEl, data.errors.password_2.join(' ')); }
+                        if(data.errors.email){ showError(emailErrorEl, data.errors.email.join(' ')); }
+                        if(data.errors.non_field_errors){ alert(data.errors.non_field_errors.join(' ')); }
+                    } else { alert(data.message || data.detail || '회원가입 실패'); }
+                }
+            } catch (e) { alert('회원가입 중 오류'); }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            clearAuthErrors();
+            const username = loginIdInputEl.value.trim(), password = loginPasswordInputEl.value;
+            const csrf = getCookie('csrftoken'); if (!csrf) { alert('CSRF 토큰 오류'); return; }
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/auth/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    currentLoggedInUsername = data.username;
+                    loadWishlist();
+                    alert(data.message || '로그인 성공!'); closeModal(loginModal); updateAuthUI(true, data.username);
+                } else {
+                    showError(loginPasswordErrorEl, data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.');
+                }
+            } catch (e) { showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다.'); }
+        }
+
+        async function handleLogout() {
+            if (!confirm("로그아웃 하시겠습니까?")) return;
+            const csrf = getCookie('csrftoken');
+            if (csrf) {
+                try { await fetch(`${API_BASE_URL}/api/auth/logout/`, { method: 'POST', headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' } }); } catch (e) { console.error("Logout API call failed:", e); }
+            }
+            currentLoggedInUsername = null;
+            wishlist = []; saveWishlist();
+            alert('로그아웃 되었습니다.'); updateAuthUI(false);
+            if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+        }
+
+        async function checkInitialAuthStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/status/`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isAuthenticated && data.username) {
+                        console.log('페이지 로드: 사용자 인증됨 -', data.username);
+                        currentLoggedInUsername = data.username; loadWishlist(); updateAuthUI(true, data.username);
+                    } else {
+                        console.log('페이지 로드: 사용자 인증 안됨');
+                        currentLoggedInUsername = null; loadWishlist(); updateAuthUI(false);
+                    }
+                } else {
+                    console.error('인증 상태 확인 API 호출 실패:', response.status);
+                    currentLoggedInUsername = null; loadWishlist(); updateAuthUI(false);
+                }
+            } catch (error) {
+                console.error('인증 상태 확인 중 JS 오류:', error);
+                currentLoggedInUsername = null; loadWishlist(); updateAuthUI(false);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentLocationTextEl = document.getElementById('currentLocationText');
+
+            signupModal=document.getElementById('signupmodal');
+            loginModal=document.getElementById('loginmodal');
+            itemDetailModal=document.getElementById('modal1');
+            placeSearchModal=document.getElementById('placemodal');
+            wishlistModal=document.getElementById('wishlistModal');
+
+            signupForm=document.getElementById('signupForm');
+            loginForm=document.getElementById('loginForm');
+
+            signupButton=document.getElementById('signupButton');
+            loginButton=document.getElementById('loginButton');
+            logoutButton=document.getElementById('logoutButton');
+
+            profileAreaEl = document.getElementById('profileArea');
+            loginUserDisplayEl=document.getElementById('loginUserDisplay');
+            profileDropdownEl = document.getElementById('profileDropdown');
+            wishlistFromDropdownLink = document.getElementById('wishlistFromDropdownLink');
+            const logoutFromDropdownLink = document.getElementById('logoutFromDropdownLink');
+
+            signupIdEl=document.getElementById('signupId');
+            signupPasswordEl=document.getElementById('signupPassword');
+            signupPasswordConfirmEl=document.getElementById('signupPasswordConfirm');
+            signupEmailEl=document.getElementById('signupEmail');
+
+            usernameError=document.getElementById('usernameError');
+            passwordErrorEl=document.getElementById('passwordError');
+            passwordConfirmErrorEl=document.getElementById('passwordConfirmError');
+            emailErrorEl=document.getElementById('emailError');
+
+            loginIdInputEl=document.getElementById('loginId');
+            loginPasswordInputEl=document.getElementById('loginPassword');
+
+            loginIdErrorEl=document.getElementById('loginIdError');
+            loginPasswordErrorEl=document.getElementById('loginPasswordError');
+
+            placeInput=document.getElementById('placeInput');
+            userSearchInput=document.getElementById('userSearchInput');
+            mainSearchButton=document.getElementById('mainSearchButton');
+
+            modalHeartIconEl=document.getElementById('modalHeartIcon');
+            wishlistItemsContainerEl=document.getElementById('wishlistItemsContainer');
+
+            aiChatbotContainerEl = document.getElementById('aiChatbotContainer');
+            aiChatbotInputWrapperEl = document.getElementById('aiChatbotInputWrapper');
+            aiChatbotInputEl = document.getElementById('aiChatbotInput');
+            aiChatbotSendButtonEl = document.getElementById('aiChatbotSendButton');
+            aiChatbotDisplayAreaEl = document.getElementById('aiChatbotDisplayArea');
+
+            // --- DOMContentLoaded 이벤트 리스너 내부에 AI 챗봇 기능 로직 추가 ---
+
+            if (aiChatbotInputWrapperEl) {
+                aiChatbotInputWrapperEl.addEventListener('click', (event) => {
+                    // 입력 필드나 전송 버튼을 클릭한 경우가 아니면 (즉, wrapper의 빈 공간을 클릭) 확장/축소
+                    if (event.target === aiChatbotInputWrapperEl) {
+                        if (!aiChatbotContainerEl.classList.contains('active')) {
+                            aiChatbotContainerEl.classList.add('active');
+                            aiChatbotInputEl.focus();
+                        }
+                        // 필요하다면, 이미 열려있을 때 wrapper 클릭 시 닫는 로직 추가 가능
+                        // else {
+                        //    aiChatbotContainerEl.classList.remove('active');
+                        // }
+                    }
+                });
+            }
+
+            if (aiChatbotInputEl) {
+                aiChatbotInputEl.addEventListener('focus', () => { // 입력 필드에 포커스될 때도 확장
+                    if (!aiChatbotContainerEl.classList.contains('active')) {
+                        aiChatbotContainerEl.classList.add('active');
+                    }
+                });
+                aiChatbotInputEl.addEventListener('click', (event) => { // 입력 필드 클릭 시 이벤트 전파 중단
+                    event.stopPropagation();
+                    if (!aiChatbotContainerEl.classList.contains('active')) {
+                        aiChatbotContainerEl.classList.add('active');
+                    }
+                });
+                aiChatbotInputEl.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // 기본 Enter 동작(줄바꿈 등) 방지
+                        if (aiChatbotSendButtonEl) aiChatbotSendButtonEl.click();
+                    }
+                });
+            }
+
+            if (aiChatbotSendButtonEl) {
+                aiChatbotSendButtonEl.addEventListener('click', async (event) => {
+                    event.stopPropagation(); // 이벤트 전파 중단 (외부 클릭으로 닫히는 것 방지) [cite: 525]
+                    const messageText = aiChatbotInputEl.value.trim();
+                    if (messageText) {
+                        // 사용자 메시지 표시 [cite: 526, 527]
+                        const userMessageDiv = document.createElement('div');
+                        userMessageDiv.classList.add('chat-message', 'user');
+                        userMessageDiv.textContent = messageText;
+                        aiChatbotDisplayAreaEl.appendChild(userMessageDiv);
+                        aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+
+                        const originalUserInput = messageText; // 원본 사용자 입력 저장
+                        aiChatbotInputEl.value = ''; // 입력창 비우기 [cite: 527]
+
+                        try {
+                            // "AI가 답변을 생각하고 있어요..." 메시지 표시
+                            const typingIndicatorDiv = document.createElement('div');
+                            typingIndicatorDiv.classList.add('chat-message', 'bot', 'typing-indicator');
+                            typingIndicatorDiv.textContent = "AI가 답변을 생각하고 있어요...";
+                            aiChatbotDisplayAreaEl.appendChild(typingIndicatorDiv);
+                            aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+
+                            const csrf = getCookie('csrftoken'); // getCookie 함수는 이미 있다고 가정
+                            if (!csrf) {
+                                console.error("CSRF 토큰을 찾을 수 없습니다.");
+                                throw new Error("요청에 필요한 인증 정보가 부족합니다.");
+                            }
+                            
+                            // 실제 챗봇 API 엔드포인트 (이전에 urls.py 수정하면서 /api/chatbot/chat/ 로 가정했었음)
+                            const actualChatbotPath = '/api/chatbot/chat/'; 
+                            const fullUrlToFetch = `${API_BASE_URL}${actualChatbotPath}`;
+                            console.log("챗봇 API 호출 URL:", fullUrlToFetch);
+
+                            const response = await fetch(fullUrlToFetch, { 
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrf
+                                },
+                                body: JSON.stringify({ message: originalUserInput }) 
+                            });
+
+                            typingIndicatorDiv.remove(); // "생각 중" 메시지 제거
+
+                            if (!response.ok) {
+                                let errorMsg = `챗봇 서버 응답 오류 (상태: ${response.status})`;
+                                try {
+                                    const errorData = await response.json();
+                                    errorMsg = errorData.error || errorData.message || errorData.response || errorMsg; // 백엔드에서 'response' 키로 에러 메시지를 줄 수도 있음
+                                } catch (e) {
+                                    // JSON 파싱 실패 시, 기본 오류 메시지 사용
+                                }
+                                throw new Error(errorMsg);
+                            }
+
+                            const data = await response.json();
+                            
+                            // ▼▼▼ 백엔드 응답 키에 맞춰 수정 ▼▼▼
+                            const botTextResponse = data.response;       // 기본 텍스트 답변
+                            const recommendationsData = data.recommendations; // 추천 카드 데이터
+                            const scheduleData = data.schedule;           // 일정 데이터
+
+                            let contentDisplayed = false;
+
+                            // 1. 기본 텍스트 답변 표시
+                            if (botTextResponse && String(botTextResponse).trim()) {
+                                const botMessageDiv = document.createElement('div');
+                                botMessageDiv.classList.add('chat-message', 'bot');
+                                botMessageDiv.textContent = botTextResponse;
+                                aiChatbotDisplayAreaEl.appendChild(botMessageDiv);
+                                contentDisplayed = true;
+                            }
+
+                            // 2. 추천 카드 정보 표시 (예시: 간단한 텍스트로 표시)
+                            // 실제로는 HTML로 카드를 만들어서 표시해야 합니다.
+                            if (recommendationsData && Array.isArray(recommendationsData) && recommendationsData.length > 0) {
+                                const recWrapperDiv = document.createElement('div');
+                                recWrapperDiv.classList.add('chat-message', 'bot', 'recommendations-wrapper');
+                                
+                                let recHtml = '<strong><i class="fas fa-map-marked-alt"></i> 추천 장소:</strong><ul>';
+                                recommendationsData.forEach(card => {
+                                    // card 객체에 title, overview, reason 등이 있다고 가정 (views.py의 format_as_cards 결과)
+                                    recHtml += `<li><strong>${card.title || '제목 없음'}</strong>: ${card.overview || card.reason || '설명 없음'}</li>`;
+                                });
+                                recHtml += '</ul>';
+                                recWrapperDiv.innerHTML = recHtml;
+                                aiChatbotDisplayAreaEl.appendChild(recWrapperDiv);
+                                contentDisplayed = true;
+                            }
+
+                            // 3. 일정 정보 표시 (예시: 간단한 텍스트로 표시)
+                            // 실제로는 HTML로 일정을 보기 좋게 만들어 표시해야 합니다.
+                            if (scheduleData) { // scheduleData가 객체이거나 내용이 있는 배열일 수 있음
+                                const scheduleDiv = document.createElement('div');
+                                scheduleDiv.classList.add('chat-message', 'bot', 'schedule-details');
+                                // scheduleData의 구조에 따라 표시 방법을 결정합니다.
+                                // 예시: scheduleData가 { "Day 1": [...], "Day 2": [...] } 형태일 경우
+                                let scheduleHtml = '<strong><i class="fas fa-calendar-alt"></i> 추천 일정:</strong>';
+                                if (typeof scheduleData === 'object' && Object.keys(scheduleData).length > 0) {
+                                    scheduleHtml += '<ul>';
+                                    for (const day in scheduleData) {
+                                        scheduleHtml += `<li><strong>${day}</strong>: `;
+                                        if (Array.isArray(scheduleData[day])) {
+                                            scheduleHtml += scheduleData[day].map(item => item.title || '활동').join(' → ');
+                                        } else {
+                                            scheduleHtml += JSON.stringify(scheduleData[day]); // 단순 문자열로 표시
+                                        }
+                                        scheduleHtml += '</li>';
+                                    }
+                                    scheduleHtml += '</ul>';
+                                } else if (typeof scheduleData === 'string' && scheduleData.trim()) {
+                                    scheduleHtml += `<p>${scheduleData}</p>`;
+                                } else {
+                                    scheduleHtml += `<p>자세한 일정 정보는 생성되지 않았습니다.</p>`; // 또는 scheduleData를 그대로 보여줌
+                                    // scheduleHtml += `<pre>${JSON.stringify(scheduleData, null, 2)}</pre>`;
+                                }
+                                scheduleDiv.innerHTML = scheduleHtml;
+                                aiChatbotDisplayAreaEl.appendChild(scheduleDiv);
+                                contentDisplayed = true;
+                            }
+                            
+                            // 만약 아무런 유효한 내용도 표시되지 않았다면 "유효한 답변 없음" 처리
+                            if (!contentDisplayed) {
+                                throw new Error("챗봇으로부터 유효한 표시 가능 콘텐츠를 받지 못했습니다.");
+                            }
+
+                        } catch (error) {
+                            console.error("AI 챗봇 통신 오류:", error);
+                            const errorMessageDiv = document.createElement('div');
+                            errorMessageDiv.classList.add('chat-message', 'bot', 'error-message-chat');
+                            errorMessageDiv.textContent = `죄송합니다. 챗봇과 대화 중 문제가 발생했습니다. (${error.message})`;
+                            aiChatbotDisplayAreaEl.appendChild(errorMessageDiv);
+                        }
+                        
+                        aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+                    }
+                    aiChatbotInputEl.focus(); // 메시지 전송 후에도 입력창에 포커스 유지 [cite: 531]
+                });
+            }
+            
+            const gpsButton = document.getElementById('gpsButton');
+            if(gpsButton) {
+                gpsButton.onclick = () => requestCurrentLocation(true); // isUserClick = true
+            }
+
+            csrfToken = getCookie('csrftoken'); 
+            if (!csrfToken){ console.warn("CSRF 토큰을 찾을 수 없습니다."); }
+
+            await checkInitialAuthStatus();
+            if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
+                kakao.maps.load(() => { 
+                    initializeKakaoMaps(); 
+                    requestCurrentLocation(false); // isUserClick = false (페이지 첫 로드)
+                });
+            } else {
+                console.error("Kakao Maps SDK load error.");
+                currentLocationTextEl.textContent = "지도 SDK 로드 실패";
+                requestCurrentLocation(false); 
+            }
+
+            if (profileAreaEl) {
+                profileAreaEl.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (profileDropdownEl) {
+                        profileDropdownEl.classList.toggle('active');
+                    }
+                });
+            }
+
+            if (wishlistFromDropdownLink) {
+                wishlistFromDropdownLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    openWishlistModal();
+                    if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+                });
+            }
+
+            if (logoutFromDropdownLink) {
+                logoutFromDropdownLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    handleLogout();
+                });
+            }
+
+            document.querySelectorAll('#profileDropdown a').forEach(link => {
+                if (link.id !== 'logoutFromDropdownLink' && link.id !== 'wishlistFromDropdownLink') {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        alert(`'${link.textContent.trim()}' 메뉴는 현재 구현 준비 중입니다.`);
+                        if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+                    });
+                }
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target.classList.contains('modal') && event.target.classList.contains('open')) {
+                    closeModal(event.target);
+                }
+                if (profileDropdownEl && profileDropdownEl.classList.contains('active')) {
+                    if (profileAreaEl && !profileAreaEl.contains(event.target) && !profileDropdownEl.contains(event.target)) {
+                        profileDropdownEl.classList.remove('active');
+                    }
+                }
+                // AI 챗봇 외부 클릭 시 닫기
+                if (aiChatbotContainerEl && aiChatbotContainerEl.classList.contains('active')) {
+                    const isClickInsideChatbot = aiChatbotContainerEl.contains(event.target);
+                    const locationButtonsContainer = document.querySelector('.location-control-buttons');
+                    const isClickInsideLocationButtons = locationButtonsContainer ? locationButtonsContainer.contains(event.target) : false;
+                    
+                    // 챗봇 영역도 아니고, 위치 버튼 영역도 아니라면 닫기
+                    if (!isClickInsideChatbot && !isClickInsideLocationButtons) {
+                        // 모달이 열려있거나, 모달을 여는 버튼 클릭 시에는 챗봇을 닫지 않도록 예외처리 (옵션)
+                        let clickedOnModalRelated = false;
+                        let targetElement = event.target;
+                        while (targetElement != null) {
+                            if (targetElement.classList && (
+                                targetElement.classList.contains('modal') || // [cite: 69]
+                                targetElement.classList.contains('modal_body') || // [cite: 72]
+                                targetElement.id === 'signupButton' || // [cite: 128] (예시)
+                                targetElement.id === 'loginButton' || // [cite: 128] (예시)
+                                targetElement.id === 'placeSearchOpenButton' // [cite: 135] (예시)
+                            )) {
+                                clickedOnModalRelated = true;
+                                break;
+                            }
+                            targetElement = targetElement.parentElement;
+                        }
+
+                        if (!clickedOnModalRelated) {
+                            aiChatbotContainerEl.classList.remove('active');
+                        }
+                    }
+                }
+
+                // 기존 프로필 드롭다운 닫기 로직 [cite: 409, 410]
+                if (profileDropdownEl && profileDropdownEl.classList.contains('active')) {
+                    if (profileAreaEl && !profileAreaEl.contains(event.target) && !profileDropdownEl.contains(event.target)) {
+                        profileDropdownEl.classList.remove('active');
+                    }
+                }
+
+                // 기존 모달 외부 클릭 시 닫기 로직 [cite: 409]
+                if (event.target.classList.contains('modal') && event.target.classList.contains('open')) {
+                    closeModal(event.target);
+                }
+            });
+            if(placeInput) placeInput.onkeydown = handlePlaceInputEnter;
+            const setPlaceBtn = document.getElementById('setPlaceFromModalButton'); if(setPlaceBtn) setPlaceBtn.onclick = setPlaceFromModal;
+            const placeOpenBtn = document.getElementById('placeSearchOpenButton'); if(placeOpenBtn) placeOpenBtn.onclick = openPlaceSearchModal;
+            if(mainSearchButton) mainSearchButton.onclick = () => { if(userSearchInput.value.trim()) alert(`검색 기능 준비중: ${userSearchInput.value.trim()}`); else alert("검색어 입력 필요"); };
+            if(userSearchInput) userSearchInput.onkeydown = (e) => { if(e.key === 'Enter' && mainSearchButton) mainSearchButton.click(); };
+            if(signupButton) signupButton.onclick = () => { clearAuthErrors(); openModal(signupModal); };
+            if(loginButton) loginButton.onclick = () => { clearAuthErrors(); openModal(loginModal); };
+
+            if(signupForm) signupForm.onsubmit = handleSignup;
+            if(loginForm) loginForm.onsubmit = handleLogin;
+            if(modalHeartIconEl) modalHeartIconEl.onclick = toggleWishlistItem;
+        });
+        function displayItemMapOnDetailModal(mapContainerElement, lat, lng) {
+            if (!mapContainerElement || isNaN(lat) || isNaN(lng) || typeof kakao === 'undefined' || !kakao.maps) {
+                if (mapContainerElement) mapContainerElement.style.display = 'none';
+                if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
+                console.warn("상세 정보 모달 지도 표시에 필요한 정보가 부족하거나 SDK가 준비되지 않았습니다.");
+                return;
+            }
+            mapContainerElement.style.display = 'block';
+            const mapOption = { center: new kakao.maps.LatLng(lat, lng), level: 4 };
+            if (itemDetailMap) { itemDetailMap.setCenter(mapOption.center); itemDetailMap.setLevel(mapOption.level); }
+            else { itemDetailMap = new kakao.maps.Map(mapContainerElement, mapOption); }
+            if (itemDetailMapMarker) { itemDetailMapMarker.setPosition(mapOption.center); itemDetailMapMarker.setMap(itemDetailMap); }
+            else { itemDetailMapMarker = new kakao.maps.Marker({ position: mapOption.center, map: itemDetailMap }); }
+            setTimeout(() => { if (itemDetailMap) { itemDetailMap.relayout(); itemDetailMap.setCenter(mapOption.center); } }, 50);
+        }
     </script>
 </body>
 </html>

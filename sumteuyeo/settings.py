@@ -10,23 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
+import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 환경변수 초기화
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+
+# .env 파일 읽기
+env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r@(xk1^k-kduh$-9g1z!!o%)43lmx(t9)1)*coglyst6^w(!rv'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
+print(f"--- Loaded DEBUG: {DEBUG} ---") # DEBUG 값 확인용 출력 추가
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+print(f"--- Loaded ALLOWED_HOSTS: {ALLOWED_HOSTS} ---") # ALLOWED_HOSTS 값 확인용 출력 추가
 
 # Application definition
 
@@ -79,8 +90,12 @@ WSGI_APPLICATION = 'sumteuyeo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('POSTGRES_DB_NAME'),
+        'USER': env('POSTGRES_DB_USER'),
+        'PASSWORD': env('POSTGRES_DB_PASSWORD'),
+        'HOST': env('POSTGRES_DB_HOST', default='localhost'),
+        'PORT': env('POSTGRES_DB_PORT', default='5432'),
     }
 }
 
@@ -129,3 +144,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#APi인증키값
+TOUR_API_KEY = env('TOUR_API_KEY')
