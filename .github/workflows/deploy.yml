@@ -19,9 +19,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
                 cd /home/ubuntu/sumteuyeo
+                source venv/bin/activate
+                python3 -m pip install --upgrade pip
                 git fetch --all
                 git reset --hard origin/main
-                source venv/bin/activate
                 python3 -m pip install -r requirements.txt
                 python3 manage.py migrate
                 python3 manage.py collectstatic --noinput
