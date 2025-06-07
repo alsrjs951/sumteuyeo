@@ -11,7 +11,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-# .env 파일 읽기
+# .env 파일 읽기 (BASE_DIR 바로 아래에 .env 파일이 있다고 가정)
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.sessions', # Redis 세션 사용 시에도 필요
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.core.apps.CoreConfig',
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware', # 세션 미들웨어
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -67,6 +67,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sumteuyeo.wsgi.application'
 
 # Database (PostgreSQL, AWS RDS 기준)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -74,21 +75,25 @@ DATABASES = {
         'USER': env('POSTGRES_DB_USER'),
         'PASSWORD': env('POSTGRES_DB_PASSWORD'),
         'HOST': env('POSTGRES_DB_HOST', default='localhost'),
-        'PORT': env('POSTGRES_DB_PORT', cast=int, default=5432),
+        'PORT': env('POSTGRES_DB_PORT', cast=int, default=3306),
         'OPTIONS': {
             # MySQL 옵션 예시 주석 처리됨
         },
     }
 }
 
-# Cache (Redis, AWS ElastiCache 기준)
+# Cache (AWS ElastiCache for Redis 사용)
+# https://django-redis-docs.readthedocs.io/en/latest/setup.html#setting-up-django-redis
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{env('REDIS_HOST', default='127.0.0.1')}:{env.int('REDIS_PORT', default=6379)}/1",
+        "LOCATION": f"redis://{env('REDIS_HOST', default='127.0.0.1')}:{env.int('REDIS_PORT', default=6379)}/1",  # Redis DB 1번을 캐시용으로 사용
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            # "PASSWORD": env('REDIS_PASSWORD', default=None),
+            # "PASSWORD": env('REDIS_PASSWORD', default=None), # ElastiCache Redis에 암호 설정 시 주석 해제
+            # ElastiCache for Redis가 '전송 중 암호화(TLS)'를 사용한다면,
+            # LOCATION에 "rediss://" 스킴을 사용하고 추가 SSL 옵션이 필요할 수 있습니다.
+            # 예: "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None} 또는 특정 인증서 경로 설정
         }
     }
 }
@@ -140,14 +145,18 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = 'static/'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
+
+# Media files (User-uploaded files)
+# 사용자가 업로드하는 파일을 처리하기 위한 설정 (필요시)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
+MEDIA_ROOT = BASE_DIR / 'mediafiles' # 사용자가 업로드한 파일이 저장될 실제 서버 경로
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -168,14 +177,22 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
-# 프로덕션 환경을 위한 추가 보안 설정 (주석 처리, 필요시 활성화)
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# API 인증키값
+TOUR_API_KEY = env('TOUR_API_KEY')
+
+# 프로덕션 환경을 위한 추가 보안 설정 (선택 사항이지만 권장됨)
 # if not DEBUG:
 #     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 #     SECURE_SSL_REDIRECT = True
 #     SESSION_COOKIE_SECURE = True
 #     CSRF_COOKIE_SECURE = True
-#     SECURE_HSTS_SECONDS = 31536000
+#     SECURE_HSTS_SECONDS = 31536000  # 1 year
 #     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 #     SECURE_HSTS_PRELOAD = True
+#     # X_FRAME_OPTIONS = 'DENY' # MIDDLEWARE에 이미 XFrameOptionsMiddleware가 있음
 #     SECURE_CONTENT_TYPE_NOSNIFF = True
 #     SECURE_BROWSER_XSS_FILTER = True
