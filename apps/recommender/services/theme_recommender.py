@@ -15,6 +15,9 @@ import joblib
 import logging
 import random
 import time
+import faiss
+from .chatbot.faiss_manager import FaissManager
+from typing import List, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -23,16 +26,28 @@ TOURIST_CATEGORIES = ["EX", "HS", "LS", "NA", "SH", "VE"]  # 관광지 카테고
 FOOD_CATEGORY = "FD"  # 음식점 카테고리
 
 class ThemeRecommender:
+    def __init__(self):
+        self.faiss_manager = FaissManager(
+            index_path="index.faiss",
+            id_map_path="id_map.pkl"
+        )
 
     # 벡터 정규화 함수
     @staticmethod
-    def l2_normalize(vec):
+    def l2_normalize(vec: np.ndarray) -> np.ndarray:
         norm = np.linalg.norm(vec)
         return vec / norm if norm > 1e-8 else vec
 
     @staticmethod
     def generate_recommendation_rows(user_id: int, month: int, user_lat: float, user_lng: float) -> dict:
         """다양한 테마의 추천 행을 생성 (제목 포함)"""
+        # 계절 이름 매핑 (영문)
+        season_map = {
+            12: 'winter', 1: 'winter', 2: 'winter',
+            3: 'spring', 4: 'spring', 5: 'spring',
+            6: 'summer', 7: 'summer', 8: 'summer',
+            9: 'autumn', 10: 'autumn', 11: 'autumn'
+        }
         
         rows = {
             'personalized': {'title': '당신을 위한 맞춤 추천', 'items': []},
@@ -42,6 +57,21 @@ class ThemeRecommender:
             'hidden_gems': {'title': '숨은 명소', 'items': []},
             'restaurants': {'title': '당신의 입맛을 저격할 맛집', 'items': []}
         }
+
+        # FAISS 검색 공통 함수
+        def get_faiss_results(blend_vec: np.ndarray, filters: Dict) -> List[int]:
+            normalized_vec = ThemeRecommender.l2_normalize(blend_vec)
+            faiss_ids = FaissManager.search(normalized_vec)
+            
+            # 위치 필터링 적용
+            nearby_ids = get_nearby_content_ids(user_lat, user_lng)
+            filtered_ids = list(set(faiss_ids) & set(nearby_ids))
+            
+            # 추가 필터 적용 (카테고리 등)
+            return ContentFeature.objects.filter(
+                contentid__in=filtered_ids,
+                **filters
+            ).values_list('contentid', flat=True)[:30]
 
         # 1. 맞춤형 추천
         try:
@@ -59,14 +89,10 @@ class ThemeRecommender:
         global_exp_vec = np.array(global_exp, dtype=np.float32) if global_exp else np.zeros(VECTOR_DIM)
         
         blended_vec = ThemeRecommender.l2_normalize(user_weight*ThemeRecommender.l2_normalize(user_exp) + global_weight*ThemeRecommender.l2_normalize(global_exp_vec))
-        rows['personalized']['items'] = (
-            ContentFeature.objects
-            .filter(contentid__in=get_nearby_content_ids(user_lat, user_lng))
-            .filter(detail__lclssystm1__in=TOURIST_CATEGORIES)
-            .annotate(
-                similarity=CosineDistance('feature_vector', blended_vec)
-            )
-            .order_by('similarity')[:30]
+        
+        rows['personalized']['items'] = get_faiss_results(
+            blended_vec,
+            {'detail__lclssystm1__in': TOURIST_CATEGORIES}
         )
 
         # 2. 선호 소분류 추천
@@ -103,16 +129,9 @@ class ThemeRecommender:
                         global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
                     )
 
-                    rows[row_key]['items'] = (
-                        ContentFeature.objects
-                        .filter(detail__lclssystm3=subcat,
-                                contentid__in=get_nearby_content_ids(user_lat, user_lng),
-                                detail__lclssystm1=TOURIST_CATEGORIES
-                                )
-                        .annotate(
-                            similarity=CosineDistance('feature_vector', subcat_blend)
-                        )
-                        .order_by('similarity')[:30]
+                    rows[row_key]['items'] = get_faiss_results(
+                        subcat_blend,
+                        {'detail__lclssystm3': subcat}
                     )
 
         except Exception as e:
@@ -120,13 +139,6 @@ class ThemeRecommender:
 
         # 3. 계절 추천 (유사도 점수 기반)
         try:
-            # 계절 이름 매핑 (영문)
-            season_map = {
-                12: 'winter', 1: 'winter', 2: 'winter',
-                3: 'spring', 4: 'spring', 5: 'spring',
-                6: 'summer', 7: 'summer', 8: 'summer',
-                9: 'autumn', 10: 'autumn', 11: 'autumn'
-            }
             current_season = season_map.get(month, 'winter')
             
             # 계절 유사도 상위 콘텐츠 선별 (0.7 이상)
@@ -142,18 +154,9 @@ class ThemeRecommender:
                 global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
             )
             
-            # 개인화 + 계절 특징 결합 추천
-            rows['seasonal']['items'] = (
-                ContentFeature.objects
-                .select_related('detail')
-                .filter(Q(contentid__in=seasonal_contents) &
-                        Q(contentid__in=get_nearby_content_ids(user_lat, user_lng)),
-                        detail__lclssystm1__in=TOURIST_CATEGORIES
-                        )
-                .annotate(
-                    similarity=CosineDistance('feature_vector', seasonal_blend)  # 개인화 벡터
-                )
-                .order_by('-similarity')[:30]  # 유사도 높은 순
+            rows['seasonal']['items'] = get_faiss_results(
+                seasonal_blend,
+                {f'{current_season}_sim__gte': 0.7}
             )
 
         except Exception as e:
@@ -178,20 +181,9 @@ class ThemeRecommender:
                 global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
             )
             
-            rows['hidden_gems']['items'] = (
-                ContentFeature.objects
-                .select_related('detail')
-                .filter(
-                    Q(contentid__in=low_interaction_ids) &
-                    Q(detail__mapx__isnull=False) &
-                    Q(detail__mapy__isnull=False) &
-                    Q(contentid__in=get_nearby_content_ids(user_lat, user_lng)) &
-                    Q(detail__lclssystm1__in=TOURIST_CATEGORIES)
-                )
-                .annotate(
-                    similarity=CosineDistance('feature_vector', hidden_blend)
-                )
-                .order_by('similarity')[:30]  # 유사도 높은 순으로 정렬
+            rows['hidden_gems']['items'] = get_faiss_results(
+                hidden_blend,
+                {'contentid__in': low_interaction_ids}
             )
         except Exception as e:
             logger.error(f"숨은 명소 추천 오류: {str(e)}")
@@ -208,10 +200,10 @@ class ThemeRecommender:
         
         # 가중치 동적 계산
         food_blend = ThemeRecommender.l2_normalize(user_weight*ThemeRecommender.l2_normalize(user_food) + global_weight*ThemeRecommender.l2_normalize(global_food_vec))
-        rows['restaurants']['items'] = ContentFeature.objects.annotate(
-            similarity=CosineDistance('feature_vector', food_blend)
-        ).filter(content__in=get_nearby_content_ids(user_lat, user_lng),
-                 detail__lclssystm1=FOOD_CATEGORY
-                 ).order_by('similarity')[:30]
+        
+        rows['restaurants']['items'] = get_faiss_results(
+            food_blend,
+            {'detail__lclssystm1': FOOD_CATEGORY}
+        )
 
         return rows

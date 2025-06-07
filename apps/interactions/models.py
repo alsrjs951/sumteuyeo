@@ -44,7 +44,13 @@ class ContentInteraction(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content_id = models.PositiveIntegerField()
+    content = models.ForeignKey(
+        'items.ContentDetailCommon', 
+        on_delete=models.CASCADE, 
+        db_column='content_id',  # 기존 DB 컬럼명 유지
+        default=1,
+    )
+
     action_type = models.CharField(max_length=20, choices=ACTION_CHOICES)
     
     # 찜 상태 추적

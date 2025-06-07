@@ -31,9 +31,12 @@ class GlobalPreferenceService:
             total_weight += weight
 
         if total_weight < 1e-9 or len(query) < cls.MIN_USERS:
-            return None  # 데이터 부족 시 None 반환
+            return None
+        normalized = sum_vector / total_weight
+        if np.isnan(normalized).any():
+            return None
             
-        return (sum_vector / total_weight).tolist()
+        return normalized.tolist()
 
     @classmethod
     @transaction.atomic

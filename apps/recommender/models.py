@@ -7,6 +7,8 @@ import numpy as np
 import joblib
 from apps.items.models import ContentDetailCommon
 from sklearn.preprocessing import normalize
+import threading
+_lock = threading.Lock()
 
 
 class ContentFeature(models.Model):
@@ -24,8 +26,9 @@ class ContentFeature(models.Model):
 
     @classmethod
     def get_text_model(cls):
-        if cls._text_model is None:
-            cls._text_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        with _lock:
+            if cls._text_model is None:
+                cls._text_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         return cls._text_model
 
     @classmethod
@@ -39,25 +42,46 @@ class ContentFeature(models.Model):
         return self.get_text_model().encode(summary_text)
 
     def get_category_embedding(self):
-        encodings = []
+        weighted_sum = np.zeros(100, dtype=np.float32)
+        
         for i, level in enumerate(['lcls1', 'lcls2', 'lcls3']):
             value = getattr(self.detail, f'lclsSystm{i+1}')
-            encoder = self.get_category_encoder(level)
+            encoder_data = self.get_category_encoder(level)
+            
+            # 카테고리 → 인덱스 매핑
+            idx = encoder_data['mapping'].get(value, encoder_data['unknown_index'])
+            
+            # 임베딩 벡터 조회
+            emb = encoder_data['embedding_matrix'][idx]
             weight = [0.4, 0.3, 0.3][i]
-            enc = encoder.transform([[value]]).toarray()[0] * weight
-            encodings.append(enc)
-        return np.concatenate(encodings)
+            
+            weighted_sum += emb * weight
+            
+        return weighted_sum
+
+
 
     def update_feature_vector(self):
         text_emb = self.get_text_embedding()
         cat_emb = self.get_category_embedding()
         
-        # 벡터 결합 및 정규화
+        # 벡터 결합
         combined = np.concatenate([text_emb, cat_emb])
-        normalized = normalize(combined.reshape(1, -1), norm='l2', axis=1)  # L2 정규화
         
-        self.feature_vector = normalized.flatten().tolist()  # 1차원 배열로 변환
+        # 정규화 여부 확인 (수정 필요)
+        model = self.get_text_model()
+        if not getattr(model, '_normalize_embeddings', False):  # 더 안전한 확인 방법
+            combined = normalize(combined.reshape(1, -1), norm='l2', axis=1).flatten()
+        else:
+            combined = combined.reshape(1, -1).flatten()
+        
+        # 차원 검증 (중요!)
+        if len(combined) != 484:
+            raise ValueError(f"Invalid dimension: {len(combined)} (expected 484)")
+        
+        self.feature_vector = combined.tolist()
         self.save(update_fields=['feature_vector'])
+
 
     class Meta:
         db_table = 'content_feature'

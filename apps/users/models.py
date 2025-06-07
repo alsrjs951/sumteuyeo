@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth import get_user_model
-from pgvector.django import VectorField
+from pgvector.django import VectorField, HnswIndex
 
 User = get_user_model()
 
@@ -15,6 +15,20 @@ class UserPreferenceProfile(models.Model):
     class Meta:
         db_table = 'user_preference_profile'
         indexes = [
+            HnswIndex(  # HNSW 인덱스 추가
+                fields=['experience'],
+                name='experience_hnsw_idx',
+                m=16,
+                ef_construction=64,
+                opclasses=['vector_cosine_ops']
+            ),
+            HnswIndex(
+                fields=['food'],
+                name='food_hnsw_idx',
+                m=16,
+                ef_construction=64,
+                opclasses=['vector_cosine_ops']
+            ),
             models.Index(fields=['user']),
         ]
 
@@ -36,3 +50,15 @@ class GlobalPreferenceProfile(models.Model):
 
     def __str__(self):
         return f"Global Profile ({self.updated_at})"
+
+class UserBookmark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
+    content_id = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_bookmark'
+        unique_together = ('user', 'content_id')  # 중복 북마크 방지
+
+    def __str__(self):
+        return f"{self.user} - {self.content_id}"

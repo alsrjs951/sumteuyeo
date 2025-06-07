@@ -15,12 +15,10 @@ logger = logging.getLogger(__name__)
     retry_backoff_max=1800
 )
 def update_global_profile_task(self):
-    """전역 프로필 주기적 업데이트 작업"""
     try:
         success = global_preference_service.update_global_profile()
         if not success:
-            self.retry(countdown=600)
-        return {"status": "success", "timestamp": timezone.now().isoformat()}
+            raise Exception("Global profile update failed")  # 명시적 예외 발생
     except Exception as e:
-        logger.error(f"Global profile task failed: {str(e)}", exc_info=True)
-        raise self.retry(exc=e, max_retries=3)
+        logger.critical(f"Critical failure: {str(e)}")  # 심각도 높은 로깅
+        raise

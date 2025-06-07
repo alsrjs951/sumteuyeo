@@ -8,4 +8,4 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_user_preference_profile(sender, instance, created, **kwargs):
     if created:
-        UserPreferenceProfile.objects.create(user=instance)
+        UserPreferenceProfile.objects.get_or_create(user=instance)

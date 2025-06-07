@@ -118,8 +118,12 @@ class PreferenceService:
         
         # 벡터 정규화 병렬 처리
         for category, vector in updated_vectors.items():
-            if np.linalg.norm(vector) > 1e-8:
-                setattr(profile, category, normalize([vector])[0].tolist())
+            norm = np.linalg.norm(vector)
+            if norm > 1e-8 and not np.isnan(norm):
+                normalized = normalize([vector])[0].tolist()
+            else:
+                normalized = vector.tolist()
+            setattr(profile, category, normalized)
         
         profile.save(update_fields=['experience', 'food', 'last_updated'])
 
