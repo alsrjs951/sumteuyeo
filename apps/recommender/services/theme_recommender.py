@@ -17,6 +17,7 @@ import random
 import time
 import faiss
 from .chatbot.faiss_manager import FaissManager
+from sumteuyeo.settings import FAISS_BASE_DIR
 from typing import List, Dict
 
 logger = logging.getLogger(__name__)
@@ -28,8 +29,8 @@ FOOD_CATEGORY = "FD"  # 음식점 카테고리
 class ThemeRecommender:
     def __init__(self):
         self.faiss_manager = FaissManager(
-            index_path="index.faiss",
-            id_map_path="id_map.pkl"
+            index_path=FAISS_BASE_DIR / "content_index.faiss",
+            id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
         )
 
     # 벡터 정규화 함수
@@ -140,13 +141,6 @@ class ThemeRecommender:
         # 3. 계절 추천 (유사도 점수 기반)
         try:
             current_season = season_map.get(month, 'winter')
-            
-            # 계절 유사도 상위 콘텐츠 선별 (0.7 이상)
-            seasonal_contents = (
-                ContentSummarize.objects
-                .filter(**{f'{current_season}_sim__gte': 0.7})
-                .values_list('contentid', flat=True)
-            )
 
             # 가중치 동적 계산
             seasonal_blend = ThemeRecommender.l2_normalize(

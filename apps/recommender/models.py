@@ -8,6 +8,9 @@ import joblib
 from apps.items.models import ContentDetailCommon
 from sklearn.preprocessing import normalize
 import threading
+import faiss
+import os
+from sumteuyeo.settings import FAISS_BASE_DIR
 _lock = threading.Lock()
 
 
@@ -60,7 +63,6 @@ class ContentFeature(models.Model):
         return weighted_sum
 
 
-
     def update_feature_vector(self):
         text_emb = self.get_text_embedding()
         cat_emb = self.get_category_embedding()
@@ -81,16 +83,32 @@ class ContentFeature(models.Model):
         
         self.feature_vector = combined.tolist()
         self.save(update_fields=['feature_vector'])
+    
+
+    @classmethod
+    def build_faiss_index(cls, index_path=FAISS_BASE_DIR / 'content_index.faiss'):
+        """FAISS 인덱스 파일 및 ID 매핑 파일 생성"""
+        os.makedirs(os.path.dirname(index_path), exist_ok=True)
+        features = cls.objects.exclude(feature_vector__isnull=True)
+        if not features.exists():
+            raise ValueError("No feature vectors available")
+
+        # 벡터 배열 생성
+        vectors = np.array([f.feature_vector for f in features], dtype=np.float32)
+        
+        # ID 매핑 정보 생성
+        id_mapping = {idx: f.detail.contentid for idx, f in enumerate(features)}
+        id_mapping_path = os.path.splitext(index_path)[0] + '_ids.npy'
+        np.save(id_mapping_path, id_mapping)
+
+        # FAISS 인덱스 생성 (Inner Product == 코사인 유사도)
+        index = faiss.IndexFlatIP(vectors.shape[1])
+        index.add(vectors)
+        faiss.write_index(index, index_path)
+
+        return index_path, id_mapping_path
 
 
     class Meta:
         db_table = 'content_feature'
-        indexes = [
-            HnswIndex(
-                fields=['feature_vector'],
-                name='feature_vector_cosine_idx',
-                opclasses=['vector_cosine_ops'],
-                m=16,
-                ef_construction=64
-            )
-        ]
+        indexes = []

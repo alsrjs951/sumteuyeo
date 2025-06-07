@@ -2,6 +2,7 @@ from django.db import models
 from sentence_transformers import SentenceTransformer
 from numpy.linalg import norm
 import numpy as np
+import threading
 
 class ContentDetailCommon(models.Model):
     contentid = models.PositiveIntegerField(unique=True)  # INTEGER, PK
@@ -79,40 +80,64 @@ class ContentDetailImage(models.Model):
             models.Index(fields=['contentid']),
         ]
 
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+_lock = threading.Lock()
+_model = None
 
+def get_model():
+    global _model
+    if _model is None:
+        with _lock:
+            if _model is None:
+                _model = SentenceTransformer('all-mpnet-base-v2')
+    return _model
+
+# 계절별 대표 문장 리스트 (멀티 센텐스 앙상블)
 season_sentences = {
-    'spring': '벚꽃이 피고 따뜻한 날씨가 시작되는 봄은 꽃구경과 피크닉에 적합한 계절입니다.',
-    'summer': '뜨거운 태양과 해변, 수영, 시원한 음료가 어울리는 여름은 휴가와 야외 활동의 계절입니다.',
-    'autumn': '단풍이 물들고 선선한 바람이 부는 가을은 산책과 수확 축제가 활발한 시기입니다.',
-    'winter': '눈이 내리고 추운 날씨가 지속되는 겨울은 스키, 온천, 따뜻한 음료가 인기인 계절입니다.'
+    'spring': ['벚꽃이 피는 계절', '따뜻한 봄바람', '피크닉하기 좋은 봄'],
+    'summer': ['해변에서 수영', '여름 바캉스', '시원한 음료와 야외 활동'],
+    'autumn': ['단풍이 아름다운 가을', '수확의 계절', '선선한 바람'],
+    'winter': ['눈이 내리는 겨울', '스키와 온천', '따뜻한 음료']
 }
 
-# 계절 임베딩 생성
+# 계절별 임베딩 평균 계산 (초기화)
+model = get_model()
 season_embeddings = {
-    season: model.encode(sentence) 
-    for season, sentence in season_sentences.items()
+    season: np.mean([model.encode(s) for s in sentences], axis=0)
+    for season, sentences in season_sentences.items()
 }
 
+# 키워드 가중치 사전
+SEASON_KEYWORDS = {
+    'spring': ['벚꽃', '꽃놀이', '봄꽃', '산책'],
+    'summer': ['해변', '수영', '여름', '바캉스'],
+    'autumn': ['단풍', '가을', '수확', '축제'],
+    'winter': ['눈', '스키', '온천', '겨울']
+}
 
 class ContentSummarize(models.Model):
     contentid = models.PositiveIntegerField(unique=True)
     summarize_text = models.TextField()
-    spring_sim = models.FloatField(default=0)  # 봄 유사도
-    summer_sim = models.FloatField(default=0)  # 여름 유사도
-    autumn_sim = models.FloatField(default=0)  # 가을 유사도
-    winter_sim = models.FloatField(default=0)  # 겨울 유사도
+    spring_sim = models.FloatField(default=0)
+    summer_sim = models.FloatField(default=0)
+    autumn_sim = models.FloatField(default=0)
+    winter_sim = models.FloatField(default=0)
 
     def update_season_similarity(self):
-        """요약 텍스트 기반 계절 유사도 갱신"""
+        """요약 텍스트 기반 계절 유사도 갱신 (강력한 모델 + 멀티 센텐스 + 키워드 가중치)"""
+        # 모델 로드
+        model = get_model()
+        # 텍스트 임베딩
         text_emb = model.encode(self.summarize_text)
-        
+        # 계절별 유사도 계산
         for season, emb in season_embeddings.items():
-            # 코사인 유사도 계산
-            cosine_sim = np.dot(text_emb, emb) / (norm(text_emb)*norm(emb))
+            cosine_sim = np.dot(text_emb, emb) / (norm(text_emb) * norm(emb))
+            # 키워드 가중치 적용
+            for kw in SEASON_KEYWORDS[season]:
+                if kw in self.summarize_text:
+                    cosine_sim = min(cosine_sim + 0.1, 1.0)
             setattr(self, f'{season}_sim', float(cosine_sim))
-        
-        self.save()
+        self.save(update_fields=['spring_sim', 'summer_sim', 'autumn_sim', 'winter_sim'])
+
 
     class Meta:
         db_table = 'content_summarize'
