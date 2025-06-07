@@ -6,6 +6,16 @@ from django.contrib.auth.forms import AuthenticationForm # Django 기본 로그�
 from django.views.decorators.http import require_POST # POST 요청만 허용하는 데코레이터
 from django.views.decorators.http import require_GET # GET 요청만 허용
 from django.db import IntegrityError # 데이터베이스 레벨 오류 처리용
+from django.db.models import Subquery
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from datetime import datetime
+from django.db.models import Prefetch
+from apps.recommender.services.theme_recommender import ThemeRecommender
+from apps.items.models import ContentDetailCommon
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
 
 # 회원가입 폼 (forms.Form 상속 버전)
 from .forms import UserSignupAPIForm
@@ -51,7 +61,6 @@ def signup_api_view(request):
                 json_dumps_params={'ensure_ascii': False} # 한글 처리
             )
         except Exception as e: # 기타 예상 못한 오류
-             print(f"DEBUG: Error during user creation or login: {e}")
              return JsonResponse(
                 {'status': 'error', 'message': '사용자 처리 중 내부 오류가 발생했습니다.'},
                 status=500,
@@ -59,7 +68,6 @@ def signup_api_view(request):
             )
     else:
         # 폼 유효성 검사 실패
-        print(f"DEBUG: Form is invalid. Errors: {form.errors.get_json_data()}") # 디버깅 로그
         return JsonResponse(
             {'status': 'error', 'errors': form.errors.get_json_data()},
             status=400,
@@ -129,3 +137,30 @@ def check_auth_status(request):
     else:
         # 로그아웃 상태일 경우
         return JsonResponse({'isAuthenticated': False})
+
+class BookmarkListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        content_ids = request.user.bookmarks.values_list('content_id', flat=True)
+        bookmarks = ContentDetailCommon.objects.filter(contentid__in=content_ids)
+
+        # 직렬화
+        serializer = SimpleBookmarkSerializer(bookmarks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class SimpleBookmarkSerializer(serializers.ModelSerializer):
+    address = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ContentDetailCommon
+        fields = ['contentid', 'title', 'address', 'image', 'lclsSystm3']
+        read_only_fields = fields
+
+    def get_address(self, obj):
+        return " ".join(filter(None, [obj.addr1.strip() if obj.addr1 else None, 
+                                    obj.addr2.strip() if obj.addr2 else None]))
+
+    def get_image(self, obj):
+        return obj.firstimage or obj.firstimage2

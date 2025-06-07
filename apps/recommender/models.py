@@ -1,3 +1,114 @@
 from django.db import models
+from pgvector.django import VectorField, HnswIndex
+from sentence_transformers import SentenceTransformer
+from apps.items.services.tourapi import get_summarize_content
+from functools import lru_cache
+import numpy as np
+import joblib
+from apps.items.models import ContentDetailCommon
+from sklearn.preprocessing import normalize
+import threading
+import faiss
+import os
+from sumteuyeo.settings import FAISS_BASE_DIR
+_lock = threading.Lock()
 
-# Create your models here.
+
+class ContentFeature(models.Model):
+    detail = models.OneToOneField(
+        ContentDetailCommon,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column='contentid',
+        related_name='feature'
+    )
+    feature_vector = VectorField(dimensions=484, null=True, blank=True)
+
+    _text_model = None
+    _category_encoders = {}
+
+    @classmethod
+    def get_text_model(cls):
+        with _lock:
+            if cls._text_model is None:
+                cls._text_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        return cls._text_model
+
+    @classmethod
+    def get_category_encoder(cls, level):
+        if level not in cls._category_encoders:
+            cls._category_encoders[level] = joblib.load(f'encoders/{level}_encoder.joblib')
+        return cls._category_encoders[level]
+
+    def get_text_embedding(self):
+        summary_text = get_summarize_content(self.detail.contentid, self.detail.contenttypeid)
+        return self.get_text_model().encode(summary_text)
+
+    def get_category_embedding(self):
+        weighted_sum = np.zeros(100, dtype=np.float32)
+        
+        for i, level in enumerate(['lcls1', 'lcls2', 'lcls3']):
+            value = getattr(self.detail, f'lclsSystm{i+1}')
+            encoder_data = self.get_category_encoder(level)
+            
+            # 카테고리 → 인덱스 매핑
+            idx = encoder_data['mapping'].get(value, encoder_data['unknown_index'])
+            
+            # 임베딩 벡터 조회
+            emb = encoder_data['embedding_matrix'][idx]
+            weight = [0.4, 0.3, 0.3][i]
+            
+            weighted_sum += emb * weight
+            
+        return weighted_sum
+
+
+    def update_feature_vector(self):
+        text_emb = self.get_text_embedding()
+        cat_emb = self.get_category_embedding()
+        
+        # 벡터 결합
+        combined = np.concatenate([text_emb, cat_emb])
+        
+        # 정규화 여부 확인 (수정 필요)
+        model = self.get_text_model()
+        if not getattr(model, '_normalize_embeddings', False):  # 더 안전한 확인 방법
+            combined = normalize(combined.reshape(1, -1), norm='l2', axis=1).flatten()
+        else:
+            combined = combined.reshape(1, -1).flatten()
+        
+        # 차원 검증 (중요!)
+        if len(combined) != 484:
+            raise ValueError(f"Invalid dimension: {len(combined)} (expected 484)")
+        
+        self.feature_vector = combined.tolist()
+        self.save(update_fields=['feature_vector'])
+    
+
+    @classmethod
+    def build_faiss_index(cls, index_path=FAISS_BASE_DIR / 'content_index.faiss'):
+        """FAISS 인덱스 파일 및 ID 매핑 파일 생성"""
+        os.makedirs(os.path.dirname(index_path), exist_ok=True)
+        features = cls.objects.exclude(feature_vector__isnull=True)
+        if not features.exists():
+            raise ValueError("No feature vectors available")
+
+        # 벡터 배열 생성
+        vectors = np.array([f.feature_vector for f in features], dtype=np.float32)
+        
+        # ID 매핑 정보 생성
+        id_mapping = {idx: f.detail.contentid for idx, f in enumerate(features)}
+        id_mapping_path = os.path.splitext(index_path)[0] + '_ids.npy'
+        np.save(id_mapping_path, id_mapping)
+
+        # FAISS 인덱스 생성 (Inner Product == 코사인 유사도)
+        index = faiss.IndexFlatIP(vectors.shape[1])
+        index.add(vectors)
+        faiss.write_index(index, index_path)
+
+        return index_path, id_mapping_path
+
+
+    class Meta:
+        db_table = 'content_feature'
+        indexes = []

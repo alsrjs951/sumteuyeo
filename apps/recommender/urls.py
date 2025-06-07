@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import MainRecommendationAPI
 
 
 urlpatterns = [
@@ -13,4 +14,6 @@ urlpatterns = [
     # HTML 템플릿을 렌더링하는 뷰 (이전과 동일)
     path('get-location-page/', views.location_page_view, name='location_page'),
 
+    # 메인 화면 콘텐츠 추천 API 엔드포인트
+    path('recommendations/main/', MainRecommendationAPI.as_view(), name='main-recommendations'),
 ]
