@@ -25,4 +25,7 @@ urlpatterns = [
     path('api/', include('apps.recommender.urls')),
     path('api/auth/', include('apps.users.urls', namespace='users_api')),
     path('api/chatbot/', include('apps.recommender.services.chatbot.urls')),
+    path('api/items/', include('apps.items.urls')),
+    path('api/interactions/', include('apps.interactions.urls')),
+    path('api/recommender/', include('apps.recommender.urls', namespace='recommender_api')),
 ]
