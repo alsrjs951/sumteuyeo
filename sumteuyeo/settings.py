@@ -87,16 +87,20 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{env('REDIS_HOST', default='127.0.0.1')}:{env.int('REDIS_PORT', default=6379)}/1",  # Redis DB 1번을 캐시용으로 사용
+        "LOCATION": f"rediss://{env('REDIS_HOST')}:{env.int('REDIS_PORT')}/1",  # TLS 사용 시 rediss://
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            # "PASSWORD": env('REDIS_PASSWORD', default=None), # ElastiCache Redis에 암호 설정 시 주석 해제
-            # ElastiCache for Redis가 '전송 중 암호화(TLS)'를 사용한다면,
-            # LOCATION에 "rediss://" 스킴을 사용하고 추가 SSL 옵션이 필요할 수 있습니다.
-            # 예: "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None} 또는 특정 인증서 경로 설정
+            "PASSWORD": env('REDIS_PASSWORD', default=''), # ElastiCache 암호 설정 시
+            "CONNECTION_POOL_KWARGS": {
+                "ssl_cert_reqs": None,  # SSL 인증서 검증 비활성화
+                "max_connections": 100   # 연결 풀 크기 조정
+            },
+            "SOCKET_CONNECT_TIMEOUT": 5,  # 연결 타임아웃(초)
+            "SOCKET_TIMEOUT": 5,          # 작업 타임아웃(초)
         }
     }
 }
+
 
 # Session Engine (Redis)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
