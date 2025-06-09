@@ -87,16 +87,16 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"rediss://{env('REDIS_HOST')}:{env.int('REDIS_PORT')}/1",  # TLS 사용 시 rediss://
+        "LOCATION": f"redis://{env('REDIS_HOST')}:{env.int('REDIS_PORT')}/0",  # TLS 사용 시 rediss://
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": env('REDIS_PASSWORD', default=''), # ElastiCache 암호 설정 시
+            # "PASSWORD": env('REDIS_PASSWORD', default=''), # ElastiCache 암호 설정 시
             "CONNECTION_POOL_KWARGS": {
-                "ssl_cert_reqs": None,  # SSL 인증서 검증 비활성화
-                "max_connections": 100   # 연결 풀 크기 조정
+                # "ssl_cert_reqs": "none",  # SSL 인증서 검증 비활성화
+                "max_connections": 50   # 연결 풀 크기 조정
             },
-            "SOCKET_CONNECT_TIMEOUT": 5,  # 연결 타임아웃(초)
-            "SOCKET_TIMEOUT": 5,          # 작업 타임아웃(초)
+            "SOCKET_CONNECT_TIMEOUT": 20,  # 연결 타임아웃(초)
+            "SOCKET_TIMEOUT": 20,          # 작업 타임아웃(초)
         }
     }
 }
