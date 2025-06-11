@@ -75,10 +75,10 @@ class PreferenceService:
         
         # 벌크 조회 및 매핑 테이블 생성
         content_map = {
-            cf.content_id: cf 
-            for cf in ContentFeature.objects.filter(content_id__in=content_ids)
+            cf.detail.contentid: cf 
+            for cf in ContentFeature.objects.filter(detail__contentid__in=content_ids)
                 .select_related('detail')
-                .only('feature_vector', 'detail__lclsSystm1')
+                .only('feature_vector', 'detail__lclssystm1')
         }
 
         # 시간 감쇠 계산 벡터화
@@ -102,7 +102,7 @@ class PreferenceService:
             if (cf := content_map.get(interaction.content_id)) is None:
                 continue
                 
-            category = CATEGORY_MAP.get(cf.detail.lclsSystm1, 'experience')
+            category = CATEGORY_MAP.get(cf.detail.lclssystm1, 'experience')
             raw_vector = np.array(cf.feature_vector, dtype=np.float32)
             
             # 벡터 분해 및 가중치 적용

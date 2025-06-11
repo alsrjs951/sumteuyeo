@@ -33,6 +33,14 @@ class ContentDetailCommon(models.Model):
     mapy = models.FloatField(blank=True, null=True)  # DOUBLE PRECISION
     mlevel = models.PositiveSmallIntegerField(blank=True, null=True)
     overview = models.TextField(blank=True, null=True)
+    
+    summarize = models.OneToOneField(
+        'ContentSummarize',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='summarize'
+    )
 
     class Meta:
         db_table = 'content_detail_common'

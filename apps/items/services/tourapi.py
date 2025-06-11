@@ -34,10 +34,6 @@ def generate_intro_text(intro: Dict[str, Any], info: Dict[str, Any], cat_code: s
     if parkingfood:
         parts.append(f"주차 여부는 {parkingfood}입니다.")
 
-    usefee = intro.get("usefee", "").strip()
-    if usefee:
-        parts.append(f"이용 요금은 {usefee}입니다.")
-
     heritage_flags = [intro.get(f"heritage{i}", "0") for i in range(1, 4)]
     if "1" in heritage_flags:
         parts.append("문화재로 지정된 장소입니다.")
@@ -172,7 +168,7 @@ def get_tourapi_detail(
     contentid: int,
     service_key: str,
     contenttypeid: int = None,
-    max_retries: int = 3
+    max_retries: int = 1
 ) -> Optional[Dict]:
     """
     TourAPI의 detail 종류 API 호출.

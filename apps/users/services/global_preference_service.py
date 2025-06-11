@@ -25,6 +25,9 @@ class GlobalPreferenceService:
 
         for profile in query.only(category_field, 'last_updated').iterator():
             vector = np.array(getattr(profile, category_field), dtype=np.float32)
+            if vector.shape != (484,):
+                logger.warning(f"Invalid vector shape {vector.shape} for user {profile.user_id}")
+                continue
             weight = cls._calculate_decay_weight(profile.last_updated)
             
             sum_vector += vector * weight

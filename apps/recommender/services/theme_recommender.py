@@ -4,7 +4,9 @@ from django.utils import timezone
 from datetime import timedelta
 from pgvector.django import CosineDistance
 from apps.users.models import UserPreferenceProfile, GlobalPreferenceProfile
+from apps.users.services.preference_service import PreferenceService
 from ..models import ContentFeature
+from apps.items.models import ContentDetailCommon
 from apps.items.models import ContentSummarize
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.functions import Cast
@@ -27,11 +29,11 @@ TOURIST_CATEGORIES = ["EX", "HS", "LS", "NA", "SH", "VE"]  # 관광지 카테고
 FOOD_CATEGORY = "FD"  # 음식점 카테고리
 
 class ThemeRecommender:
-    def __init__(self):
-        self.faiss_manager = FaissManager(
-            index_path=FAISS_BASE_DIR / "content_index.faiss",
-            id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
-        )
+    # def __init__(self):
+    #     self.faiss_manager = FaissManager(
+    #         index_path=FAISS_BASE_DIR / "content_index.faiss",
+    #         id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
+    #     )
 
     # 벡터 정규화 함수
     @staticmethod
@@ -59,20 +61,23 @@ class ThemeRecommender:
             'restaurants': {'title': '당신의 입맛을 저격할 맛집', 'items': []}
         }
 
+        nearby_ids = get_nearby_content_ids(user_lat, user_lng)
+
         # FAISS 검색 공통 함수
         def get_faiss_results(blend_vec: np.ndarray, filters: Dict) -> List[int]:
-            normalized_vec = ThemeRecommender.l2_normalize(blend_vec)
-            faiss_ids = FaissManager.search(normalized_vec)
+            faiss_manager = FaissManager(
+                index_path=FAISS_BASE_DIR / "content_index.faiss",
+                id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
+            )
+            faiss_ids = faiss_manager.search(blend_vec, 10000)
             
             # 위치 필터링 적용
-            nearby_ids = get_nearby_content_ids(user_lat, user_lng)
             filtered_ids = list(set(faiss_ids) & set(nearby_ids))
             
             # 추가 필터 적용 (카테고리 등)
-            return ContentFeature.objects.filter(
-                contentid__in=filtered_ids,
-                **filters
-            ).values_list('contentid', flat=True)[:30]
+            return ContentDetailCommon.objects.filter(
+                contentid__in=filtered_ids
+            ).filter(**filters)[:30]
 
         # 1. 맞춤형 추천
         try:
@@ -83,60 +88,64 @@ class ThemeRecommender:
 
         # 가중치 동적 계산
         interaction_count = ContentInteraction.objects.filter(user_id=user_id).count()
-        user_weight = UserPreferenceProfile.calculate_user_weight(interaction_count)
+        user_weight = PreferenceService.calculate_user_weight(interaction_count)
         global_weight = 1.0 - user_weight
 
         global_exp = GlobalPreferenceProfile.objects.first().experience
-        global_exp_vec = np.array(global_exp, dtype=np.float32) if global_exp else np.zeros(VECTOR_DIM)
+        try:
+            global_exp_vec = np.array(global_exp, dtype=np.float32)
+            assert global_exp_vec.size == VECTOR_DIM  # 차원 일치 확인
+        except (TypeError, ValueError, AssertionError):
+            global_exp_vec = np.zeros(VECTOR_DIM)
+
         
         blended_vec = ThemeRecommender.l2_normalize(user_weight*ThemeRecommender.l2_normalize(user_exp) + global_weight*ThemeRecommender.l2_normalize(global_exp_vec))
         
         rows['personalized']['items'] = get_faiss_results(
             blended_vec,
-            {'detail__lclssystm1__in': TOURIST_CATEGORIES}
+            {'lclssystm1__in': TOURIST_CATEGORIES}
         )
 
         # 2. 선호 소분류 추천
+        # 2. 선호 소분류 추천
         try:
             if np.linalg.norm(user_exp) > 1e-8:
-                # 계층별 인코더 사이즈 확인
-                lcls1_encoder = ContentFeature.get_category_encoder('lcls1')
-                lcls2_encoder = ContentFeature.get_category_encoder('lcls2')
                 lcls3_encoder = ContentFeature.get_category_encoder('lcls3')
                 
-                lcls1_dim = len(lcls1_encoder.categories_[0])
-                lcls2_dim = len(lcls2_encoder.categories_[0])
-                lcls3_dim = len(lcls3_encoder.categories_[0])
+                # 소분류 벡터 영역 추출 (고정 차원)
+                lcls3_start = 40 + 30  # 대분류(40) + 중분류(30)
+                lcls3_dim = 30  # 소분류 차원
+                lcls3_vector = user_exp[384 + lcls3_start : 384 + lcls3_start + lcls3_dim]
                 
-                # lcls3 벡터 영역 추출
-                lcls3_start = lcls1_dim + lcls2_dim
-                lcls3_vector = user_exp[384+lcls3_start : 384+lcls3_start+lcls3_dim]
+                # Softmax 적용
+                probs = np.exp(lcls3_vector) / np.sum(np.exp(lcls3_vector))
+                top_indices = np.argsort(probs)[-2:][::-1]
                 
-                # 상위 2개 인덱스
-                top_indices = np.argsort(lcls3_vector)[-2:][::-1]
-                
-                # 실제 카테고리명 변환
-                subcategories = lcls3_encoder.inverse_transform(
-                    np.array(top_indices).reshape(-1, 1)
-                ).flatten()
+                # 유효 인덱스 필터링
+                valid_indices = [idx for idx in top_indices if idx < len(lcls3_encoder.categories_[0])]
+                subcategories = lcls3_encoder.categories_[0][valid_indices]
 
+                # ▼▼▼ for 루프 내부로 이동 ▼▼▼
                 for i, subcat in enumerate(subcategories, 1):
                     row_key = f'preferred_subcat_{i}'
                     rows[row_key]['title'] = f'#{subcat} 핫플레이스'
 
-                    # 가중치 동적 계산
+                    # 가중치 계산 (각 서브카테고리별 독립적 계산)
                     subcat_blend = ThemeRecommender.l2_normalize(
                         user_weight*ThemeRecommender.l2_normalize(user_exp) + 
                         global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
                     )
-
+                    
+                    # ▼▼▼ 루프 내에서 결과 할당 ▼▼▼
                     rows[row_key]['items'] = get_faiss_results(
                         subcat_blend,
-                        {'detail__lclssystm3': subcat}
+                        {'lclssystm3': subcat}
                     )
 
         except Exception as e:
-            logger.error(f"소분류 추천 오류: {str(e)}")
+            logger.error(f"소분류 추천 오류: {str(e)}", exc_info=True)
+
+
 
         # 3. 계절 추천 (유사도 점수 기반)
         try:
@@ -147,10 +156,15 @@ class ThemeRecommender:
                 user_weight*ThemeRecommender.l2_normalize(user_exp) + 
                 global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
             )
+
+            # 계절 유사도가 높은 콘텐츠 ID 추출
+            seasonal_ids = ContentSummarize.objects.filter(
+                **{f'{current_season}_sim__gte': 0.7}
+            ).values_list('contentid', flat=True)
             
             rows['seasonal']['items'] = get_faiss_results(
                 seasonal_blend,
-                {f'{current_season}_sim__gte': 0.7}
+                {'contentid__in': seasonal_ids}
             )
 
         except Exception as e:
@@ -190,14 +204,15 @@ class ThemeRecommender:
             user_food = np.zeros(VECTOR_DIM)
 
         global_food = GlobalPreferenceProfile.objects.first().food
-        global_food_vec = np.array(global_food, dtype=np.float32) if global_food else np.zeros(VECTOR_DIM)
+        global_food_vec = np.array(global_food, dtype=np.float32) if global_food is not None else np.zeros(VECTOR_DIM)
+
         
         # 가중치 동적 계산
         food_blend = ThemeRecommender.l2_normalize(user_weight*ThemeRecommender.l2_normalize(user_food) + global_weight*ThemeRecommender.l2_normalize(global_food_vec))
         
         rows['restaurants']['items'] = get_faiss_results(
             food_blend,
-            {'detail__lclssystm1': FOOD_CATEGORY}
+            {'lclssystm1': FOOD_CATEGORY}
         )
 
         return rows
