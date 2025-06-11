@@ -93,7 +93,7 @@ class MainRecommendationAPI(APIView):
         for section_key, section_data in recommendation_rows.items():
             items = []
             for item in section_data['items']:
-                content_id = item.detail.contentid
+                content_id = item.contentid
                 if content_id not in seen_ids:
                     seen_ids.add(content_id)
                     items.append(self._serialize_content(item))
@@ -110,15 +110,14 @@ class MainRecommendationAPI(APIView):
 
         return serialized
 
-    def _serialize_content(self, content_feature):
+    def _serialize_content(self, detail):
         """개별 콘텐츠 직렬화"""
-        detail = content_feature.detail
         return {
             "contentid": detail.contentid,
             "title": detail.title,
             "address": self._get_full_address(detail),
             "image": detail.firstimage or detail.firstimage2,
-            "category": detail.lclsSystm3
+            "category": detail.lclssystm3
         }
 
     def _get_full_address(self, detail):

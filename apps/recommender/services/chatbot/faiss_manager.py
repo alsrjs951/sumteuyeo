@@ -5,10 +5,11 @@ import numpy as np
 
 class FaissManager:
     def __init__(self, index_path: str, id_map_path: str):
-        self.index = faiss.read_index(index_path)
-        with open(id_map_path, 'rb') as f:
-            self.id_map = pickle.load(f)
-            
+        self.index = faiss.read_index(str(index_path))
+        # with open(id_map_path, 'rb') as f:
+        #     self.id_map = pickle.load(f)
+        self.id_map = np.load(id_map_path, allow_pickle=True)
+    
     def search(self, query_vec: np.ndarray, top_k: int=30) -> List[int]:
         """정규화된 쿼리 벡터로 FAISS 검색 수행"""
         query_vec = query_vec.astype(np.float32).reshape(1, -1)
