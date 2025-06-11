@@ -12,6 +12,7 @@ from apps.items.models import ContentDetailCommon
 from .models import ContentInteraction
 import time
 
+
 class ContentClick(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -19,7 +20,7 @@ class ContentClick(APIView):
         user = request.user
         content_id = request.data.get('content_id')
         content = get_object_or_404(ContentDetailCommon, pk=content_id)
-        
+
         # 캐시 기반 중복 클릭 방지 (30분 유효)
         cache_key = f'click_{user.id}_{content.contentid}'
         if not cache.get(cache_key):
@@ -31,6 +32,7 @@ class ContentClick(APIView):
             )
             return Response(status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_200_OK)
+
 
 class BookmarkToggle(APIView):
     permission_classes = [IsAuthenticated]
@@ -67,6 +69,7 @@ class BookmarkToggle(APIView):
                 )
                 return Response({'status': 'added'}, status=status.HTTP_201_CREATED)
 
+
 class ContentRating(APIView):
     permission_classes = [IsAuthenticated]
     VALID_RATINGS = ['like', 'dislike']
@@ -79,7 +82,7 @@ class ContentRating(APIView):
 
         if rating_type not in self.VALID_RATINGS:
             return Response(
-                {"error": "Invalid rating type"}, 
+                {"error": "Invalid rating type"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -90,15 +93,16 @@ class ContentRating(APIView):
                 content=content,
                 action_type__in=self.VALID_RATINGS
             ).delete()
-            
+
             # 새 평가 생성
             ContentInteraction.objects.create(
                 user=user,
                 content=content,
                 action_type=rating_type
             )
-        
+
         return Response(status=status.HTTP_201_CREATED)
+
 
 class ContentDuration(APIView):
     permission_classes = [IsAuthenticated]
@@ -107,11 +111,11 @@ class ContentDuration(APIView):
         user = request.user
         content_id = request.data.get('content_id')
         content = get_object_or_404(ContentDetailCommon, pk=content_id)
-        
+
         # 세션 기반 체류 시간 계산
         session_key = f'content_{content.contentid}_duration'
         start_time = request.session.get(session_key)
-        
+
         if not start_time:
             # 세션 시작 시간 기록
             request.session[session_key] = timezone.now().timestamp()
@@ -121,7 +125,7 @@ class ContentDuration(APIView):
             end_time = timezone.now().timestamp()
             duration = end_time - start_time
             del request.session[session_key]
-            
+
             ContentInteraction.objects.create(
                 user=user,
                 content=content,

@@ -20,7 +20,6 @@ urlpatterns = [
 
     # 로그인 상태 확인 URL
     path('status/', views.check_auth_status, name='status'),
-
     path('bookmarks/', views.BookmarkListView.as_view(), name='bookmark-list'),
 
 ]
