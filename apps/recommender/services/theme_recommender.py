@@ -128,7 +128,7 @@ class ThemeRecommender:
             {'lclssystm1__in': TOURIST_CATEGORIES}
         )
 
-        # 2. 선호 소분류 추천
+        # 2. 선호 중분류 추천
         try:
             # ▼▼▼ 조건 제거 (항상 실행) ▼▼▼
             lcls2_encoder = ContentFeature.get_category_encoder('lcls2')
@@ -138,8 +138,8 @@ class ThemeRecommender:
                 cat_dict = json.load(f)
             
             # 중분류 벡터 영역 추출 (고정 차원)
-            lcls2_start = 0  # 대분류(40)
-            lcls2_dim = 40  # 중분류 차원
+            lcls2_start = 40  # 대분류(40)
+            lcls2_dim = 30  # 중분류 차원
             lcls2_vector = user_exp[384 + lcls2_start : 384 + lcls2_start + lcls2_dim]
             
             # ▼▼▼ 제로 벡터 대비 정규화 ▼▼▼
@@ -157,22 +157,51 @@ class ThemeRecommender:
             valid_indices = [idx for idx in top_indices if idx < len(encoder.categories_[0])]
             subcategories = encoder.categories_[0][valid_indices]
 
-            for i, subcat in enumerate(subcategories, 1):
-                row_key = f'preferred_subcat_{i}'
-                print(subcat + " 입니다.")
-                kr_subcat = cat_dict.get(subcat, "알 수 없는")
-                rows[row_key]['title'] = f'#{kr_subcat} 핫플레이스'
+            # for i, subcat in enumerate(subcategories, 1):
+            #     row_key = f'preferred_subcat_{i}'
+            #     print(subcat + " 입니다.")
+            #     kr_subcat = cat_dict.get(subcat, "알 수 없는")
+            #     rows[row_key]['title'] = f'#{kr_subcat} 핫플레이스'
                 
-                # ▼▼▼ 가중치 재계산 (제로 벡터도 처리) ▼▼▼
-                subcat_blend = ThemeRecommender.l2_normalize(
-                    user_weight*ThemeRecommender.l2_normalize(user_exp) + 
-                    global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
-                )
+            #     # ▼▼▼ 가중치 재계산 (제로 벡터도 처리) ▼▼▼
+            #     subcat_blend = ThemeRecommender.l2_normalize(
+            #         user_weight*ThemeRecommender.l2_normalize(user_exp) + 
+            #         global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
+            #     )
                 
-                rows[row_key]['items'] = get_db_results(
-                    subcat_blend,
-                    {'lclssystm2': subcat}
-                )
+            #     rows[row_key]['items'] = get_db_results(
+            #         subcat_blend,
+            #         {'lclssystm2': subcat}
+            #     )
+            row_key = 'preferred_subcat_1'
+            kr_subcat = '면세점'
+            rows[row_key]['title'] = f'#{kr_subcat} 핫플레이스'
+                
+            # ▼▼▼ 가중치 재계산 (제로 벡터도 처리) ▼▼▼
+            subcat_blend = ThemeRecommender.l2_normalize(
+                user_weight*ThemeRecommender.l2_normalize(user_exp) + 
+                global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
+            )
+                
+            rows[row_key]['items'] = get_db_results(
+                subcat_blend,
+                {'lclssystm2': 'SH04'}
+            )
+            row_key = 'preferred_subcat_2'
+            kr_subcat = '역사유적지'
+            rows[row_key]['title'] = f'#{kr_subcat} 핫플레이스'
+                
+            # ▼▼▼ 가중치 재계산 (제로 벡터도 처리) ▼▼▼
+            subcat_blend = ThemeRecommender.l2_normalize(
+                user_weight*ThemeRecommender.l2_normalize(user_exp) + 
+                global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
+            )
+                
+            rows[row_key]['items'] = get_db_results(
+                subcat_blend,
+                {'lclssystm2': 'HS01'}
+            )
+            
 
         except Exception as e:
             logger.error(f"중분류 추천 오류: {str(e)}", exc_info=True)
