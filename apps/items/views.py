@@ -9,7 +9,6 @@ import certifi
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 
-
 # Create your views here.
 # --- 헬퍼 함수: detailIntro2 API 호출 및 정보 추출 ---
 def _get_detail_intro_info(api_key, ca_bundle_path, content_id, content_type_id):
