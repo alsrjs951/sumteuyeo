@@ -17,9 +17,6 @@ import joblib
 import logging
 import random
 import time
-import faiss
-from .chatbot.faiss_manager import FaissManager
-from sumteuyeo.settings import FAISS_BASE_DIR
 from typing import List, Dict
 import json
 from datetime import timedelta
@@ -33,11 +30,6 @@ TOURIST_CATEGORIES = ["EX", "HS", "LS", "NA", "SH", "VE"]  # 관광지 카테고
 FOOD_CATEGORY = "FD"  # 음식점 카테고리
 
 class ThemeRecommender:
-    # def __init__(self):
-    #     self.faiss_manager = FaissManager(
-    #         index_path=FAISS_BASE_DIR / "content_index.faiss",
-    #         id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
-    #     )
 
     # 벡터 정규화 함수
     @staticmethod
@@ -84,23 +76,6 @@ class ThemeRecommender:
                 .order_by('-similarity')  # 내림차순 정렬
                 [: size]  # 상위 size개만 추출
             )
-
-
-        # FAISS 검색 공통 함수
-        def get_faiss_results(blend_vec: np.ndarray, filters: Dict) -> List[int]:
-            faiss_manager = FaissManager(
-                index_path=FAISS_BASE_DIR / "content_index.faiss",
-                id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
-            )
-            faiss_ids = faiss_manager.search(blend_vec, 50000)
-            
-            # 위치 필터링 적용
-            filtered_ids = list(set(faiss_ids) & set(nearby_ids))
-            
-            # 추가 필터 적용 (카테고리 등)
-            return ContentDetailCommon.objects.filter(
-                contentid__in=filtered_ids
-            ).filter(**filters)[:30]
 
         # 1. 맞춤형 추천
         try:
@@ -193,7 +168,7 @@ class ThemeRecommender:
                 global_weight * ThemeRecommender.l2_normalize(global_exp_vec)
             )
 
-            # FAISS 검색 및 필터 적용
+            # 검색 및 필터 적용
             rows['hot_places']['items'] = get_db_results(
                 hot_blend,
                 {'contentid__in': hot_interaction_ids},
