@@ -1,0 +1,32 @@
+name: Auto Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+                cd /home/ubuntu/sumteuyeo
+                if [ ! -d "venv" ]; then
+                  python3 -m venv venv
+                fi
+                source venv/bin/activate
+                python3 -m pip install --upgrade pip
+                git fetch --all
+                git reset --hard origin/main
+                python3 -m pip install -r requirements.txt
+                python3 manage.py migrate
+                python3 manage.py collectstatic --noinput
+                sudo systemctl restart gunicorn
