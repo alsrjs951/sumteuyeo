@@ -9,16 +9,15 @@ from django.db import IntegrityError # 데이터베이스 레벨 오류 처리�
 from django.db.models import Subquery
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
 from datetime import datetime
 from django.db.models import Prefetch
 from apps.recommender.services.theme_recommender import ThemeRecommender
 from apps.items.models import ContentDetailCommon
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
-
-# 회원가입 폼 (forms.Form 상속 버전)
+from rest_framework import serializers, generics, permissions, status
+from .models import UserRating
 from .forms import UserSignupAPIForm
+from rest_framework.exceptions import NotFound
 
 User = get_user_model() # 현재 활성화된 사용자 모델 가져오기
 
@@ -164,3 +163,23 @@ class SimpleBookmarkSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         return obj.firstimage or obj.firstimage2
+
+class UserRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRating
+        fields = ['id', 'user', 'content', 'rating_type', 'created_at']
+
+
+class UserRatingByContentView(generics.RetrieveAPIView):
+    serializer_class = UserRatingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        content_id = self.kwargs['content_id']
+        try:
+            return UserRating.objects.get(
+                user=self.request.user,  # 현재 인증된 사용자
+                content_id=content_id    # URL 파라미터로 전달된 content_id
+            )
+        except UserRating.DoesNotExist:
+            raise NotFound("해당 콘텐츠에 대한 평가 정보가 없습니다.")

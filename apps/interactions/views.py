@@ -11,6 +11,7 @@ from apps.users.models import UserBookmark
 from apps.items.models import ContentDetailCommon
 from .models import ContentInteraction
 import time
+from apps.users.models import UserRating
 
 class ContentClick(APIView):
     permission_classes = [IsAuthenticated]
@@ -90,15 +91,27 @@ class ContentRating(APIView):
                 content=content,
                 action_type__in=self.VALID_RATINGS
             ).delete()
-            
+
+            # UserRating 기존 평가 삭제 및 새로 생성
+            UserRating.objects.filter(
+                user=user,
+                content=content
+            ).delete()
+            UserRating.objects.create(
+                user=user,
+                content=content,
+                rating_type=rating_type
+            )
+
             # 새 평가 생성
             ContentInteraction.objects.create(
                 user=user,
                 content=content,
                 action_type=rating_type
             )
-        
+
         return Response(status=status.HTTP_201_CREATED)
+
 
 class ContentDuration(APIView):
     permission_classes = [IsAuthenticated]

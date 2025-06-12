@@ -23,4 +23,6 @@ urlpatterns = [
 
     path('bookmarks/', views.BookmarkListView.as_view(), name='bookmark-list'),
 
+    path('user_ratings/<int:content_id>/', views.UserRatingByContentView.as_view(), name='user-rating-by-content'),
+
 ]

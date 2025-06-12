@@ -26,6 +26,8 @@ class Command(BaseCommand):
                          help='체류 시간(초), duration 액션에서 필수')
         parser.add_argument('--toggle', action='store_true',
                          help='북마크 토글 모드 활성화')
+        parser.add_argument('--duration', required=('action' == 'duration'))
+
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -116,6 +118,8 @@ class Command(BaseCommand):
         )
 
 # # 명령어 사용 예시
+#
+# 파라미터에 user 는 user_id 컬럼이고, content 는 contentid 컬럼입니다.
 #
 # # 클릭 이벤트 기록
 # python manage.py handle_interaction \
