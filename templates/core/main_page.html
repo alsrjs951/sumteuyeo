@@ -861,6 +861,7 @@
                 <ul id="profileDropdown" class="profile-dropdown-menu">
                     <li><a href="my-info.html" id="myInfoLink"><i class="fas fa-user-cog"></i> 내 정보</a></li>
                     <li><a href="#" id="wishlistFromDropdownLink"><i class="fas fa-heart"></i> 찜 목록</a></li>
+                    <li><a href="survey.html" id="surveyLink" class="hidden"><i class="fas fa-poll"></i> 설문조사 하러가기</a></li>
                     <li class="dropdown-divider"></li>
                     <li><a href="#" id="logoutFromDropdownLink"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
                 </ul>
@@ -1074,6 +1075,7 @@
         let closePlaceModalAfterGeo = false;
         let modalOpenTime = null;
         let contentIdForDurationLog = null;
+        let surveyLinkEl;
         const API_BASE_URL = 'http://127.0.0.1:8000';
         const INTERACTIONS_API_BASE = `${API_BASE_URL}/api/interactions/`;
         const RECOMMENDATIONS_API_BASE = `${API_BASE_URL}/api/recommender/recommendations/main/`;
@@ -1085,11 +1087,6 @@
             };
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const csrfToken = getCookie('csrftoken'); // CSRF 토큰 가져오는 함수 (getCookie)는 이미 있습니다.
-            if (csrfToken) {
-                headers['X-CSRFToken'] = csrfToken;
             }
             return headers;
         };
@@ -1281,7 +1278,6 @@
         }
 
         async function openItemDetailModal(itemDataFromList) {
-            console.log("제발");
             if (!itemDataFromList || !itemDetailModal) return;
 
             const homepageDiv = document.getElementById('itemDetailHomepage');
@@ -1307,7 +1303,6 @@
 
             //클릭 로그 전송
             if (currentDetailItemContentId) {
-                console.log("제발!!!");
                 sendContentClick(currentDetailItemContentId);
                 startContentDuration(currentDetailItemContentId);
                 contentIdForDurationLog = currentDetailItemContentId; // 이탈 시 사용할 ID 저장
@@ -1443,7 +1438,7 @@
                     introAttributesContainerEl.style.display = 'block';
                 }
 
-                const locationAddressForMap = detailedData.addr || itemDataFromList.addr || itemDataFromList.addr1 || itemDataFromList.address || "";
+                const locationAddressForMap = detailedData.addr || itemDataFromList.addr1 || itemDataFromList.address || "";
                 if (locationAddressForMap && geocoder) { 
                     if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
                     mapContainer.style.display = 'none';
@@ -1476,7 +1471,7 @@
                 textContent: '관광정보 수정요청' 
             }); 
             editButton.onclick = () => { 
-                window.open(`mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`, '_blank');
+                window.location.href = `mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`; 
             }; 
             // 좋아요 버튼이 HTML에 이미 존재한다고 가정하고 그 앞에 수정요청 버튼을 삽입합니다.
             const likeBtnRefForEdit = homepageDiv.querySelector('#likeButton');
@@ -1584,9 +1579,7 @@
         }
         // 콘텐츠 클릭 기록 (POST, 중복 방지 로직은 서버가 처리)
         async function sendContentClick(contentId) {
-            console.log("테스트1");
-            // if (!localStorage.getItem('access_token')) return; // 비로그인 시 기록 안함
-            console.log("테스트2");
+            if (!localStorage.getItem('access_token')) return; // 비로그인 시 기록 안함
             try {
                 const res = await fetch(`${INTERACTIONS_API_BASE}click/`, {
                     method: 'POST',
@@ -1737,7 +1730,6 @@
 
             try {
                 const response = await axios.post('/api/interactions/bookmark/', {
-                    headers: getAuthHeaders(),
                     content_id: contentIdForAPI
                 });
 
@@ -2058,6 +2050,7 @@
                 if (titles[2]) titles[2].textContent = "여름";
                 if (titles[3]) titles[3].textContent = "가을";
                 if (titles[4]) titles[4].textContent = "겨울";
+                if (titles[5]) titles[5].textContent = "봄";
             } else {
                 // sections 배열에 있는 각 데이터에 대해 반복
                 sections.forEach((section, index) => {
@@ -2107,7 +2100,15 @@
                             if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
                                 e.stopPropagation(); // 모달 열림 방지
 
-                                toggleBookmark(item.contentid); // item.contentid를 사용하여 API 호출
+                                // 찜하기/해제하기 로직을 여기에 추가합니다.
+                                // 현재 찜 목록에 있는지 확인합니다.
+                                if (isWished(item.title)) {
+                                    // 이미 찜 되어 있다면, 목록에서 제거합니다.
+                                    removeFromWishlist(item.title);
+                                } else {
+                                    // 찜 되어 있지 않다면, 목록에 추가합니다.
+                                    addToWishlist(item);
+                                }
                                 
                                 // 상세 정보 모달이 열리지 않도록 여기서 실행을 마칩니다.
                                 return; 
@@ -2161,10 +2162,9 @@
             cardContainer.className = 'chatbot-card-container';
 
             const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
+
             recommendations.forEach(item => {
                 const itemIdForWishlist = item.title;
-                // API 호출에 사용할 content_id
-                const contentIdForApi = item.contentid; // ★ 추가: contentid 변수 선언
                 let heartIconHTML = '';
 
                 if (isLoggedIn) {
@@ -2174,8 +2174,7 @@
 
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
-                cardEl.setAttribute('data-item-id', itemIdForWishlist); // UI 업데이트용 ID
-                cardEl.setAttribute('data-content-id', contentIdForApi); // ★ 추가: API 호출용 contentid 저장
+                cardEl.setAttribute('data-item-id', itemIdForWishlist);
 
                 // ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼
                 cardEl.innerHTML = `
@@ -2190,16 +2189,12 @@
 
                 cardEl.onclick = (e) => {
                     if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
-                        e.stopPropagation(); // 모달 열림 방지
-
-                        // ★ 이 부분을 contentIdForApi로 변경
-                        if (!contentIdForApi) { // contentid가 없을 경우 처리
-                            console.error("챗봇 카드 찜하기 오류: contentid가 없습니다.", item);
-                            alert("찜 처리 중 오류가 발생했습니다 (ID 누락).");
-                            return;
+                        e.stopPropagation();
+                        if (isWished(item.title)) {
+                            removeFromWishlist(item.title);
+                        } else {
+                            addToWishlist(item);
                         }
-                        toggleBookmark(contentIdForApi); // ★ toggleBookmark 호출 시 contentIdForApi 전달
-
                         return;
                     }
                     openedDetailFromWishlist = false;
@@ -2225,6 +2220,18 @@
             signupButton.classList.toggle('hidden', isLoggedIn);
             loginButton.classList.toggle('hidden', isLoggedIn);
             profileAreaEl.classList.toggle('hidden', !isLoggedIn);
+            if (isLoggedIn) {
+                loginUserDisplayEl.textContent = username;
+                const surveyStatus = localStorage.getItem(`surveyStatus_${username}`);
+                        if (surveyStatus !== 'completed') {
+                            surveyLinkEl.classList.remove('hidden');
+                        } else {
+                            surveyLinkEl.classList.add('hidden');
+                        }
+            } else {
+                if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+                surveyLinkEl.classList.add('hidden');
+            }
 
             if(logoutButton) logoutButton.classList.add('hidden');
             if (isLoggedIn) {
@@ -2253,7 +2260,8 @@
                     currentLoggedInUsername = username; 
                     loadWishlist(); 
                     updateAuthUI(true, username); // UI를 로그인 상태로 업데이트
-                    window.location.reload();
+
+                    window.location.href = 'survey.html'; // 설문조사 페이지로 이동
                 } else {
                     if (data.errors) {
                         // username 오류 처리
@@ -2407,6 +2415,7 @@
             aiChatbotSendButtonEl = document.getElementById('aiChatbotSendButton');
             aiChatbotDisplayAreaEl = document.getElementById('aiChatbotDisplayArea');
 
+            surveyLinkEl = document.getElementById('surveyLink'); // 새로 추가한 버튼 선택
 
             if (placeSearchModal) { // placeSearchModal이 정상적으로 찾아졌는지 확인
                 const modalInternalGpsButton = placeSearchModal.querySelector('#modal_map_container #gpsButton');
@@ -2638,7 +2647,7 @@
             }
 
             document.querySelectorAll('#profileDropdown a').forEach(link => {
-                if (link.id === 'myInfoLink') {
+                if (link.id === 'myInfoLink' || link.id === 'surveyLink') {
                     // 이 링크들은 HTML에서 href를 설정했습니다.
                     // 드롭다운만 닫히도록 합니다.
                     link.addEventListener('click', (e) => {
@@ -2736,9 +2745,8 @@
 
                 // currentDetailItemContentId는 상세 모달이 열릴 때 설정됩니다. [cite: 1, 324]
                 if (currentDetailItemContentId) {
-                    axios.post('/api/interactions/rating/', {
+                    axios.post('/api/items/interactions/rating/', {
                         content_id: currentDetailItemContentId,
-                        headers: getAuthHeaders(),
                         type: type // 'like' 또는 'dislike'
                     })
                     .then(response => {

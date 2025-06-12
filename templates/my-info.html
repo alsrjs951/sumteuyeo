@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 정보 - 숨트여</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* 기본 스타일 및 폰트 설정 */
+        @font-face {
+            font-family: 'GangwonEdu_OTFBoldA';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'SUITE-Regular';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        body {
+            font-family: 'GangwonEdu_OTFBoldA';
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+
+        /* 내 정보 페이지 컨테이너 스타일 */
+        .main-container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 40px 50px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* 타이틀 디자인 */
+        .main-container h1 {
+            font-size: 3.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #ff8a8a, #5fc2ff, #3d5afe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
+        .main-container h1 i {
+            display: inline;
+            margin-right: 15px;
+        }
+
+        .info-group {
+            margin-bottom: 30px;
+        }
+        .info-group label {
+            display: block;
+            font-size: 1.2em;
+            color: #5fc2ff;
+            margin-bottom: 10px;
+        }
+        .info-group .info-text {
+            font-family: 'SUITE-Regular';
+            font-size: 1.2em;
+            color: #333;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #5fc2ff;
+            word-break: break-all;
+        }
+        
+        /* 버튼 스타일 */
+        .action-buttons {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        .btn-gradient {
+            background-image: linear-gradient(45deg, #64b5f6 0%, #3d5afe 100%);
+            color: white;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'GangwonEdu_OTFBoldA';
+            font-size: 1.2em;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.25);
+        }
+        .btn-gradient i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1><i class="fas fa-user-shield"></i> 나의 정보</h1>
+        
+        <div class="info-group">
+            <label><i class="fas fa-user"></i> 아이디</label>
+            <div id="myInfoId" class="info-text">불러오는 중...</div>
+        </div>
+        
+        <div class="info-group">
+            <label><i class="fas fa-envelope"></i> 이메일</label>
+            <div id="myInfoEmail" class="info-text">불러오는 중...</div>
+        </div>
+
+        <div class="info-group">
+            <label><i class="fas fa-calendar-alt"></i> 가입일</label>
+            <div id="myInfoJoinDate" class="info-text">불러오는 중...</div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="{% url 'core:main_page' %}" class="btn-gradient"><i class="fas fa-home"></i> 메인으로 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        // Django View에서 전달받을 데이터
+        const DJANGO_CONTEXT = {
+            isAuthenticated: `{{ user.is_authenticated|yesno:'true,false' }}`,
+            username: `{{ user.username|default:'' }}`,
+            email: `{{ user.email|default:'' }}`,
+            date_joined: `{{ user.date_joined|date:'Y년 m월 d일' }}`
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 내 정보 필드 요소 선택
+            const myInfoIdEl = document.getElementById('myInfoId');
+            const myInfoEmailEl = document.getElementById('myInfoEmail');
+            const myInfoJoinDateEl = document.getElementById('myInfoJoinDate');
+
+            // Django 데이터로 페이지 초기화
+            const isAuthenticated = DJANGO_CONTEXT.isAuthenticated === 'true';
+            if (isAuthenticated) {
+                myInfoIdEl.textContent = DJANGO_CONTEXT.username;
+                myInfoEmailEl.textContent = DJANGO_CONTEXT.email || '이메일 정보가 없습니다.';
+                myInfoJoinDateEl.textContent = DJANGO_CONTEXT.date_joined || '가입일 정보가 없습니다.';
+            } else {
+                // 로그인하지 않은 사용자는 이 페이지에 접근할 수 없도록 Django view에서 처리하는 것이 좋습니다.
+                // 템플릿에서는 비상시를 대비해 메시지를 표시합니다.
+                document.querySelector('.main-container').innerHTML = `
+                    <h1><i class="fas fa-exclamation-triangle"></i> 로그인이 필요합니다.</h1>
+                    <div class="action-buttons">
+                        <a href="{% url 'core:main_page' %}" class="btn-gradient"><i class="fas fa-home"></i> 메인으로 돌아가기</a>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

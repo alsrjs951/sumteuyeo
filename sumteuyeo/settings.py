@@ -153,6 +153,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
@@ -207,6 +208,3 @@ TOUR_API_KEY = env('TOUR_API_KEY')
 #     # X_FRAME_OPTIONS = 'DENY' # MIDDLEWARE에 이미 XFrameOptionsMiddleware가 있음
 #     SECURE_CONTENT_TYPE_NOSNIFF = True
 #     SECURE_BROWSER_XSS_FILTER = True
-
-# FAISS 경로
-FAISS_BASE_DIR = BASE_DIR / 'data' / 'faiss'

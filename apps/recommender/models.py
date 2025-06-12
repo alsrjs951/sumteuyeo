@@ -8,9 +8,7 @@ import joblib
 from apps.items.models import ContentDetailCommon
 from sklearn.preprocessing import normalize
 import threading
-import faiss
 import os
-from sumteuyeo.settings import FAISS_BASE_DIR
 import logging
 from sumteuyeo.settings import BASE_DIR
 from pathlib import Path
@@ -129,83 +127,6 @@ class ContentFeature(models.Model):
                 self.feature_vector = None
                 self.save(update_fields=['feature_vector'])
             return False
-
-    
-
-    @classmethod
-    def build_faiss_index(cls, index_path=FAISS_BASE_DIR / 'content_index.faiss', batch_size=1000):
-        """FAISS 인덱스 생성 (배치 처리 및 메모리 최적화)"""
-        os.makedirs(os.path.dirname(index_path), exist_ok=True)
-        
-        # 유효한 feature_vector가 있는 객체 쿼리
-        qs = cls.objects.exclude(feature_vector__isnull=True)\
-                       .select_related('detail')\
-                       .annotate(contentid=F('detail__contentid'))\
-                       .order_by('contentid')
-
-        if not qs.exists():
-            raise ValueError("생성할 특징 벡터가 존재하지 않습니다")
-
-        # 첫 번째 벡터로 차원 확인
-        first_vec = qs.first().feature_vector
-        if isinstance(first_vec, list):
-            first_vec = np.array(first_vec, dtype=np.float32)
-        dim = len(first_vec)
-
-        # FAISS 인덱스 초기화 (코사인 유사도용)
-        index = faiss.IndexFlatIP(dim)
-        
-        # 벡터 및 ID 저장 리스트
-        all_vectors = []
-        all_ids = []
-        
-        # 배치 처리 진행률 표시
-        total = qs.count()
-        with tqdm(total=total, desc="FAISS 인덱스 빌드 중") as pbar:
-            for offset in range(0, total, batch_size):
-                batch = list(qs[offset:offset+batch_size])
-                
-                # 벡터 변환 및 유효성 검사
-                vectors = []
-                ids = []
-                for obj in batch:
-                    vec = obj.feature_vector
-                    # 1차 검증: None 또는 빈 리스트
-                    if vec is None or vec.size == 0 or np.all(vec == None) or np.isnan(vec).any():
-                        continue
-                    
-                    # 2차 검증: 숫자형 데이터 확인
-                    try:
-                        vec = np.array(vec, dtype=np.float32)
-                    except ValueError:
-                        continue
-                    
-                    # 3차 검증: 차원 및 NaN 확인
-                    if vec.ndim != 1 or vec.shape[0] != dim or np.isnan(vec).any():
-                        continue
-                    
-                    vectors.append(vec)
-                    ids.append(obj.contentid)
-                
-                if vectors:
-                    # 배치 벡터 정규화 후 추가
-                    vectors = np.vstack(vectors)
-                    vectors = vectors.astype(np.float32)
-                    faiss.normalize_L2(vectors)  # 코사인 유사도 정규화
-                    index.add(vectors)
-                    
-                    all_vectors.append(vectors)
-                    all_ids.extend(ids)
-                    pbar.update(len(vectors))
-
-        # ID 매핑 파일 저장
-        id_map_path = index_path.with_name(f"{index_path.stem}_ids.npy")
-        np.save(id_map_path, np.array(all_ids))
-
-        # 인덱스 저장
-        faiss.write_index(index, str(index_path))
-        
-        return str(index_path), str(id_map_path)
 
 
     class Meta:
