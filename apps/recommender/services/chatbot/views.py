@@ -67,6 +67,7 @@ class ChatbotAsyncView(View):
                     cache.set(cache_key, result, timeout=3600)
                 except Exception:
                     return JsonResponse({"response": "GPT 호출 중 오류가 발생했습니다."}, status=500)
+
         # 👤 5. 사용자 프로필 불러오기
         user_profile = get_user_profile(user_id)
 
@@ -78,6 +79,8 @@ class ChatbotAsyncView(View):
         # 📌 7. 추천 결과 생성 (의도 + 키워드 반영)
         expanded_keywords = expand_keywords_with_synonyms(keywords, synonym_dict)
         recommendations = await get_recommendations(user_input, user_profile, intent, expanded_keywords, top_n=5)
+
+        # 관광지 contentid 추출 후 요약 정보 구성
         contentids = [item['contentid'] for item in recommendations]
         places_summary = get_places_summary_by_contentids(contentids, metadata)
 
@@ -87,11 +90,10 @@ class ChatbotAsyncView(View):
             for place in places_summary:
                 place["title"] = await translate_to_original(place["title"], dest=original_lang)
                 place["addr"] = await translate_to_original(place["addr"], dest=original_lang)
-                # 필요시 tel, firstimage 등도 번역 가능
-
+                # tel, firstimage는 보통 번역 X
         print(places_summary)
         # 📤 9. 최종 응답 반환
         return JsonResponse({
-            "response": result,  # 안내 메시지
+            "response": result,  # 추천 메시지 ("제주도 조용한 여행지 추천드립니다!")
+            "results": places_summary  # 관광지 카드용 리스트
         })
-

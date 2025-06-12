@@ -2,48 +2,47 @@ from ...utils.embedding import model, faiss_index, normalize_query
 from asgiref.sync import sync_to_async
 from .score import core_item_score
 from django.conf import settings
-from ...constants import cat_dict
+from ...constants import cat_dict, INTENT_TO_CATEGORY_MAP
 import json
 import os
 from .cross_encoder_trainer import KCrossEncoderReranker
+from ...utils.ner import extract_locations_from_query  # 👈 NER 기반 지역 추출 함수
+from django.http import JsonResponse
 
-#재랭킹 모델 로딩
-reranker = KCrossEncoderReranker("C:/django/sumteuyeo/apps/recommender/services/chatbot/services/recommendation/reranker_model")
-
-# 데이터 경로 설정
+# --- 데이터 및 모델 로딩 ---
 DATA_DIR = os.path.join(settings.BASE_DIR, 'apps', 'recommender', 'services', 'chatbot', 'data')
-SPOT_METADATA_PATH = os.path.join(DATA_DIR, "spot_metadata.json")  # ✅ 추가
+SPOT_METADATA_PATH = os.path.join(DATA_DIR, "spot_metadata.json")
+SUMMARIES_PATH = os.path.join(DATA_DIR, "persistent_spot_summaries.json")
+model_id = "udol/sumteuyeo-cross"
 
 def load_metadata_as_dict(path):
-    """리스트 형태의 spot_metadata를 contentid 기준으로 딕셔너리 변환"""
     with open(path, "r", encoding="utf-8") as f:
-        raw = json.load(f)
-    return {str(item["contentid"]): item for item in raw if "contentid" in item}  # ✅ contentid를 문자열로 변환
+        raw_list = json.load(f)
+    return {str(item["contentid"]): item for item in raw_list if "contentid" in item}
 
-# 요약 정보 로드
-with open(os.path.join(DATA_DIR, "persistent_spot_summaries.json"), "r", encoding="utf-8") as f:
+with open(SUMMARIES_PATH, "r", encoding="utf-8") as f:
     summaries = json.load(f)
+metadata = load_metadata_as_dict(SPOT_METADATA_PATH)
 
-# 메타데이터를 dict로 변환해 로드
-metadata = load_metadata_as_dict(SPOT_METADATA_PATH)  # ✅ 수정된 부분
-
+reranker = KCrossEncoderReranker(
+    model_path=model_id,
+    summaries=summaries
+)
 
 @sync_to_async
 def get_recommendations(query, user_profile, intent=None, keywords=None, top_n=5):
     """
-    intent 및 쿼리에 따라 관광지를 추천합니다.
-    Cross-Encoder 재랭킹이 적용됩니다.
+    사용자 쿼리와 의도에 따라 관광지를 추천합니다.
+    NER 기반 지역 필터링 + 카테고리 + 점수 기반 재랭킹 구조.
     """
     scored_results = []
-    seen_content_ids = set()  # 중복 방지용 집합
+    seen_content_ids = set()
 
+    # Case 1: '한적한 곳' 추천
     if intent == "recommend_quiet":
-        items = sorted(
-            metadata.items(),
-            key=lambda x: x[1].get("congestion_ratio", 1.0)
-        )
+        items = sorted(metadata.items(), key=lambda x: x[1].get("congestion_ratio", 1.0))
         for contentid, item in items:
-            if item["title"] in user_profile.get("visited", []):
+            if item.get("title") in user_profile.get("visited", []):
                 continue
             if contentid in seen_content_ids:
                 continue
@@ -52,43 +51,60 @@ def get_recommendations(query, user_profile, intent=None, keywords=None, top_n=5
             seen_content_ids.add(contentid)
             if len(scored_results) >= top_n * 5:
                 break
-        # 조용한 장소 추천은 Cross-Encoder 재랭킹 적용 (선택 사항)
         candidates = [item for item, score in scored_results]
-        if candidates:  # 후보군이 있을 때만 재랭킹
-            ranked_items = reranker.rerank(query, candidates, top_n)
-            return ranked_items
-        else:
-            return []
+        return reranker.rerank(query, candidates, top_n) if candidates else []
 
+    # Case 2: 일반 추천
     else:
-        query_vec = model.encode([normalize_query(query)])
-        D, I = faiss_index.search(query_vec, top_n * 20)
+        # 1. NER 기반 지역명 추출 (사전 정의된 함수 사용)
+        extracted_locations = extract_locations_from_query(query)  # ['제주', '경주'] 등
+        extracted_locations_set = set(extracted_locations) if extracted_locations else set()
 
-        content_ids = list(summaries.keys())
-        for idx in I[0]:
-            contentid = content_ids[idx]
+        # 2. 의도 기반 필수 카테고리 확인
+        required_category = INTENT_TO_CATEGORY_MAP.get(intent)
+
+        # 3. FAISS 전체에서 1차 후보군 검색
+        query_vec = model.encode([normalize_query(query)])
+        D, I = faiss_index.search(query_vec, top_n * 100)
+        faiss_candidate_ids = [list(summaries.keys())[idx] for idx in I[0]]
+
+        # 4. 지역명 기반 후처리 필터링 + 카테고리 체크 + 점수 계산
+        for contentid in faiss_candidate_ids:
             if contentid in seen_content_ids:
                 continue
+
             item = metadata.get(contentid)
             if not item:
                 continue
+
+            # 지역명 필터링
+            if extracted_locations_set:
+                item_addr = item.get("addr1", "") + item.get("addr2", "")
+                if not any(loc in item_addr for loc in extracted_locations_set):
+                    continue
+
+            # 카테고리 필터링
+            if required_category and str(item.get("contenttypeid")) != required_category:
+                continue
+
+            # 점수 계산
             score = core_item_score(item, user_profile, intent=intent, keywords=keywords, cat_dict=cat_dict)
             if score is not None:
                 scored_results.append((item, score))
                 seen_content_ids.add(contentid)
-        # 점수순 정렬 후 상위 (top_n * m)개만 Cross-Encoder 재랭킹 대상으로 추출
-        ranked = sorted(scored_results, key=lambda x: -x[1])[:top_n * 20]
-        candidates = [item for item, score in ranked]
-        # Cross-Encoder 재랭킹
-        ranked_items = reranker.rerank(query, candidates, top_n)
-        print(ranked_items)
-        return ranked_items
 
+        if not scored_results:
+            return []
+
+        # 5. 점수 상위 항목 rerank
+        ranked_by_score = sorted(scored_results, key=lambda x: -x[1])[:top_n * 100]
+        candidates = [item for item, score in ranked_by_score]
+        return reranker.rerank(query, candidates, top_n)
 
 def get_places_summary_by_contentids(contentids, spot_data_dict):
     places_summary_list = []
-    for contentid in contentids:
-        item = spot_data_dict.get(str(contentid))
+    for content_id in contentids:
+        item = spot_data_dict.get(str(content_id))
         if not item:
             continue
         addr1 = item.get('addr1', '')
@@ -106,7 +122,6 @@ def get_places_summary_by_contentids(contentids, spot_data_dict):
             'addr': full_address,
             'tel': item.get('tel', ''),
             'firstimage': item.get('firstimage', ''),
-            'lclsSystm3': item.get('lclsSystm3', ''),
             'contenttypeid': item.get('contenttypeid')
         })
     return places_summary_list
