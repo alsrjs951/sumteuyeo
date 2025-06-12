@@ -2,14 +2,18 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth import get_user_model
 from pgvector.django import VectorField, HnswIndex
+import numpy as np
 
 User = get_user_model()
+
+def default_vector():
+    return np.zeros(484, dtype=np.float32).tolist()
 
 class UserPreferenceProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preferences')
     # 3개 메인 카테고리별 484차원 벡터 (pgvector)
-    experience = VectorField(dimensions=484, null=True, blank=True)        # 체험관광+역사+레저+자연+쇼핑+문화
-    food = VectorField(dimensions=484, null=True, blank=True)              # 음식
+    experience = VectorField(dimensions=484, default=default_vector, blank=True)        # 체험관광+역사+레저+자연+쇼핑+문화
+    food = VectorField(dimensions=484, default=default_vector, blank=True)              # 음식
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:

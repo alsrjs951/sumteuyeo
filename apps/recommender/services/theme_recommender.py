@@ -21,6 +21,7 @@ import faiss
 from .chatbot.faiss_manager import FaissManager
 from sumteuyeo.settings import FAISS_BASE_DIR
 from typing import List, Dict
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -107,44 +108,52 @@ class ThemeRecommender:
         )
 
         # 2. 선호 소분류 추천
-        # 2. 선호 소분류 추천
         try:
-            if np.linalg.norm(user_exp) > 1e-8:
-                lcls3_encoder = ContentFeature.get_category_encoder('lcls3')
-                
-                # 소분류 벡터 영역 추출 (고정 차원)
-                lcls3_start = 40 + 30  # 대분류(40) + 중분류(30)
-                lcls3_dim = 30  # 소분류 차원
-                lcls3_vector = user_exp[384 + lcls3_start : 384 + lcls3_start + lcls3_dim]
-                
-                # Softmax 적용
-                probs = np.exp(lcls3_vector) / np.sum(np.exp(lcls3_vector))
-                top_indices = np.argsort(probs)[-2:][::-1]
-                
-                # 유효 인덱스 필터링
-                valid_indices = [idx for idx in top_indices if idx < len(lcls3_encoder.categories_[0])]
-                subcategories = lcls3_encoder.categories_[0][valid_indices]
+            # ▼▼▼ 조건 제거 (항상 실행) ▼▼▼
+            lcls3_encoder = ContentFeature.get_category_encoder('lcls3')
 
-                # ▼▼▼ for 루프 내부로 이동 ▼▼▼
-                for i, subcat in enumerate(subcategories, 1):
-                    row_key = f'preferred_subcat_{i}'
-                    rows[row_key]['title'] = f'#{subcat} 핫플레이스'
+            with open('apps/items/services/cat_dict.json', 'rb') as f:
+                cat_dict = json.load(f)
+            
+            # 소분류 벡터 영역 추출 (고정 차원)
+            lcls3_start = 40 + 30  # 대분류(40) + 중분류(30)
+            lcls3_dim = 30  # 소분류 차원
+            lcls3_vector = user_exp[384 + lcls3_start : 384 + lcls3_start + lcls3_dim]
+            
+            # ▼▼▼ 제로 벡터 대비 정규화 ▼▼▼
+            lcls3_vector = ThemeRecommender.l2_normalize(lcls3_vector)
+            if np.all(lcls3_vector == 0):  # 완전한 제로 벡터일 경우
+                lcls3_vector = ThemeRecommender.l2_normalize(global_exp_vec[384 + lcls3_start : 384 + lcls3_start + lcls3_dim])
+            
+            # Softmax 적용
+            probs = np.exp(lcls3_vector) / np.sum(np.exp(lcls3_vector))
+            top_indices = np.argsort(probs)[-2:][::-1]
+            
+            # 실제 카테고리명 변환
+            encoder = lcls3_encoder['encoder']
 
-                    # 가중치 계산 (각 서브카테고리별 독립적 계산)
-                    subcat_blend = ThemeRecommender.l2_normalize(
-                        user_weight*ThemeRecommender.l2_normalize(user_exp) + 
-                        global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
-                    )
-                    
-                    # ▼▼▼ 루프 내에서 결과 할당 ▼▼▼
-                    rows[row_key]['items'] = get_faiss_results(
-                        subcat_blend,
-                        {'lclssystm3': subcat}
-                    )
+            valid_indices = [idx for idx in top_indices if idx < len(encoder.categories_[0])]
+            subcategories = encoder.categories_[0][valid_indices]
+
+            for i, subcat in enumerate(subcategories, 1):
+                row_key = f'preferred_subcat_{i}'
+                print(subcat + " 입니다.")
+                kr_subcat = cat_dict.get(subcat, "알 수 없는")
+                rows[row_key]['title'] = f'#{kr_subcat} 핫플레이스'
+                
+                # ▼▼▼ 가중치 재계산 (제로 벡터도 처리) ▼▼▼
+                subcat_blend = ThemeRecommender.l2_normalize(
+                    user_weight*ThemeRecommender.l2_normalize(user_exp) + 
+                    global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
+                )
+                
+                rows[row_key]['items'] = get_faiss_results(
+                    subcat_blend,
+                    {'lclssystm3': subcat}
+                )
 
         except Exception as e:
             logger.error(f"소분류 추천 오류: {str(e)}", exc_info=True)
-
 
 
         # 3. 계절 추천 (유사도 점수 기반)
@@ -161,10 +170,20 @@ class ThemeRecommender:
             seasonal_ids = ContentSummarize.objects.filter(
                 **{f'{current_season}_sim__gte': 0.7}
             ).values_list('contentid', flat=True)
+
+
+            if current_season == 'winter':
+                rows['seasonal']['title'] = '겨울 추천'
+            elif current_season == 'spring':
+                rows['seasonal']['title'] = '봄 추천'
+            elif current_season == 'summer':
+                rows['seasonal']['title'] = '여름 추천'
+            elif current_season == 'autumn':
+                rows['seasonal']['title'] = '가을 추천'
             
             rows['seasonal']['items'] = get_faiss_results(
                 seasonal_blend,
-                {'contentid__in': seasonal_ids}
+                {'contentid__in': seasonal_ids, 'lclssystm1__in': TOURIST_CATEGORIES}
             )
 
         except Exception as e:
@@ -176,12 +195,20 @@ class ThemeRecommender:
         try:
             # 저조한 상호작용 콘텐츠 ID 추출
             low_interaction_ids = (
-                ContentInteraction.objects
-                .values('content_id')
-                .annotate(interaction_count=Count('id'))
-                .filter(interaction_count__lt=20)  # 상호작용 20개 이내 콘텐츠 추출
-                .values_list('content_id', flat=True)
+                ContentDetailCommon.objects  # 모든 콘텐츠 대상
+                .annotate(
+                    interaction_count=Count(
+                        'contentinteraction',  # ContentInteraction 모델의 related_name
+                        filter=Q(contentinteraction__user__isnull=False)
+                    )
+                )
+                .filter(
+                    Q(interaction_count__lt=20) | 
+                    Q(interaction_count__isnull=True)  # 상호작용 0개 포함
+                )
+                .values_list('contentid', flat=True)[:10000]
             )
+
 
             # 가중치 동적 계산
             hidden_blend = ThemeRecommender.l2_normalize(
