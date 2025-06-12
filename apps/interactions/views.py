@@ -95,8 +95,6 @@ class ContentRating(APIView):
                 action_type__in=self.VALID_RATINGS
             ).delete()
 
-<<<<<<< HEAD
-=======
             # UserRating 기존 평가 삭제 및 새로 생성
             UserRating.objects.filter(
                 user=user,
@@ -108,7 +106,6 @@ class ContentRating(APIView):
                 rating_type=rating_type
             )
 
->>>>>>> develop
             # 새 평가 생성
             ContentInteraction.objects.create(
                 user=user,
@@ -125,13 +122,8 @@ class ContentDuration(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-<<<<<<< HEAD
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
-
-=======
         content = get_object_or_404(ContentDetailCommon, contentid=content_id)
-        
->>>>>>> develop
+
         # 세션 기반 체류 시간 계산
         session_key = f'content_{content.contentid}_duration'
         start_time = request.session.get(session_key)

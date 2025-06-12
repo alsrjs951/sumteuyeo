@@ -635,7 +635,7 @@
             gap: 10px; /* 버튼과 챗봇 사이 간격 */ /* [cite: 127] */
             background-color: #ffffff; /* [cite: 128] */
             top: 30px; /* 헤더 높이에 맞춰 조정 (기존 70px에서 60px로 변경하여 위로 올림) */
-            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */
+            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */          
             max-width: 1000px; /* 원하는 최대 너비로 설정 (예: 800px) */
             margin: 0 auto; /* 전체 바를 중앙으로 정렬 */
         }
@@ -758,6 +758,93 @@
             margin-right: auto; /* 왼쪽 정렬 */ /* [cite: 176] */
             border-bottom-left-radius: 8px; /* [cite: 177] */ /* 수정: 꼬리 모양 더 자연스럽게 */
         }
+                /* 추천 카드들을 감싸는 bot 메시지 스타일 조정 */
+        .chat-message.bot.recommendations-wrapper {
+            background-color: transparent; /* 카드 자체 디자인을 보여주기 위해 말풍선 배경은 투명하게 */
+            padding: 5px 0;
+            box-shadow: none;
+        }
+
+        /* 챗봇 카드들을 가로로 배치하고 스크롤 가능하게 만드는 컨테이너 */
+        .chatbot-card-container {
+            display: flex; /* 이 줄이 카드를 가로로 배치합니다. */
+            overflow-x: auto; /* 카드가 많으면 가로로 스크롤합니다. */
+            padding: 10px 5px 15px 5px; 
+            gap: 15px; 
+        }
+
+        /* 가로 스크롤바 디자인 (선택 사항) */
+        .chatbot-card-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .chatbot-card-container::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+        .chatbot-card-container::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+
+        /* 챗봇 컨테이너 내부의 카드 스타일 지정 */
+        .chatbot-card-container .card {
+            width: 230px; /* 너비를 살짝 줄여 더 많은 카드가 보이도록 함 */
+            border: 1px solid #e9ecef; /* 테두리를 더 연한 색으로 변경 */
+            border-radius: 12px; /* 모서리를 더 둥글게 하여 부드러운 느낌 강조 */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* 그림자를 더 자연스럽고 부드럽게 */
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; /* 부드러운 전환 효과 */
+        }
+
+        /* 3. 카드에 마우스 올렸을 때 효과 */
+        .chatbot-card-container .card:hover {
+            transform: translateY(-4px); /* 살짝 위로 떠오르는 효과 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12); /* 그림자를 더 진하게 하여 입체감 부여 */
+        }
+
+        /* 4. 카드 이미지 스타일 조정 */
+        .chatbot-card-container .card img {
+            height: 140px; /* 이미지 높이를 줄여 카드를 더 컴팩트하게 만듦 */
+        }
+
+        /* 5. 카드 정보(.info) 영역 스타일 */
+        .chatbot-card-container .card .info {
+            padding: 12px; /* 내부 여백을 살짝 조정 */
+            min-height: auto; /* 고정 높이 제거하여 내용에 맞게 조절 */
+        }
+
+        /* 6. 카드 제목(h3) 스타일 */
+        .chatbot-card-container .card .info h3 {
+            font-size: 1.05em; /* 폰트 크기 조정 */
+            font-weight: 600; /* 폰트 두께를 조금 더 굵게 */
+            color: #212529; /* 제목 색상을 더 선명하게 */
+            margin-bottom: 6px; /* 제목과 주소 사이 간격 조정 */
+            
+            /* 제목이 길어질 경우 2줄까지 표시하고 나머지는 ... 처리 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 2줄로 제한 */
+            -webkit-box-orient: vertical;
+            min-height: 2.5em; /* 2줄 높이 확보 */
+        }
+
+        /* 7. 카드 주소(p) 스타일 */
+        .chatbot-card-container .card .info p {
+            font-size: 0.85em; /* 폰트 크기를 작게 하여 보조 정보 느낌 강조 */
+            color: #6c757d; /* 주소 색상을 회색 계열로 변경 */
+            margin: 0; /* 위아래 마진 제거 */
+
+            /* 주소가 길 경우 1줄만 표시하고 ... 처리 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 8. 챗봇 카드 내 하트 아이콘 위치 및 크기 조정 */
+        .chatbot-card-container .card .card-heart-icon {
+            font-size: 1.4rem; /* 아이콘 크기 살짝 줄임 */
+            bottom: 8px; /* 위치 미세 조정 */
+            right: 8px; /* 위치 미세 조정 */
+        }
 
     </style>
 </head>
@@ -779,7 +866,7 @@
                     <li><a href="#" id="logoutFromDropdownLink"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
                 </ul>
             </div>
-
+            
             <button id="logoutButton" class="auth-button hidden">로그아웃</button>
         </div>
     </header>
@@ -833,9 +920,9 @@
     </div>
 
     {% csrf_token %}
-
+    
     <div class="ai-chatbot-enhanced-search-bar">
-
+        
         <div class="location-control-buttons">
             <img src="{% static 'sum.png' %}" alt="Sum 이미지" width="100" height=auto id="sumImage">
             <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
@@ -856,17 +943,17 @@
     <div class="modal_body">
         <div class="modal_scroll_content">
             <i class="fas fa-heart heart-icon" id="modalHeartIcon" title="찜하기"></i>
-
+            
             <img id="itemDetailImage" src="" alt="상세 이미지">
             <h2 id="itemDetailTitle">상세 정보</h2>
             <p id="itemDetailOverview"></p>
             <p id="itemDetailPeriod"></p>
             <div id="itemDetailMapContainer" style="width:100%;height:250px;margin-bottom:15px;border-radius:4px;border: 1px solid #eee;"></div>
             <p id="itemDetailLocation"></p>
-
+            
             <div id="itemDetailIntroAttributesContainer" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px;">
             </div>
-            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p>
+            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p> 
         </div>
         <div class="modal_actions_footer">
             <div id="itemDetailHomepage" class="homepage-link detail-buttons-container">
@@ -906,6 +993,50 @@
         </div>
     </div>
 
+    <div class="category-section">
+        <div class="slider-container">
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
+            <div class="slider" id="aaSlider"></div>
+            <div class="slider-controls">
+                <button id="aaPrevBtn" aria-label="이전 관광지 보기"><i class="fas fa-chevron-left"></i></button>
+                <button id="aaNextBtn" aria-label="다음 관광지 보기"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-section">
+        <div class="slider-container">
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
+            <div class="slider" id="bbSlider"></div>
+            <div class="slider-controls">
+                <button id="bbPrevBtn" aria-label="이전 관광지 보기"><i class="fas fa-chevron-left"></i></button>
+                <button id="bbNextBtn" aria-label="다음 관광지 보기"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="category-section">
+        <div class="slider-container">
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
+            <div class="slider" id="ccSlider"></div>
+            <div class="slider-controls">
+                <button id="ccPrevBtn" aria-label="이전 관광지 보기"><i class="fas fa-chevron-left"></i></button>
+                <button id="ccNextBtn" aria-label="다음 관광지 보기"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+     <div class="category-section">
+        <div class="slider-container">
+            <h2 class="category-title">여름에 가기 좋은 곳</h2>
+            <div class="slider" id="ddSlider"></div>
+            <div class="slider-controls">
+                <button id="ddPrevBtn" aria-label="이전 관광지 보기"><i class="fas fa-chevron-left"></i></button>
+                <button id="ddNextBtn" aria-label="다음 관광지 보기"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>   
+
     <div id="wishlistModal" class="modal">
         <div class="modal_body">
             <h2 class="modal-title">나의 찜 목록</h2>
@@ -918,11 +1049,11 @@
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
         let ps = null, targetLat = null, targetLon = null, targetPlaceName = "알 수 없음";
-        let isInitialLoadGpsAttempt = true;
+        let isInitialLoadGpsAttempt = true; 
         let isGpsButtonClicked = false; // GPS 버튼 클릭에 의한 요청인지 식별하는 플래그
 
         const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
-        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null;
+        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null; aaSliderControls = null; bbSliderControls = null; ccSliderControls = null; ddSliderControls = null;
         let modalMap = null, modalMapMarker = null, modalClickedLatLng = null;
         //let placeInput, userSearchInput, mainSearchButton;
         let aiChatbotContainerEl, aiChatbotInputWrapperEl, aiChatbotInputEl, aiChatbotSendButtonEl, aiChatbotDisplayAreaEl;
@@ -982,7 +1113,7 @@
             try {
                 // 로딩 상태 표시 (옵션) - 모달 내부에 로딩 스피너나 메시지를 표시할 수 있습니다.
                 // 예: document.getElementById('itemDetailOverview').textContent = "상세 정보를 불러오는 중...";
-
+                
                 const response = await fetch(`${API_BASE_URL}/api/items/place-detail/${contentId}/`); // CSRF 토큰은 GET 요청이므로 필수는 아님 (백엔드 설정에 따라 다름)
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ message: `상세 정보 로딩 실패 (HTTP ${response.status})` }));
@@ -998,7 +1129,7 @@
                 console.error('fetchPlaceDetail 에러:', error);
                 return null;
             }
-        }
+        }       
 
         function updateDetailModalUIElementsVisibility(listData, detailData) {
             const overviewEl = document.getElementById('itemDetailOverview');
@@ -1181,9 +1312,9 @@
 
             document.getElementById('itemDetailImage').src = itemDataFromList.firstimage ||
                 itemDataFromList.image ||
-                "https://via.placeholder.com/400x200?text=No+Image";
+                "https://via.placeholder.com/400x200?text=No+Image"; 
             document.getElementById('itemDetailTitle').textContent = itemDataFromList.title ||
-                "상세 정보";
+                "상세 정보"; 
 
             const overviewEl = document.getElementById('itemDetailOverview');
             const periodEl = document.getElementById('itemDetailPeriod');
@@ -1223,8 +1354,8 @@
             if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
 
             openModal(itemDetailModal);
-            if (telEl) {
-                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") {
+            if (telEl) { 
+                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") { 
                     const telLink = document.createElement('a');
                     telLink.href = `tel:${itemDataFromList.tel.replace(/-/g, "")}`;
                     telLink.textContent = itemDataFromList.tel;
@@ -1235,12 +1366,12 @@
                 }
             }
 
-            if (!currentDetailItemContentId) {
+            if (!currentDetailItemContentId) { 
                 overviewEl.textContent = "상세 정보를 불러올 수 없습니다. (ID 없음)";
                 console.error("openItemDetailModal: itemDataFromList에 contentid가 없습니다.");
                 if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
                 updateDetailModalUIElementsVisibility(itemDataFromList, null);
-                return;
+                return; 
             }
 
             const detailedData = await fetchPlaceDetail(currentDetailItemContentId);
@@ -1248,33 +1379,33 @@
 
             if (detailedData) {
                 overviewEl.textContent = detailedData.overview ||
-                    "자세한 설명이 없습니다.";
+                    "자세한 설명이 없습니다."; 
 
-                if (detailedData.addr && detailedData.addr.trim() !== "") {
-                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`;
+                if (detailedData.addr && detailedData.addr.trim() !== "") { 
+                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`; 
                 }
 
-                if (telEl) {
-                    if (detailedData.tel && detailedData.tel.trim() !== "") {
+                if (telEl) { 
+                    if (detailedData.tel && detailedData.tel.trim() !== "") { 
                         const telLink = document.createElement('a');
                         telLink.href = `tel:${detailedData.tel.replace(/-/g, "")}`;
                         telLink.textContent = detailedData.tel;
                         telEl.innerHTML = `<strong>연락처:</strong> `;
                         telEl.appendChild(telLink);
                     } else {
-                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`;
+                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`; 
                     }
                 }
 
-                if (detailedData.homepage) {
+                if (detailedData.homepage) { 
                     const homepageUrl = detailedData.homepage;
-                    if (homepageUrl) {
-                        const link = Object.assign(document.createElement('a'), {
-                            href: homepageUrl,
-                            textContent: "홈페이지 방문",
-                            target: "_blank",
-                            rel: "noopener noreferrer"
-                        });
+                    if (homepageUrl) { 
+                        const link = Object.assign(document.createElement('a'), { 
+                            href: homepageUrl, 
+                            textContent: "홈페이지 방문", 
+                            target: "_blank", 
+                            rel: "noopener noreferrer" 
+                        }); 
                         homepageDiv.insertBefore(link, homepageDiv.firstChild); // 좋아요/싫어요 버튼들 앞에 추가
                     }
                 }
@@ -1295,25 +1426,24 @@
 
                 if (introAttributesContainerEl && detailedData.intro_details && Object.keys(detailedData.intro_details).length > 0) {
                     let introHtml = '<h4><i class="fas fa-info-circle"></i> 추가 정보</h4><ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">';
-
+                    
                     // intro_details 객체를 순회하며 리스트 아이템(li)을 생성합니다.
                     for (const [label, value] of Object.entries(detailedData.intro_details)) {
                         introHtml += `<li style="margin-bottom: 8px;"><strong>${label}:</strong> ${value}</li>`;
                     }
                     introHtml += '</ul>';
-
+                    
                     // 생성된 HTML을 컨테이너에 삽입하고 보이게 합니다.
                     introAttributesContainerEl.innerHTML = introHtml;
                     introAttributesContainerEl.style.display = 'block';
                 }
 
-                const locationAddressForMap = detailedData.addr ||
-                    itemDataFromList.addr || "";
-                if (locationAddressForMap && geocoder) {
+                const locationAddressForMap = detailedData.addr || itemDataFromList.addr1 || itemDataFromList.address || "";
+                if (locationAddressForMap && geocoder) { 
                     if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
                     mapContainer.style.display = 'none';
-                    geocoder.addressSearch(locationAddressForMap, function(result, status) {
-                        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                    geocoder.addressSearch(locationAddressForMap, function(result, status) { 
+                        if (status === kakao.maps.services.Status.OK && result.length > 0) { 
                             const coords = result[0];
                             displayItemMapOnDetailModal(mapContainer, parseFloat(coords.y), parseFloat(coords.x));
                         } else {
@@ -1334,15 +1464,15 @@
                 if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
             }
 
-            const editButton = Object.assign(document.createElement('button'), {
-                type: 'button',
-                id: 'editInfoRequestButton',
-                className: 'detail-modal-button',
-                textContent: '관광정보 수정요청'
-            });
-            editButton.onclick = () => {
-                window.location.href = `mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`;
-            };
+            const editButton = Object.assign(document.createElement('button'), { 
+                type: 'button', 
+                id: 'editInfoRequestButton', 
+                className: 'detail-modal-button', 
+                textContent: '관광정보 수정요청' 
+            }); 
+            editButton.onclick = () => { 
+                window.location.href = `mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`; 
+            }; 
             // 좋아요 버튼이 HTML에 이미 존재한다고 가정하고 그 앞에 수정요청 버튼을 삽입합니다.
             const likeBtnRefForEdit = homepageDiv.querySelector('#likeButton');
             if (likeBtnRefForEdit) {
@@ -1368,18 +1498,18 @@
                 }
             }
 
-            const likeBtn = document.getElementById('likeButton');
-            const dislikeBtn = document.getElementById('dislikeButton');
+            const likeBtn = document.getElementById('likeButton'); 
+            const dislikeBtn = document.getElementById('dislikeButton'); 
 
             if (likeBtn) {
-                likeBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
-                likeBtn.disabled = false;
-                likeBtn.style.borderColor = '';
+                likeBtn.style.display = isLoggedIn ? 'inline-block' : 'none'; 
+                likeBtn.disabled = false; 
+                likeBtn.style.borderColor = ''; 
             }
             if (dislikeBtn) {
-                dislikeBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
-                dislikeBtn.disabled = false;
-                dislikeBtn.style.borderColor = '';
+                dislikeBtn.style.display = isLoggedIn ? 'inline-block' : 'none'; 
+                dislikeBtn.disabled = false; 
+                dislikeBtn.style.borderColor = ''; 
             }
         }
         function isWished(itemId) {
@@ -1388,29 +1518,34 @@
             return wishlist.some(item => item.id === itemId); // [cite: 374]
         }
 
-        function addToWishlist(itemData) { // 매개변수를 itemData로 변경
+        function addToWishlist(itemData) {
+            // ▼▼▼ 1번 로그: 원본 데이터 확인 ▼▼▼
+            console.log("찜하기 직전 원본 데이터:", itemData); 
+
             if (!itemData || !itemData.title) {
                 console.warn("addToWishlist: itemData 또는 itemData.title이 없습니다.", itemData);
                 return;
             }
             const itemId = itemData.title;
-            if (isWished(itemId)) return; // 이미 찜한 경우 추가하지 않음
-
-            // itemData에서 필요한 최소한의 정보를 추출하거나, 전체를 저장합니다.
-            // 여기서는 상세 모달 및 찜 목록 표시에 필요한 주요 정보를 포함하는 itemData 전체를 저장합니다.
+            if (isWished(itemId)) return;
             const wishlistItem = {
-                id: itemId, // title을 ID로 사용
-                data: { // 실제 장소 데이터를 'data' 속성에 저장
+                id: itemId, 
+                data: { 
                     contentid: itemData.contentid,
                     title: itemData.title,
                     firstimage: itemData.firstimage,
-                    image: itemData.image, // 대체 이미지 필드
-                    addr: itemData.addr,
-                    location: itemData.location, // 대체 주소 필드
-                    tel: itemData.tel
-                    // 필요시 여기에 더 많은 필드를 추가할 수 있습니다. (예: period)
+                    image: itemData.image,
+                    addr1: itemData.addr1,
+                    address: itemData.address,
+                    location: itemData.location,
+                    tel: itemData.tel,
+                    period: itemData.period 
                 }
             };
+            
+            // ▼▼▼ 2번 로그: 저장될 객체 확인 ▼▼▼
+            console.log("찜 목록에 저장될 객체:", wishlistItem);
+
             wishlist.push(wishlistItem);
             saveWishlist();
             updateAllHeartIcons(itemId, true);
@@ -1425,11 +1560,11 @@
             }
             updateAllHeartIcons(itemId, false); // [cite: 373]
         }
-        function updateModalHeartIcon(itemId) {
-            if (modalHeartIconEl) {
+        function updateModalHeartIcon(itemId) { 
+            if (modalHeartIconEl) { 
                 modalHeartIconEl.classList.toggle('active', isWished(itemId)); // [cite: 375]
                 modalHeartIconEl.title = isWished(itemId) ? '찜 해제' : '찜하기'; // [cite: 375]
-            }
+            } 
         }
         function updateAllHeartIcons(itemId, isActive) {
             document.querySelectorAll(`.card[data-item-id="${CSS.escape(itemId)}"] .card-heart-icon`).forEach(heart => { // [cite: 376]
@@ -1437,9 +1572,9 @@
                 heart.title = isActive ? '찜 해제' : '찜하기'; // [cite: 376]
             });
             if (itemDetailModal.classList.contains('open') && currentDetailItemId === itemId) { // [cite: 377]
-                if (profileAreaEl && !profileAreaEl.classList.contains('hidden')) {
+                if (profileAreaEl && !profileAreaEl.classList.contains('hidden')) { 
                     updateModalHeartIcon(itemId); // [cite: 377]
-                }
+                } 
             }
         }
         // 콘텐츠 클릭 기록 (POST, 중복 방지 로직은 서버가 처리)
@@ -1623,40 +1758,43 @@
         }
 
         function openWishlistModal() {
-            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) {
-                alert("로그인이 필요한 기능입니다."); // [cite: 381]
+            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { 
+                alert("로그인이 필요한 기능입니다.");
                 return;
             }
-            // allPlaces 참조 제거
-            if (!wishlistItemsContainerEl || !wishlistModal) return; // [cite: 382]
+            if (!wishlistItemsContainerEl || !wishlistModal) return;
 
-            wishlistItemsContainerEl.innerHTML = ''; // [cite: 382]
+            // ▼▼▼ 3번 로그: 전체 찜 목록 확인 ▼▼▼
+            console.log("모달을 열 때의 전체 찜 목록:", wishlist);
 
+            wishlistItemsContainerEl.innerHTML = '';
+            
             if (wishlist.length === 0) {
-                wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>'; // [cite: 383]
+                wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
             } else {
-                wishlist.forEach(wishlistItem => { // wishlist 배열을 직접 순회
-                    const item = wishlistItem.data; // 저장된 itemData 사용 (contentid, title, image, addr 등 포함)
+                wishlist.forEach(wishlistItem => {
+                    const item = wishlistItem.data;
+                    
+                    // ▼▼▼ 4번 로그: 개별 아이템 확인 ▼▼▼
+                    console.log("찜 목록에서 처리 중인 아이템:", item);
 
-                    // item.title이 없을 경우를 대비한 방어 코드 (wishlistItem.id를 fallback으로 사용)
-                    const displayTitle = item.title || wishlistItem.id;
-                    const displayAddr = item.addr || item.location || '주소 정보 없음';
+                    const displayTitle = item.title || wishlistItem.id; 
+                    const displayAddr = item.addr1 || item.address || item.location || '주소 정보 없음';
                     const displayImage = item.firstimage || item.image || 'https://via.placeholder.com/100x75?text=No+Image';
-
-                    const itemEl = Object.assign(document.createElement('div'), { className: 'wishlist-item' }); // [cite: 113]
-                    itemEl.setAttribute('data-item-id', wishlistItem.id); // DOM ID는 여전히 title (wishlistItem.id)
-
+                    
+                    // ... (이하 동일)
+                    const itemEl = Object.assign(document.createElement('div'), { className: 'wishlist-item' });
+                    itemEl.setAttribute('data-item-id', wishlistItem.id);
                     itemEl.innerHTML = `<img src="${displayImage}" alt="${displayTitle}"><div class="wishlist-item-info"><h4>${displayTitle}</h4><p>${displayAddr}</p></div>`;
-
                     itemEl.onclick = () => {
                         openedDetailFromWishlist = true;
-                        closeModal(wishlistModal);
-                        openItemDetailModal(item); // 저장된 'item' (wishlistItem.data) 객체를 전달
+                        closeModal(wishlistModal); 
+                        openItemDetailModal(item);
                     };
-                    wishlistItemsContainerEl.appendChild(itemEl); // [cite: 389]
+                    wishlistItemsContainerEl.appendChild(itemEl);
                 });
             }
-            openModal(wishlistModal); // [cite: 390]
+            openModal(wishlistModal);
         }
 
         function initializeKakaoMaps() {
@@ -1705,7 +1843,7 @@
         function requestCurrentLocation(isUserClick = false) {
             console.log(`requestCurrentLocation 호출됨. isUserClick: ${isUserClick}, isInitialLoadGpsAttempt: ${isInitialLoadGpsAttempt}`);
             isGpsButtonClicked = isUserClick; // GPS 버튼 클릭 여부 플래그 설정
-
+            
             currentLocationTextEl.textContent = "위치 정보 불러오는 중...";
 
             if (navigator.geolocation) {
@@ -1713,11 +1851,11 @@
             } else {
                 console.log("GPS 미지원 환경");
                 currentLocationTextEl.textContent = "GPS 미지원 환경";
-                if (isInitialLoadGpsAttempt) {
+                if (isInitialLoadGpsAttempt) { 
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME);
                 }
-                isInitialLoadGpsAttempt = false;
+                isInitialLoadGpsAttempt = false; 
                 if (isGpsButtonClicked) { // 사용자가 버튼을 눌렀는데 GPS 미지원이면 alert
                      alert("현재 브라우저 또는 기기에서 GPS를 지원하지 않습니다.");
                 }
@@ -1731,8 +1869,8 @@
 
             setTargetLocation(pos.coords.latitude, pos.coords.longitude, "현재 내 위치", true);
             updateLocationDisplay(pos.coords.latitude, pos.coords.longitude, "현재 내 위치");
-            isInitialLoadGpsAttempt = false;
-            isGpsButtonClicked = false;
+            isInitialLoadGpsAttempt = false; 
+            isGpsButtonClicked = false; 
 
             if (closePlaceModalAfterGeo && placeSearchModal) { // placeSearchModal 변수는 모달 DOM 요소를 가리켜야 합니다.
                 closeModal(placeSearchModal);
@@ -1742,27 +1880,27 @@
 
         function onGeoError(err) {
             console.warn("onGeoError 호출됨", err);
-
+            
             if (err.code === 1) { // PERMISSION_DENIED
                 currentLocationTextEl.textContent = "GPS 권한 거부됨";
-                if (isGpsButtonClicked) {
+                if (isGpsButtonClicked) { 
                     retryGpsPermission();
-                } else if (isInitialLoadGpsAttempt) {
+                } else if (isInitialLoadGpsAttempt) { 
                     console.log("첫 GPS 시도 시 권한 거부, 기본 위치로 설정합니다.");
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 권한 거부됨 (기본 위치: ${DEFAULT_PLACE_NAME})`);
                 }
-            } else {
+            } else { 
                 currentLocationTextEl.textContent = "GPS 오류 발생";
-                 if (isGpsButtonClicked) {
+                 if (isGpsButtonClicked) { 
                     alert(`위치 정보를 가져오는 데 실패했습니다. (오류 코드: ${err.code})\n네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.`);
-                } else if (isInitialLoadGpsAttempt) {
+                } else if (isInitialLoadGpsAttempt) { 
                     console.log("첫 GPS 시도 시 오류, 기본 위치로 설정합니다.");
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 오류 (기본 위치: ${DEFAULT_PLACE_NAME})`);
                 }
             }
-            isInitialLoadGpsAttempt = false;
+            isInitialLoadGpsAttempt = false; 
             isGpsButtonClicked = false;
             if (closePlaceModalAfterGeo && placeSearchModal) { // placeSearchModal 변수는 모달 객체여야 함
                 closeModal(placeSearchModal);
@@ -1778,8 +1916,8 @@
             console.log(`setTargetLocation 호출: lat=${lat}, lon=${lon}, name='${name}', sendToBackend=${sendToBackend}`);
             targetLat = parseFloat(lat);
             targetLon = parseFloat(lon);
-            targetPlaceName = name;
-
+            targetPlaceName = name; 
+            
             if (sendToBackend && targetLat != null && targetLon != null){
                 fetchNearbyPlacesData(targetLat, targetLon);
             }
@@ -1811,9 +1949,9 @@
                 placeInput.value = '';
                 modalClickedLatLng = null;
                 isInitialLoadGpsAttempt = false; // 장소 검색 모달 열면 더 이상 초기 GPS 시도 아님
-                currentLocationTextEl.textContent = targetPlaceName || DEFAULT_PLACE_NAME;
+                currentLocationTextEl.textContent = targetPlaceName || DEFAULT_PLACE_NAME; 
 
-                openModal(placeSearchModal);
+                openModal(placeSearchModal); 
                 setTimeout(loadModalMap, 50);
             }
         }
@@ -1826,13 +1964,13 @@
             const keyword = placeInput.value.trim();
             if (keyword && !keyword.startsWith("위도:")) {
                 if (!ps) { alert("장소 검색 서비스가 준비되지 않았습니다."); return; }
-                ps.keywordSearch(keyword, (data, status, pagination) => {
+                ps.keywordSearch(keyword, (data, status, pagination) => { 
                     if (status === kakao.maps.services.Status.OK && data.length > 0) {
                         const newLat = parseFloat(data[0].y);
                         const newLng = parseFloat(data[0].x);
                         const placeNameFromApi = data[0].place_name;
-
-                        isInitialLoadGpsAttempt = false;
+                        
+                        isInitialLoadGpsAttempt = false; 
                         setTargetLocation(newLat, newLng, placeNameFromApi, true);
                         updateLocationDisplay(newLat, newLng, placeNameFromApi);
                     } else { alert("검색 결과가 없습니다."); }
@@ -1842,7 +1980,7 @@
                  const newLng = modalClickedLatLng.getLng();
                  const placeNameFromMap = `지도 선택 지점 (${newLat.toFixed(4)}, ${newLng.toFixed(4)})`;
 
-                 isInitialLoadGpsAttempt = false;
+                 isInitialLoadGpsAttempt = false; 
                  setTargetLocation(newLat, newLng, placeNameFromMap, true);
                  updateLocationDisplay(newLat, newLng, placeNameFromMap);
             } else {
@@ -1866,6 +2004,10 @@
             // 로딩 중 메시지 표시
             document.getElementById('festivalSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
             document.getElementById('touristSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
+            document.getElementById('aaSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
+            document.getElementById('bbSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
+            document.getElementById('ccSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
+            document.getElementById('ddSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
 
             try {
                 const sections = await fetchRecommendations(lat, lon); // 추천 API 호출
@@ -1875,36 +2017,61 @@
                 renderPlaces([]); // 에러 발생 시에도 빈 배열로 렌더링
             }
         }
-
+        
         function renderPlaces(sections = []) {
-            const festivalSliderEl = document.getElementById('festivalSlider');
-            const touristSliderEl = document.getElementById('touristSlider');
-            const festivalTitleEl = festivalSliderEl.previousElementSibling;
-            const touristTitleEl = touristSliderEl.previousElementSibling;
+            // 각 슬라이더와 제목 요소를 배열에 순서대로 담습니다.
+            // 이 순서가 HTML의 순서와 정확히 일치해야 합니다.
+            const sliders = [
+                document.getElementById('festivalSlider'),
+                document.getElementById('touristSlider'),
+                document.getElementById('aaSlider'),
+                document.getElementById('bbSlider'),
+                document.getElementById('ccSlider'),
+                document.getElementById('ddSlider')
+            ];
+            const titles = sliders.map(slider => slider ? slider.previousElementSibling : null);
 
-            // 슬라이더와 제목 초기화
-            [festivalSliderEl, touristSliderEl].forEach(el => el.innerHTML = '');
+            // 모든 슬라이더 내용을 먼저 비웁니다.
+            sliders.forEach(el => {
+                if (el) el.innerHTML = '';
+            });
 
             const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
 
+            // 데이터가 아예 없는 경우 처리
             if (!sections || sections.length === 0) {
                 const msg = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보가 없습니다.</p>';
-                festivalSliderEl.innerHTML = msg;
-                touristSliderEl.innerHTML = msg;
-                festivalTitleEl.textContent = "당신을 위한 추천";
-                touristTitleEl.textContent = "근처 맛집 추천";
+                sliders.forEach(slider => {
+                    if (slider) slider.innerHTML = msg;
+                });
+                // 기본 제목 설정
+                if (titles[0]) titles[0].textContent = "당신을 위한 추천";
+                if (titles[1]) titles[1].textContent = "근처 맛집 추천";
+                if (titles[2]) titles[2].textContent = "여름";
+                if (titles[3]) titles[3].textContent = "가을";
+                if (titles[4]) titles[4].textContent = "겨울";
+                if (titles[5]) titles[5].textContent = "봄";
             } else {
+                // sections 배열에 있는 각 데이터에 대해 반복
                 sections.forEach((section, index) => {
-                    const targetSlider = (index === 0) ? festivalSliderEl : touristSliderEl;
-                    const targetTitle = (index === 0) ? festivalTitleEl : touristTitleEl;
+                    // ✨ 핵심: index를 사용해 순서대로 슬라이더와 제목을 지정합니다.
+                    const targetSlider = sliders[index];
+                    const targetTitle = titles[index];
 
+                    // 데이터 개수보다 슬라이더가 적거나, 해당 슬라이더/타이틀이 없으면 건너뜁니다.
+                    if (!targetSlider || !targetTitle) {
+                        return;
+                    }
+
+                    // 아래부터는 동일한 카드 생성 로직입니다.
+                    // section.title은 그대로 표시만 해줍니다.
                     if (section.title) {
                         targetTitle.textContent = section.title;
                     }
 
                     const items = section.items || [];
                     if (items.length === 0) {
-                        targetSlider.innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;"></p>';
+                        targetSlider.innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">표시할 항목이 없습니다.</p>';
                         return;
                     }
 
@@ -1921,7 +2088,7 @@
                             <img src="${item.firstimage || item.image || 'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title || ''}">
                             <div class="info">
                                 <h3>${item.title || ''}</h3>
-                                <p>${item.addr || item.address || '주소 정보 없음'}</p>
+                                <p>${item.addr1 || item.address || '주소 정보 없음'}</p>
                                 ${item.tel ? `<p style="color:#666; font-size:0.85em; margin-top:5px;"><i class="fas fa-phone-alt fa-fw"></i> ${item.tel}</p>` : ''}
                             </div>`;
 
@@ -1929,11 +2096,25 @@
                         cardEl.setAttribute('data-item-id', itemIdForWishlist);
 
                         cardEl.onclick = (e) => {
+                            // 하트 아이콘을 클릭했을 경우
                             if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
-                                e.stopPropagation();
-                                // 찜하기 로직 (생략)
-                                return;
+                                e.stopPropagation(); // 모달 열림 방지
+
+                                // 찜하기/해제하기 로직을 여기에 추가합니다.
+                                // 현재 찜 목록에 있는지 확인합니다.
+                                if (isWished(item.title)) {
+                                    // 이미 찜 되어 있다면, 목록에서 제거합니다.
+                                    removeFromWishlist(item.title);
+                                } else {
+                                    // 찜 되어 있지 않다면, 목록에 추가합니다.
+                                    addToWishlist(item);
+                                }
+                                
+                                // 상세 정보 모달이 열리지 않도록 여기서 실행을 마칩니다.
+                                return; 
                             }
+                            
+                            // 하트 아이콘이 아닌 카드의 다른 부분을 클릭했을 경우
                             openedDetailFromWishlist = false;
                             openItemDetailModal(item);
                         };
@@ -1942,13 +2123,91 @@
                 });
             }
 
-            // 슬라이더 UI를 다시 초기화
+            // 슬라이더 UI 초기화
             if (festivalSliderControls) festivalSliderControls.reinit();
             else festivalSliderControls = setupSlider('festivalSlider', 'festivalPrevBtn', 'festivalNextBtn');
 
             if (touristSliderControls) touristSliderControls.reinit();
             else touristSliderControls = setupSlider('touristSlider', 'touristPrevBtn', 'touristNextBtn');
+
+            if (aaSliderControls) aaSliderControls.reinit();
+            else aaSliderControls = setupSlider('aaSlider', 'aaPrevBtn', 'aaNextBtn');
+
+            if (bbSliderControls) bbSliderControls.reinit();
+            else bbSliderControls = setupSlider('bbSlider', 'bbPrevBtn', 'bbNextBtn');
+
+            if (ccSliderControls) ccSliderControls.reinit();
+            else ccSliderControls = setupSlider('ccSlider', 'ccPrevBtn', 'ccNextBtn');
+
+            if (ddSliderControls) ddSliderControls.reinit();
+            else ddSliderControls = setupSlider('ddSlider', 'ddPrevBtn', 'ddNextBtn');
         }
+
+        // ===== ▼▼▼ 1. 여기에 새 함수 추가 ▼▼▼ =====
+        /**
+         * AI 챗봇 대화창 내에 추천 장소 카드를 렌더링하는 함수
+         * @param {Array} recommendations - 백엔드에서 받은 추천 장소 데이터 배열
+         * @param {HTMLElement} containerEl - 카드들이 추가될 부모 요소 (aiChatbotDisplayAreaEl)
+         */
+
+        function renderChatbotRecommendationCards(recommendations, containerEl) {
+            if (!recommendations || recommendations.length === 0) {
+                return;
+            }
+
+            const recommendationsWrapper = document.createElement('div');
+            recommendationsWrapper.className = 'chat-message bot recommendations-wrapper';
+
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'chatbot-card-container';
+
+            const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
+
+            recommendations.forEach(item => {
+                const itemIdForWishlist = item.title;
+                let heartIconHTML = '';
+
+                if (isLoggedIn) {
+                    const isItemWished = isWished(itemIdForWishlist);
+                    heartIconHTML = `<i class="fas fa-heart card-heart-icon ${isItemWished ? 'active' : ''}" title="${isItemWished ? '찜 해제' : '찜하기'}"></i>`;
+                }
+
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.setAttribute('data-item-id', itemIdForWishlist);
+
+                // ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼
+                cardEl.innerHTML = `
+                    ${heartIconHTML}
+                    <img src="${item.firstimage || item.image || 'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title || ''}">
+                    <div class="info">
+                        <h3>${item.title || ''}</h3>
+                        <p>${item.addr || item.addr1 || item.address || '주소 정보 없음'}</p>
+                    </div>
+                `;
+                // ▲▲▲ 수정 완료 ▲▲▲
+
+                cardEl.onclick = (e) => {
+                    if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
+                        e.stopPropagation();
+                        if (isWished(item.title)) {
+                            removeFromWishlist(item.title);
+                        } else {
+                            addToWishlist(item);
+                        }
+                        return;
+                    }
+                    openedDetailFromWishlist = false;
+                    openItemDetailModal(item);
+                };
+
+                cardContainer.appendChild(cardEl);
+            });
+
+            recommendationsWrapper.appendChild(cardContainer);
+            containerEl.appendChild(recommendationsWrapper);
+        }
+
 
         function showError(el, msg) { if (el) { el.textContent = msg; el.style.display = 'block'; } }
         function clearAuthErrors() { [usernameError, passwordErrorEl, passwordConfirmErrorEl, emailErrorEl, loginIdErrorEl, loginPasswordErrorEl].forEach(el => { if (el) { el.textContent = ""; el.style.display = 'none'; } }); }
@@ -1975,7 +2234,7 @@
             }
 
             if(logoutButton) logoutButton.classList.add('hidden');
-            renderPlaces();
+            renderPlaces(); 
         }
 
         async function handleSignup(event) {
@@ -1989,12 +2248,12 @@
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
                     const username = signupIdEl.value.trim(); // 모달을 닫기 전에 아이디 값을 먼저 가져옵니다.
-
+                    
                     alert(data.message || '회원가입 성공! 자동으로 로그인됩니다.');
                     closeModal(signupModal); // 그 다음에 모달을 닫습니다.
 
-                    currentLoggedInUsername = username;
-                    loadWishlist();
+                    currentLoggedInUsername = username; 
+                    loadWishlist(); 
                     updateAuthUI(true, username); // UI를 로그인 상태로 업데이트
 
                     window.location.href = 'survey.html'; // 설문조사 페이지로 이동
@@ -2166,7 +2425,7 @@
                         // 모달은 onGeoSuccess 또는 onGeoError에서 닫힙니다.
                     });
                 }
-            }
+            }    
 
             // --- DOMContentLoaded 이벤트 리스너 내부에 AI 챗봇 기능 로직 추가 ---
 
@@ -2204,71 +2463,86 @@
 
             if (aiChatbotSendButtonEl) {
                 aiChatbotSendButtonEl.addEventListener('click', async (event) => {
-                    event.stopPropagation(); // 이벤트 전파 중단 (외부 클릭으로 닫히는 것 방지) [cite: 525]
+                    event.stopPropagation();
                     const messageText = aiChatbotInputEl.value.trim();
+            
                     if (messageText) {
-                        // 사용자 메시지 표시 [cite: 526, 527]
                         const userMessageDiv = document.createElement('div');
                         userMessageDiv.classList.add('chat-message', 'user');
                         userMessageDiv.textContent = messageText;
                         aiChatbotDisplayAreaEl.appendChild(userMessageDiv);
                         aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
 
-                        const originalUserInput = messageText; // 원본 사용자 입력 저장달 내의 GPS 버튼을 찾을 수 없습니다. (선택자: #modal_map_container #
-                        aiChatbotInputEl.value = ''; // 입력창 비우기 [cite: 527]
+                        const originalUserInput = messageText;
+                        aiChatbotInputEl.value = '';
 
                         try {
-                            // "AI가 답변을 생각하고 있어요..." 메시지 표시
                             const typingIndicatorDiv = document.createElement('div');
                             typingIndicatorDiv.classList.add('chat-message', 'bot', 'typing-indicator');
                             typingIndicatorDiv.textContent = "AI가 답변을 생각하고 있어요...";
                             aiChatbotDisplayAreaEl.appendChild(typingIndicatorDiv);
                             aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
 
-                            const csrf = getCookie('csrftoken'); // getCookie 함수는 이미 있다고 가정
+                            const csrf = getCookie('csrftoken');
                             if (!csrf) {
-                                console.error("CSRF 토큰을 찾을 수 없습니다.");
                                 throw new Error("요청에 필요한 인증 정보가 부족합니다.");
                             }
-
-                            // 실제 챗봇 API 엔드포인트 (이전에 urls.py 수정하면서 /api/chatbot/chat/ 로 가정했었음)
-                            const actualChatbotPath = '/api/chatbot/chat/';
-                            const fullUrlToFetch = `${API_BASE_URL}${actualChatbotPath}`;
-                            console.log("챗봇 API 호출 URL:", fullUrlToFetch);
-
-                            const response = await fetch(fullUrlToFetch, {
+                            
+                            const response = await fetch(`${API_BASE_URL}/api/chatbot/chat/`, { 
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-CSRFToken': csrf
                                 },
-                                body: JSON.stringify({ message: originalUserInput })
+                                body: JSON.stringify({ message: originalUserInput }) 
                             });
-
-                            typingIndicatorDiv.remove(); // "생각 중" 메시지 제거
+                            typingIndicatorDiv.remove();
 
                             if (!response.ok) {
-                                let errorMsg = `챗봇 서버 응답 오류 (상태: ${response.status})`;
-                                try {
-                                    const errorData = await response.json();
-                                    errorMsg = errorData.error || errorData.message || errorData.response || errorMsg; // 백엔드에서 'response' 키로 에러 메시지를 줄 수도 있음
-                                } catch (e) {
-                                    // JSON 파싱 실패 시, 기본 오류 메시지 사용
-                                }
-                                throw new Error(errorMsg);
+                                throw new Error(`챗봇 서버 응답 오류 (상태: ${response.status})`);
                             }
 
                             const data = await response.json();
+                            const botTextResponse = data.response;
+                            const scheduleData = data.schedule;
+                            let recommendationsData = data.results; // 1. 일단 data.results를 가져옵니다.
 
-                            // ▼▼▼ 백엔드 응답 키에 맞춰 수정 ▼▼▼
-                            const botTextResponse = data.response;       // 기본 텍스트 답변
-                            const recommendationsData = data.recommendations; // 추천 카드 데이터
-                            const scheduleData = data.schedule;           // 일정 데이터
+                            // 2. 만약 recommendationsData가 문자열(string)이면, 자바스크립트 배열로 변환합니다.
+                            if (typeof recommendationsData === 'string') {
+                                console.log("data.results가 문자열이므로 파싱을 시도합니다.");
+                                try {
+                                    recommendationsData = JSON.parse(recommendationsData);
+                                } catch (e) {
+                                    console.error("JSON 파싱 중 오류 발생:", e);
+                                    recommendationsData = []; // 파싱 실패 시, 안전하게 빈 배열로 만듭니다.
+                                }
+                            }
 
                             let contentDisplayed = false;
+                            let recommendationsFound = [];
 
-                            // 1. 기본 텍스트 답변 표시
-                            if (botTextResponse && String(botTextResponse).trim()) {
+                            if (Array.isArray(recommendationsData) && recommendationsData.length > 0) {
+                                recommendationsFound = recommendationsData;
+                            }
+                            else if (botTextResponse) {
+                                try {
+                                    const trimmedResponse = botTextResponse.trim();
+                                    if (trimmedResponse.startsWith('[') && trimmedResponse.endsWith(']')) {
+                                        const parsedData = JSON.parse(trimmedResponse);
+                                        if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                            recommendationsFound = parsedData;
+                                        }
+                                    }
+                                } catch (e) {
+                                    // 파싱 실패 시 일반 텍스트로 취급
+                                }
+                            }
+
+                            if (recommendationsFound.length > 0) {
+                                renderChatbotRecommendationCards(recommendationsFound, aiChatbotDisplayAreaEl);
+                                contentDisplayed = true;
+                            }
+                            else if (botTextResponse && String(botTextResponse).trim()) {
                                 const botMessageDiv = document.createElement('div');
                                 botMessageDiv.classList.add('chat-message', 'bot');
                                 botMessageDiv.textContent = botTextResponse;
@@ -2276,31 +2550,11 @@
                                 contentDisplayed = true;
                             }
 
-                            // 2. 추천 카드 정보 표시 (예시: 간단한 텍스트로 표시)
-                            // 실제로는 HTML로 카드를 만들어서 표시해야 합니다.
-                            if (recommendationsData && Array.isArray(recommendationsData) && recommendationsData.length > 0) {
-                                const recWrapperDiv = document.createElement('div');
-                                recWrapperDiv.classList.add('chat-message', 'bot', 'recommendations-wrapper');
-
-                                let recHtml = '<strong><i class="fas fa-map-marked-alt"></i> 추천 장소:</strong><ul>';
-                                recommendationsData.forEach(card => {
-                                    // card 객체에 title, overview, reason 등이 있다고 가정 (views.py의 format_as_cards 결과)
-                                    recHtml += `<li><strong>${card.title || '제목 없음'}</strong>: ${card.overview || card.reason || '설명 없음'}</li>`;
-                                });
-                                recHtml += '</ul>';
-                                recWrapperDiv.innerHTML = recHtml;
-                                aiChatbotDisplayAreaEl.appendChild(recWrapperDiv);
-                                contentDisplayed = true;
-                            }
-
-                            // 3. 일정 정보 표시 (예시: 간단한 텍스트로 표시)
-                            // 실제로는 HTML로 일정을 보기 좋게 만들어 표시해야 합니다.
-                            if (scheduleData) { // scheduleData가 객체이거나 내용이 있는 배열일 수 있음
+                            if (scheduleData) { 
                                 const scheduleDiv = document.createElement('div');
                                 scheduleDiv.classList.add('chat-message', 'bot', 'schedule-details');
-                                // scheduleData의 구조에 따라 표시 방법을 결정합니다.
-                                // 예시: scheduleData가 { "Day 1": [...], "Day 2": [...] } 형태일 경우
                                 let scheduleHtml = '<strong><i class="fas fa-calendar-alt"></i> 추천 일정:</strong>';
+                                // ... (기존 일정 표시 로직은 그대로 유지) ...
                                 if (typeof scheduleData === 'object' && Object.keys(scheduleData).length > 0) {
                                     scheduleHtml += '<ul>';
                                     for (const day in scheduleData) {
@@ -2308,7 +2562,7 @@
                                         if (Array.isArray(scheduleData[day])) {
                                             scheduleHtml += scheduleData[day].map(item => item.title || '활동').join(' → ');
                                         } else {
-                                            scheduleHtml += JSON.stringify(scheduleData[day]); // 단순 문자열로 표시
+                                            scheduleHtml += JSON.stringify(scheduleData[day]);
                                         }
                                         scheduleHtml += '</li>';
                                     }
@@ -2316,51 +2570,49 @@
                                 } else if (typeof scheduleData === 'string' && scheduleData.trim()) {
                                     scheduleHtml += `<p>${scheduleData}</p>`;
                                 } else {
-                                    scheduleHtml += `<p>자세한 일정 정보는 생성되지 않았습니다.</p>`; // 또는 scheduleData를 그대로 보여줌
-                                    // scheduleHtml += `<pre>${JSON.stringify(scheduleData, null, 2)}</pre>`;
+                                    scheduleHtml += `<p>자세한 일정 정보는 생성되지 않았습니다.</p>`;
                                 }
                                 scheduleDiv.innerHTML = scheduleHtml;
                                 aiChatbotDisplayAreaEl.appendChild(scheduleDiv);
                                 contentDisplayed = true;
                             }
-
-                            // 만약 아무런 유효한 내용도 표시되지 않았다면 "유효한 답변 없음" 처리
+                            
                             if (!contentDisplayed) {
                                 throw new Error("챗봇으로부터 유효한 표시 가능 콘텐츠를 받지 못했습니다.");
                             }
 
                         } catch (error) {
-                            console.error("AI 챗봇 통신 오류:", error);
+                            // ... (기존 에러 처리 로직) ...
                             const errorMessageDiv = document.createElement('div');
                             errorMessageDiv.classList.add('chat-message', 'bot', 'error-message-chat');
                             errorMessageDiv.textContent = `죄송합니다. 챗봇과 대화 중 문제가 발생했습니다. (${error.message})`;
                             aiChatbotDisplayAreaEl.appendChild(errorMessageDiv);
                         }
-
+                        
                         aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
                     }
-                    aiChatbotInputEl.focus(); // 메시지 전송 후에도 입력창에 포커스 유지 [cite: 531]
+                    aiChatbotInputEl.focus();
                 });
             }
-
+            
             const gpsButton = document.getElementById('gpsButton');
             if(gpsButton) {
                 gpsButton.onclick = () => requestCurrentLocation(true); // isUserClick = true
             }
 
-            csrfToken = getCookie('csrftoken');
+            csrfToken = getCookie('csrftoken'); 
             if (!csrfToken){ console.warn("CSRF 토큰을 찾을 수 없습니다."); }
 
             await checkInitialAuthStatus();
             if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
-                kakao.maps.load(() => {
-                    initializeKakaoMaps();
+                kakao.maps.load(() => { 
+                    initializeKakaoMaps(); 
                     requestCurrentLocation(false); // isUserClick = false (페이지 첫 로드)
                 });
             } else {
                 console.error("Kakao Maps SDK load error.");
                 currentLocationTextEl.textContent = "지도 SDK 로드 실패";
-                requestCurrentLocation(false);
+                requestCurrentLocation(false); 
             }
 
             if (profileAreaEl) {
@@ -2423,7 +2675,7 @@
                     const isClickInsideChatbot = aiChatbotContainerEl.contains(event.target);
                     const locationButtonsContainer = document.querySelector('.location-control-buttons');
                     const isClickInsideLocationButtons = locationButtonsContainer ? locationButtonsContainer.contains(event.target) : false;
-
+                    
                     // 챗봇 영역도 아니고, 위치 버튼 영역도 아니라면 닫기
                     if (!isClickInsideChatbot && !isClickInsideLocationButtons) {
                         // 모달이 열려있거나, 모달을 여는 버튼 클릭 시에는 챗봇을 닫지 않도록 예외처리 (옵션)

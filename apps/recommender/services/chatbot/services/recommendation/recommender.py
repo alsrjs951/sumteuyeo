@@ -21,6 +21,8 @@ def load_metadata_as_dict(path):
 
 with open(SUMMARIES_PATH, "r", encoding="utf-8") as f:
     summaries = json.load(f)
+metadata = load_metadata_as_dict(SPOT_METADATA_PATH)
+
 
 metadata = load_metadata_as_dict(SPOT_METADATA_PATH)
 
@@ -28,7 +30,6 @@ reranker = KCrossEncoderReranker(
     model_path=model_id,
     summaries=summaries
 )
-
 
 @sync_to_async
 def get_recommendations(user_input, user_profile, intent=None, keywords=None, extracted_locations=None, top_n=5):
