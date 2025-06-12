@@ -5,7 +5,6 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from asgiref.sync import sync_to_async
-import faiss
 from dotenv import load_dotenv
 from bareunpy import Corrector
 
@@ -30,14 +29,10 @@ HOST = "localhost"   # 로컬 서버가 아니라면 bareun.ai 등으로 변경
 PORT = 5656        # 포트는 서버 실행 환경에 따라 변경
 corrector = Corrector(apikey=BAREUN_API_KEY, host=HOST, port=PORT)
 
-# Faiss 인덱스 및 메타데이터 로드
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
 chatbot_service_dir = os.path.dirname(current_file_dir)
 data_dir = os.path.join(chatbot_service_dir, "data")
-faiss_file_path = os.path.join(data_dir, "spot_index.faiss")
 metadata_file_path = os.path.join(data_dir, "persistent_spot_summaries.json")
-print(f"Reading Faiss index from: {faiss_file_path}")
-faiss_index = faiss.read_index(faiss_file_path)
 print(f"Reading metadata from: {metadata_file_path}")
 with open(metadata_file_path, "r", encoding="utf-8") as f:
     spot_data = json.load(f)
@@ -97,11 +92,6 @@ def normalize_query(query: str) -> str:
 @sync_to_async
 def embed_query(query):
     return model.encode([query])
-
-@sync_to_async
-def search_faiss(query_vec, top_n):
-    # 검색 결과 개수를 top_n으로 직접 사용하고, 필요하다면 호출하는 쪽에서 top_n * 5 등으로 조절
-    return faiss_index.search(query_vec, top_n)
 
 def get_spot_data():
     return spot_data

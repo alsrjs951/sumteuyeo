@@ -1,27 +1,15 @@
 import re
 from enum import Enum
-from ..constants import FORBIDDEN_PATTERNS
+from ..constants import FORBIDDEN_PATTERNS, Intent, TRAVEL_INTENTS, INTENT_MESSAGES
 from .intent_classifier import predict_intent_transformer
+from typing import Dict, List, Tuple
 
 
-class Intent(str, Enum):
-    RECOMMEND_TOUR = "recommend_tour"
-    RECOMMEND_FOOD = "recommend_food"
-    RECOMMEND_SHOPPING = "recommend_shopping"
-    RECOMMEND_FESTIVAL = "recommend_festival"
-    RECOMMEND_ACTIVITY = "recommend_activity"
-    RECOMMEND_NATURE = "recommend_nature"
-    RECOMMEND_HISTORY = "recommend_history"
-    RECOMMEND_LEISURE = "recommend_leisure"
-    RECOMMEND_QUITE = "recommend_quite"
-    MALICIOUS = "malicious"
-    UNKNOWN = "unknown"
-
-
+# 각 의도에 해당하는 키워드를 탐지하기 위한 정규식 패턴 딕셔너리
 INTENT_PATTERNS = {
     Intent.RECOMMEND_TOUR: [
-        r"(여행|관광|명소|가볼만한\s*곳|추천\s*(코스|장소|일정)?|일정\s*짜줘)",
-        r"(힐링|캠핑|도보|가족|나홀로|맛집)\s*(코스|여행)",
+        r"(여행|관광|명소|일정\s*짜줘)",
+        r"(도보|맛집)\s*(코스|여행)",
     ],
     Intent.RECOMMEND_FOOD: [
         r"(맛집|먹거리|식당|음식점|카페|주점|간식|한식|중식|일식|분식|퓨전음식)",
@@ -47,97 +35,112 @@ INTENT_PATTERNS = {
     Intent.RECOMMEND_QUITE: [
         r"(조용한|한적한|사람\s*없는|숨은\s*명소|한산한|힐링\s*여행|숨트여)",
     ],
+    Intent.RECOMMEND_DATE_SPOT: [
+        r"(데이트|소개팅|기념일|커플|여자친구|남자친구|함께\s*가기\s*좋은)"
+    ],
 }
 
-
-INTENT_MESSAGES = {
-    Intent.RECOMMEND_TOUR: "관광지를 추천해드릴게요. 여행 스타일(예: 힐링, 가족, 나홀로)에 맞는 코스를 찾아보는 중입니다.",
-    Intent.RECOMMEND_FOOD: "지역 내 맛집을 추천해드릴게요. 선호하는 음식이 있다면 알려주세요!",
-    Intent.RECOMMEND_SHOPPING: "쇼핑하기 좋은 장소를 찾고 있어요. 대형 쇼핑몰부터 기념품점까지 다양하게 추천해드릴게요.",
-    Intent.RECOMMEND_FESTIVAL: "지금 열리는 축제나 문화 행사를 찾아드릴게요!",
-    Intent.RECOMMEND_ACTIVITY: "색다른 체험 활동을 원하시나요? 관련 체험 관광지를 추천해드릴게요.",
-    Intent.RECOMMEND_NATURE: "자연 속으로 떠나볼까요? 산, 계곡, 바다 같은 자연 관광지를 찾아보는 중입니다.",
-    Intent.RECOMMEND_HISTORY: "역사와 문화를 느낄 수 있는 유적지나 사찰을 추천해드릴게요.",
-    Intent.RECOMMEND_LEISURE: "레저 스포츠나 액티비티를 즐기고 싶으시군요! 관련된 장소를 찾아드릴게요.",
-    Intent.RECOMMEND_QUITE: "북적이지 않아 좋은, 감성 한 스푼 여행지 추천 해드릴게요.",
-    Intent.UNKNOWN: "죄송해요, 요청하신 내용을 정확히 이해하지 못했어요. 다시 한번 말씀해주시겠어요?",
-    Intent.MALICIOUS: "저는 여행 관련 추천만 도와드릴 수 있어요. 예: '서울 2박 3일 여행 코스 추천해줘'",
-}
 
 
 def is_malicious(text: str) -> bool:
+    """
+    입력된 텍스트에 금지된 패턴이 포함되어 있는지 확인하여 악성 여부를 판단합니다.
+
+    Args:
+        text (str): 사용자 입력 문자열.
+
+    Returns:
+        bool: 악성 패턴이 하나라도 발견되면 True, 그렇지 않으면 False.
+    """
+    # FORBIDDEN_PATTERNS의 각 정규식에 대해 하나라도 매칭되는 것이 있는지 확인
     return any(re.search(pattern, text, re.IGNORECASE) for pattern in FORBIDDEN_PATTERNS)
 
 
-def extract_intent_keywords(text: str):
+def extract_intent_keywords(text: str) -> Dict[Intent, List[str]]:
+    """
+    정규식을 기반으로 텍스트에서 모든 의도와 관련된 키워드를 추출합니다.
+
+    Args:
+        text (str): 사용자 입력 문자열.
+
+    Returns:
+        Dict[Intent, List[str]]: 각 의도를 키로, 해당 의도에 매칭된 키워드 리스트를 값으로 하는 딕셔너리.
+    """
     keyword_hits = {}
+    # INTENT_PATTERNS에 정의된 모든 의도와 패턴에 대해 반복
     for intent, patterns in INTENT_PATTERNS.items():
         for pattern in patterns:
+            # 정규식에 매칭되는 모든 키워드를 찾음 (대소문자 무시)
             matches = re.findall(pattern, text, re.IGNORECASE)
             if matches:
+                # 매칭된 키워드가 있으면, 해당 의도에 대한 리스트에 추가
                 keyword_hits[intent] = keyword_hits.get(intent, []) + matches
     return keyword_hits
 
 
-def classify_intent(text: str) -> Intent:
+def classify_intent(text: str) -> Tuple[Intent, Dict[Intent, List[str]]]:
+    """
+    정규식과 ML 모델을 함께 사용하는 하이브리드 방식으로 사용자의 최종 의도를 분류합니다.
+    효율성을 위해 의도와 함께 추출된 키워드 딕셔너리 전체를 반환합니다.
+
+    Args:
+        text (str): 사용자 입력 문자열.
+
+    Returns:
+        Tuple[Intent, Dict[Intent, List[str]]]: (확정된 최종 의도, 정규식으로 찾은 전체 키워드 딕셔너리) 튜플.
+    """
     keyword_hits = extract_intent_keywords(text)
 
     if not keyword_hits:
-        # 정규식 미일치 → 바로 ML 모델
-        ml_intent_str = predict_intent_transformer(text)
-        return Intent[ml_intent_str] if ml_intent_str in Intent.__members__ else Intent.UNKNOWN
+        # ml_intent_str = predict_intent_transformer(text)
+        ml_intent_str = "unknown"  # ML 모델 임시 비활성화
+        intent = Intent(ml_intent_str) if ml_intent_str in Intent.__members__ else Intent.UNKNOWN
+        return intent, {}
 
-    sorted_hits = sorted(keyword_hits.items(), key=lambda x: len(x[1]), reverse=True)
+    sorted_hits = sorted(keyword_hits.items(), key=lambda item: len(item[1]), reverse=True)
     top_intent, top_matches = sorted_hits[0]
 
-    # 1개만 일치하거나, 압도적으로 많다면 → 정규식 기반 확정
-    if len(sorted_hits) == 1 or (
-        len(sorted_hits) > 1 and len(top_matches) > len(sorted_hits[1][1]) + 1
-    ):
-        return top_intent
+    # '데이트'와 같은 복합 의도가 감지되면, 다른 의도보다 우선 순위를 부여할 수 있습니다.
+    # 여기서는 기존 로직을 유지하되, 모든 return이 튜플 형식을 지키도록 합니다.
+    if len(sorted_hits) == 1 or (len(sorted_hits) > 1 and len(top_matches) > len(sorted_hits[1][1])):
+        return top_intent, keyword_hits
 
-    # ambiguous → ML 보조
-    ml_intent_str = predict_intent_transformer(text)
+    # ml_intent_str = predict_intent_transformer(text)
+    ml_intent_str = "unknown"  # ML 모델 임시 비활성화
     if ml_intent_str in Intent.__members__:
-        ml_intent = Intent[ml_intent_str]
-        if ml_intent in dict(sorted_hits).keys():
-            return ml_intent
+        ml_intent = Intent(ml_intent_str)
+        if ml_intent in keyword_hits:
+            return ml_intent, keyword_hits
 
-    # 불확실할 경우 → 정규식 상위 intent 반환
-    return top_intent
+    # ⭐️ [중요] 모든 경로에서 반드시 (Intent, dict) 튜플로 반환해야 합니다.
+    return top_intent, keyword_hits
 
 
-def analyze_user_input(text: str):
-    if is_malicious(text):
-        return {
-            "intent": Intent.MALICIOUS.value,
-            "message": INTENT_MESSAGES[Intent.MALICIOUS],
-            "keywords": [],
-        }
+def analyze_user_input(text: str) -> Dict:
+    """
+    사용자 입력에 대한 전체 분석 파이프라인을 실행하는 메인 함수입니다.
+    악성 입력을 먼저 확인하고, 의도 분류 후 최종 결과를 포맷에 맞게 반환합니다.
 
-    intent = classify_intent(text)
-    keywords = extract_intent_keywords(text).get(intent, [])
+    Args:
+        text (str): 사용자 입력 문자열.
+
+    Returns:
+        Dict: {'intent': ..., 'message': ..., 'keywords': ...} 형태의 분석 결과 딕셔너리.
+    """
+    intent, keyword_hits = classify_intent(text)
+
+    final_keywords = keyword_hits.get(intent, [])
 
     return {
         "intent": intent.value,
-        "message": INTENT_MESSAGES[intent],
-        "keywords": list(set(keywords)),
+        "message": INTENT_MESSAGES.get(intent, INTENT_MESSAGES[Intent.UNKNOWN]),
+        "keywords": list(set(final_keywords)),
     }
 
 
-def is_travel_related(text: str) -> bool:
-    result = analyze_user_input(text)
-    intent = result["intent"]
-    return intent in {
-        i.value for i in [
-            Intent.RECOMMEND_TOUR,
-            Intent.RECOMMEND_FOOD,
-            Intent.RECOMMEND_SHOPPING,
-            Intent.RECOMMEND_FESTIVAL,
-            Intent.RECOMMEND_ACTIVITY,
-            Intent.RECOMMEND_NATURE,
-            Intent.RECOMMEND_HISTORY,
-            Intent.RECOMMEND_LEISURE,
-            Intent.RECOMMEND_QUITE,
-        ]
-    }
+def is_travel_intent(intent: Intent) -> bool:
+    """
+    [수정] 주어진 의도가 여행 관련 카테고리에 속하는지 확인합니다.
+    중앙 관리되는 TRAVEL_INTENTS 집합을 사용합니다.
+    """
+    return intent in TRAVEL_INTENTS

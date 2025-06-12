@@ -1,5 +1,4 @@
-from sentence_transformers import SentenceTransformer
-import faiss
+'''from sentence_transformers import SentenceTransformer
 import numpy as np
 import json
 from typing import Dict, List, Any, Optional, Tuple
@@ -451,3 +450,4 @@ if __name__ == '__main__':
         print(f"오류: FAISS ID 맵 '{faiss_id_map_output_file}' 저장 실패: {e}")
 
     print("\n--- 스크립트 실행 완료 ---")
+'''

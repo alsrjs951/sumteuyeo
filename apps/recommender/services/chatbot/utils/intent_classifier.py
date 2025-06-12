@@ -2,7 +2,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
 # 저장된 모델 경로 (fine_tune.py에서 저장한 곳과 같아야 함)
-MODEL_DIR = r"C:\django\sumteuyeo\apps\recommender\services\chatbot\utils\ml\saved_kcelectra_intent"
+MODEL_DIR = "udol/sumteuyeo-intent"
 
 # 토크나이저와 모델 로드
 tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
