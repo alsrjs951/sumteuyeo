@@ -19,7 +19,7 @@ class ContentClick(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
         
         # 캐시 기반 중복 클릭 방지 (30분 유효)
         cache_key = f'click_{user.id}_{content.contentid}'
@@ -39,7 +39,7 @@ class BookmarkToggle(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
 
         with transaction.atomic():
             # Select for update로 동시성 문제 해결
@@ -76,7 +76,7 @@ class ContentRating(APIView):
         user = request.user
         content_id = request.data.get('content_id')
         rating_type = request.data.get('type')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
 
         if rating_type not in self.VALID_RATINGS:
             return Response(
@@ -119,7 +119,7 @@ class ContentDuration(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
         
         # 세션 기반 체류 시간 계산
         session_key = f'content_{content.contentid}_duration'
