@@ -1,5 +1,17 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,django
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django
+data/
+ml/
+*.faiss
+*.pkl
+*.npy
+*.pt
+__pycache__/
+crdata/
+reranker_model/
+spot_id_map.json
+spot_metadata.json
+*.joblib
 
 ### Django ###
 *.log

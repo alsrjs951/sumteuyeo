@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관광정보 수정 제안 - 숨트여</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f7f9fc; /* 매우 밝은 파란/회색 계열 배경 */
+            color: #333;
+            line-height: 1.65;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        legend {
+            font-size: 25px;
+            border-bottom: 1px solid #e0e7ef;
+                }
+
+        /* Header */
+        .page-header {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 1rem 2.5rem;
+            border-bottom: 1px solid #e0e7ef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .page-header .logo a {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #2c3e50; /* 차분한 남색 계열 로고 */
+            text-decoration: none;
+        }
+        .page-header .nav-link a {
+            font-size: 0.95rem;
+            color: #007bff; /* 메인 페이지 링크색 참고 */
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .page-header .nav-link a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        .page-header .nav-link i {
+            margin-right: 0.4rem;
+        }
+
+        /* Main Content Area */
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px; /* 콘텐츠 최대 너비 */
+            background-color: #ffffff;
+            margin: 2.5rem auto;
+            padding: 2rem 2.5rem;
+            border-radius: 10px; /* 부드러운 모서리 */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+        }
+
+        .content-wrapper h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .content-wrapper .page-description {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        .content-wrapper .item-info {
+            background-color: #e9f5ff; /* 밝은 파란색 배경 */
+            padding: 0.9rem 1.25rem;
+            border-radius: 6px;
+            margin-bottom: 2.5rem;
+            font-size: 0.95rem;
+            color: #0056b3; /* 진한 파란색 텍스트 */
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .content-wrapper .item-info strong {
+            font-weight: 600;
+        }
+
+
+        .form-block legend { /* 섹션 제목 */
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #34495e; /* 약간 어두운 파란/회색 */
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid #dce4ec;
+            display: block;
+            width: 100%;
+        }
+
+        .input-field {
+            margin-bottom: 1.5rem;
+        }
+        .input-field label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .input-field textarea,
+        .input-field input[type="file"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #495057;
+            background-color: #fff;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .input-field textarea:focus,
+        .input-field input[type="file"]:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .input-field textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+        .input-field .field-description {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.3rem;
+        }
+
+        /* Notes Section */
+        .notes-box {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin-top: 0.5rem;
+        }
+        .notes-box .notes-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+        .notes-box ul {
+            font-size: 0.8rem;
+            color: #495057;
+            padding-left: 1.2rem;
+            margin-bottom: 0;
+        }
+        .notes-box ul li {
+            margin-bottom: 0.3rem;
+            line-height: 1.5;
+        }
+
+        /* Checkbox & Terms */
+        .agreement-section {
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .agreement-check {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .agreement-check input[type="checkbox"] {
+            width: 1.1rem;
+            height: 1.1rem;
+            margin-right: 0.75rem;
+            accent-color: #007bff;
+            cursor: pointer;
+        }
+        .agreement-check label {
+            font-size: 0.9rem;
+            color: #343a40;
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        .agreement-check a {
+            font-size: 0.9rem;
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+        .agreement-check a:hover {
+            text-decoration: underline;
+        }
+        
+        .terms-display { /* 약관 텍스트 */
+            background-color: #f1f3f5;
+            border: 1px solid #dee2e6;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            margin-bottom: 2.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: #495057;
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+        }
+
+        /* Buttons */
+        .action-buttons {
+            margin-top: 2.5rem;
+            text-align: center;
+            display: flex;
+            justify-content: flex-end; /* 오른쪽 정렬 */
+            gap: 0.75rem;
+        }
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+        .btn:active{
+            transform: translateY(1px);
+        }
+        .btn-secondary {
+            background-color: #6c757d; 
+            color: white;
+            border: 1px solid #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .btn-primary {
+            background-color: #007bff; /* 메인 페이지와 동일한 파란색 */
+            color: white;
+            border: 1px solid #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="content-wrapper">
+        <h1>관광정보 수정 제안</h1>
+        <p class="page-description">알고 계신 정보와 다른 부분이 있다면 알려주세요. 더 정확한 정보 제공에 도움이 됩니다.</p>
+        <div id="itemNameDisplay" class="item-info">수정 요청 대상: <strong>정보를 불러오는 중...</strong></div>
+
+        <form id="editForm">
+
+                <legend>수정할 내용</legend>
+                <div class="input-field">
+                    <label for="correctionDetails">상세 설명</label>
+                    <textarea id="correctionDetails" name="correctionDetails" rows="7" placeholder="예: 운영 시간이 오전 10시부터 오후 5시까지로 변경되었습니다."></textarea>
+                    <p class="field-description">(주소, 연락처, 운영 시간, 관광지 소개 등 변경된 내용을 구체적으로 작성해주세요.)</p>
+                </div>
+
+
+
+                <legend>사진 자료 첨부 (선택)</legend>
+                <div class="input-field">
+                    <label for="fileUpload">사진 파일</label>
+                    <input type="file" id="fileUpload" name="fileUpload" multiple accept="image/jpeg,image/png,image/gif,image/bmp,application/zip,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                    <p class="field-description">파일첨부는 최대 6개까지 가능하며, 다수의 파일 첨부 시 압축하여 업로드해주세요. (총 200MB 이하)</p>
+                </div>
+                <div class="notes-box">
+                    <p class="notes-title"><i class="fas fa-exclamation-circle"></i> 사진 파일 첨부 시 유의사항</p>
+                    <ul>
+                        <li>저작권 및 초상권에 문제가 없는 사진만 첨부해주세요. (인물, 얼굴 노출 삼가)</li>
+                        <li>사진 파일은 5장 이상 등록을 권장하며, jpg, gif, png, bmp, zip, xls, xlsx 형식을 지원합니다.</li>
+                        <li>사진의 가로 크기는 940px 이상을 권장합니다.</li>
+                        <li>PC 사양 및 파일 용량에 따라 업로드 시간이 소요될 수 있습니다.</li>
+                    </ul>
+                </div>
+
+            
+            <div class="agreement-section">
+                <div class="agreement-check">
+                    <input type="checkbox" id="copyrightAgree" name="copyrightAgree" required>
+                    <label for="copyrightAgree">저작권 보증 및 제공에 동의합니다.</label>
+                    <a href="#" id="viewTermsLink">(약관보기)</a>
+                </div>
+                <div id="termsTextContainer" class="terms-display hidden">
+※ 저작권 보증 및 제공 동의
+
+지역관광지(업소) 홍보를 목적으로 귀하(기관)에서 우리 공사에 제공하는 자료(사진,원고 등)에 대한 저작권 및 소유권을 귀하(기관)가 보유하고 있음을 보증하여야 합니다.
+
+만일, 귀하(기관)가 제공한 자료가 제3자의 권리를 침해하거나 제3자에게 손해가 발생하는 등 자료와 관련하여 법적 분쟁이 발생했을 경우, 모든 책임은 귀하(기관)에 있으며 귀하(기관)의 비용과 노력으로 분쟁을 해결해야 하며 함을 알려 드립니다.
+
+귀하(기관)에서 우리 공사에 제공하는 자료(사진, 원고, 영상 등)는 지역관광지(업소) 홍보 목적으로 타기관(공공기관, 포탈사이트 등)에 제공 될 수 있으며, 민원 제기 등의 사유로 귀하(기관)의 정보를 더 이상 제공하기에 어렵다고 판단되는 경우, 사전 동의 없이 삭제 처리할 수 있음을 알려 드립니다.
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" id="cancelButton">취소</button>
+                <button type="button" class="btn btn-primary" id="submitButton">제안 등록</button>
+            </div>
+        </form>
+    </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemNameFromUrl = urlParams.get('itemName');
+        const itemNameDisplayDiv = document.getElementById('itemNameDisplay');
+        if (itemNameFromUrl && itemNameDisplayDiv) {
+            itemNameDisplayDiv.innerHTML = `수정 요청 대상: <strong>${decodeURIComponent(itemNameFromUrl)}</strong>`;
+        } else if (itemNameDisplayDiv) {
+            itemNameDisplayDiv.innerHTML = `수정 요청 대상: <strong>항목 정보를 불러오지 못했습니다.</strong>`;
+        }
+
+        const submitButton = document.getElementById('submitButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const copyrightCheckbox = document.getElementById('copyrightAgree');
+        const viewTermsLink = document.getElementById('viewTermsLink');
+        const termsTextContainer = document.getElementById('termsTextContainer');
+
+        if (submitButton) {
+            submitButton.addEventListener('click', function() {
+                if (!copyrightCheckbox.checked) {
+                    alert('저작권 보증 및 제공에 동의하셔야 등록할 수 있습니다.');
+                    copyrightCheckbox.focus();
+                    return;
+                }
+                const details = document.getElementById('correctionDetails').value;
+                const files = document.getElementById('fileUpload').files;
+                
+                if (!details.trim()) {
+                    alert('수정할 상세내용을 입력해주세요.');
+                    document.getElementById('correctionDetails').focus();
+                    return;
+                }
+
+                console.log("수정 내용:", details);
+                console.log("첨부 파일:", files);
+                // 실제 폼 제출 로직은 여기에...
+                alert('관광정보 수정 제안이 접수되었습니다. (서버 연동은 구현되지 않았습니다)');
+            });
+        }
+
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                if (confirm('작성을 취소하고 메인 페이지로 돌아가시겠습니까?')) {
+                    window.location.href = '{% url "core:main_page" %}'; // 메인 페이지 파일명
+                }
+            });
+        }
+
+        if (viewTermsLink && termsTextContainer) {
+            viewTermsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (termsTextContainer.classList.contains('hidden')) {
+                    termsTextContainer.classList.remove('hidden');
+                    viewTermsLink.textContent = "(약관닫기)";
+                } else {
+                    termsTextContainer.classList.add('hidden');
+                    viewTermsLink.textContent = "(약관보기)";
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
