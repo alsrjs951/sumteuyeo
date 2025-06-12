@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth import get_user_model
 from pgvector.django import VectorField, HnswIndex
 import numpy as np
+from apps.items.models import ContentDetailCommon
 
 User = get_user_model()
 
@@ -66,3 +67,17 @@ class UserBookmark(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.content_id}"
+
+class UserRating(models.Model):
+    RATING_CHOICES = [
+        ('like', 'Like'),
+        ('dislike', 'Dislike'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.ForeignKey(ContentDetailCommon, on_delete=models.CASCADE)
+    rating_type = models.CharField(max_length=10, choices=RATING_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_rating'
+        unique_together = ('user', 'content')

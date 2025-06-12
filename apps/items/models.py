@@ -91,29 +91,34 @@ class ContentDetailImage(models.Model):
 
 _lock = threading.Lock()
 _model = None
+_season_embeddings = {}
+_season_norms = {}
 
-def get_model():
-    global _model
+def get_model() -> SentenceTransformer:
+    """모델 및 계절 임베딩 싱글톤 초기화 (검색 결과 [4] 반영)"""
+    global _model, _season_embeddings, _season_norms
+    
     if _model is None:
         with _lock:
             if _model is None:
+                # 1. 모델 초기화
                 _model = SentenceTransformer('all-mpnet-base-v2')
+                
+                # 2. 계절 임베딩 사전 계산
+                season_sentences = {
+                    'spring': ['벚꽃이 피는 계절', '따뜻한 봄바람', '피크닉하기 좋은 봄'],
+                    'summer': ['해변에서 수영', '여름 바캉스', '시원한 음료와 야외 활동'],
+                    'autumn': ['단풍이 아름다운 가을', '수확의 계절', '선선한 바람'],
+                    'winter': ['눈이 내리는 겨울', '스키와 온천', '따뜻한 음료']
+                }
+                
+                # 3. 벡터화 최적화 (배치 처리)
+                for season, sentences in season_sentences.items():
+                    embeddings = _model.encode(sentences)
+                    _season_embeddings[season] = np.mean(embeddings, axis=0)
+                    _season_norms[season] = norm(_season_embeddings[season])
+    
     return _model
-
-# 계절별 대표 문장 리스트 (멀티 센텐스 앙상블)
-season_sentences = {
-    'spring': ['벚꽃이 피는 계절', '따뜻한 봄바람', '피크닉하기 좋은 봄'],
-    'summer': ['해변에서 수영', '여름 바캉스', '시원한 음료와 야외 활동'],
-    'autumn': ['단풍이 아름다운 가을', '수확의 계절', '선선한 바람'],
-    'winter': ['눈이 내리는 겨울', '스키와 온천', '따뜻한 음료']
-}
-
-# 계절별 임베딩 평균 계산 (초기화)
-model = get_model()
-season_embeddings = {
-    season: np.mean([model.encode(s) for s in sentences], axis=0)
-    for season, sentences in season_sentences.items()
-}
 
 # 키워드 가중치 사전
 SEASON_KEYWORDS = {
@@ -132,20 +137,83 @@ class ContentSummarize(models.Model):
     winter_sim = models.FloatField(default=0)
 
     def update_season_similarity(self):
-        """요약 텍스트 기반 계절 유사도 갱신 (강력한 모델 + 멀티 센텐스 + 키워드 가중치)"""
-        # 모델 로드
+        """최적화된 계절 유사도 계산 (메모리 항목 [1] 반영)"""
+        # 1. 텍스트 임베딩
         model = get_model()
-        # 텍스트 임베딩
         text_emb = model.encode(self.summarize_text)
-        # 계절별 유사도 계산
-        for season, emb in season_embeddings.items():
-            cosine_sim = np.dot(text_emb, emb) / (norm(text_emb) * norm(emb))
-            # 키워드 가중치 적용
-            for kw in SEASON_KEYWORDS[season]:
-                if kw in self.summarize_text:
-                    cosine_sim = min(cosine_sim + 0.1, 1.0)
+        text_norm = norm(text_emb)
+        
+        # 2. 제로 벡터 검사 (검색 결과 [5] 반영)
+        if text_norm < 1e-8:
+            return
+            
+        # 3. 계절별 유사도 계산
+        for season in _season_embeddings.keys():
+            emb = _season_embeddings[season]
+            season_norm = _season_norms[season]
+            
+            # 4. 코사인 유사도 (벡터화 연산)
+            cosine_sim = np.dot(text_emb, emb) / (text_norm * season_norm)
+            
+            # 5. 키워드 가중치 (최적화된 검색)
+            keyword_count = sum(
+                1 for kw in SEASON_KEYWORDS[season] 
+                if kw in self.summarize_text
+            )
+            cosine_sim = min(cosine_sim + 0.1 * keyword_count, 1.0)
+            
             setattr(self, f'{season}_sim', float(cosine_sim))
-        self.save(update_fields=['spring_sim', 'summer_sim', 'autumn_sim', 'winter_sim'])
+
+    @classmethod
+    def bulk_update_season_similarities(cls, batch_size: int = 500):
+        """벡터화 연산 최적화 버전 (검색 결과 [1][5] 반영)"""
+        model = get_model()
+        total = cls.objects.count()
+        processed = 0
+        
+        while processed < total:
+            batch = list(cls.objects.all()[processed:processed+batch_size])
+            texts = [obj.summarize_text for obj in batch]
+            
+            # 1. 텍스트 임베딩 (배치 처리)
+            text_embs = model.encode(
+                texts, 
+                convert_to_numpy=True,
+                show_progress_bar=False
+            )
+            
+            # 2. 노름 계산 (1D 배열로 변환)
+            text_norms = np.linalg.norm(text_embs, axis=1)  # keepdims=False
+            text_norms = np.where(text_norms < 1e-8, 1e-8, text_norms)
+            
+            # 3. 계절별 유사도 계산
+            for season in _season_embeddings.keys():
+                season_emb = _season_embeddings[season]
+                season_norm = _season_norms[season]
+                
+                # 코사인 유사도 (벡터화 연산)
+                cosine_sims = np.dot(text_embs, season_emb) / (text_norms * season_norm)
+                
+                # 키워드 가중치 적용 (NumPy 연산으로 변경)
+                keyword_counts = np.array([
+                    sum(1 for kw in SEASON_KEYWORDS[season] if kw in obj.summarize_text)
+                    for obj in batch
+                ])
+                final_sims = np.minimum(cosine_sims + 0.1 * keyword_counts, 1.0)
+                
+                # 객체 속성 업데이트
+                for idx, obj in enumerate(batch):
+                    setattr(obj, f'{season}_sim', float(final_sims[idx]))
+            
+            # 4. 벌크 업데이트
+            cls.objects.bulk_update(
+                batch,
+                ['spring_sim', 'summer_sim', 'autumn_sim', 'winter_sim'],
+                batch_size=batch_size
+            )
+            
+            processed += len(batch)
+            print(f"진행: {processed}/{total} ({processed/total*100:.1f}%)")
 
 
     class Meta:
