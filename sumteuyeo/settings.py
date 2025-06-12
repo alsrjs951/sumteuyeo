@@ -19,6 +19,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
     'pgvector.django',    # 첫 번째 파일에만 있었음
     'rest_framework',     # 첫 번째 파일에만 있었음
     # 'django_redis',     # django-redis는 INSTALLED_APPS에 필수는 아님
+
 ]
 
 MIDDLEWARE = [
@@ -67,7 +69,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sumteuyeo.wsgi.application'
 
 # Database (PostgreSQL, AWS RDS 기준)
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -197,14 +198,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TOUR_API_KEY = env('TOUR_API_KEY')
 
 # 프로덕션 환경을 위한 추가 보안 설정 (선택 사항이지만 권장됨)
-# if not DEBUG:
-#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-#     SECURE_SSL_REDIRECT = True
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_SECURE = True
-#     SECURE_HSTS_SECONDS = 31536000  # 1 year
-#     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-#     SECURE_HSTS_PRELOAD = True
-#     # X_FRAME_OPTIONS = 'DENY' # MIDDLEWARE에 이미 XFrameOptionsMiddleware가 있음
-#     SECURE_CONTENT_TYPE_NOSNIFF = True
 #     SECURE_BROWSER_XSS_FILTER = True
