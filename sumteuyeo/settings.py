@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'apps.recommender.apps.RecommenderConfig',
     'pgvector.django',    # 첫 번째 파일에만 있었음
     'rest_framework',     # 첫 번째 파일에만 있었음
+    'rest_framework_simplejwt',
     # 'django_redis',     # django-redis는 INSTALLED_APPS에 필수는 아님
 
 ]
@@ -199,3 +200,45 @@ TOUR_API_KEY = env('TOUR_API_KEY')
 
 # 프로덕션 환경을 위한 추가 보안 설정 (선택 사항이지만 권장됨)
 #     SECURE_BROWSER_XSS_FILTER = True
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# (선택사항) 토큰 만료 시간 등 세부 설정
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),      # Access Token 유효 시간: 2시간
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),     # Refresh Token 유효 시간: 7일
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": True, # 로그인 시 last_login 필드 업데이트
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY, # settings.py의 SECRET_KEY 사용
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    "JTI_CLAIM": "jti",
+
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+}
