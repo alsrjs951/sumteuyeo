@@ -70,7 +70,7 @@ class ThemeRecommender:
                 index_path=FAISS_BASE_DIR / "content_index.faiss",
                 id_map_path=FAISS_BASE_DIR / "content_index_ids.npy"
             )
-            faiss_ids = faiss_manager.search(blend_vec, 10000)
+            faiss_ids = faiss_manager.search(blend_vec, 30000)
             
             # 위치 필터링 적용
             filtered_ids = list(set(faiss_ids) & set(nearby_ids))
@@ -110,27 +110,28 @@ class ThemeRecommender:
         # 2. 선호 소분류 추천
         try:
             # ▼▼▼ 조건 제거 (항상 실행) ▼▼▼
-            lcls3_encoder = ContentFeature.get_category_encoder('lcls3')
+            lcls2_encoder = ContentFeature.get_category_encoder('lcls2')
+            assert lcls2_encoder is not None, "lcls2 인코더 없음"
 
             with open('apps/items/services/cat_dict.json', 'rb') as f:
                 cat_dict = json.load(f)
             
-            # 소분류 벡터 영역 추출 (고정 차원)
-            lcls3_start = 40 + 30  # 대분류(40) + 중분류(30)
-            lcls3_dim = 30  # 소분류 차원
-            lcls3_vector = user_exp[384 + lcls3_start : 384 + lcls3_start + lcls3_dim]
+            # 중분류 벡터 영역 추출 (고정 차원)
+            lcls2_start = 0  # 대분류(40)
+            lcls2_dim = 40  # 중분류 차원
+            lcls2_vector = user_exp[384 + lcls2_start : 384 + lcls2_start + lcls2_dim]
             
             # ▼▼▼ 제로 벡터 대비 정규화 ▼▼▼
-            lcls3_vector = ThemeRecommender.l2_normalize(lcls3_vector)
-            if np.all(lcls3_vector == 0):  # 완전한 제로 벡터일 경우
-                lcls3_vector = ThemeRecommender.l2_normalize(global_exp_vec[384 + lcls3_start : 384 + lcls3_start + lcls3_dim])
+            lcls2_vector = ThemeRecommender.l2_normalize(lcls2_vector)
+            if np.all(lcls2_vector == 0):  # 완전한 제로 벡터일 경우
+                lcls2_vector = ThemeRecommender.l2_normalize(global_exp_vec[384 + lcls2_start : 384 + lcls2_start + lcls2_dim])
             
             # Softmax 적용
-            probs = np.exp(lcls3_vector) / np.sum(np.exp(lcls3_vector))
+            probs = np.exp(lcls2_vector) / np.sum(np.exp(lcls2_vector))
             top_indices = np.argsort(probs)[-2:][::-1]
             
             # 실제 카테고리명 변환
-            encoder = lcls3_encoder['encoder']
+            encoder = lcls2_encoder['encoder']
 
             valid_indices = [idx for idx in top_indices if idx < len(encoder.categories_[0])]
             subcategories = encoder.categories_[0][valid_indices]
@@ -149,11 +150,11 @@ class ThemeRecommender:
                 
                 rows[row_key]['items'] = get_faiss_results(
                     subcat_blend,
-                    {'lclssystm3': subcat}
+                    {'lclssystm2': subcat}
                 )
 
         except Exception as e:
-            logger.error(f"소분류 추천 오류: {str(e)}", exc_info=True)
+            logger.error(f"중분류 추천 오류: {str(e)}", exc_info=True)
 
 
         # 3. 계절 추천 (유사도 점수 기반)
