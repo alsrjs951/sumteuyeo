@@ -182,6 +182,13 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
+
+
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -201,6 +208,3 @@ TOUR_API_KEY = env('TOUR_API_KEY')
 #     # X_FRAME_OPTIONS = 'DENY' # MIDDLEWARE에 이미 XFrameOptionsMiddleware가 있음
 #     SECURE_CONTENT_TYPE_NOSNIFF = True
 #     SECURE_BROWSER_XSS_FILTER = True
-
-# FAISS 경로
-FAISS_BASE_DIR = BASE_DIR / 'data' / 'faiss'

@@ -2,14 +2,19 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth import get_user_model
 from pgvector.django import VectorField, HnswIndex
+import numpy as np
+from apps.items.models import ContentDetailCommon
 
 User = get_user_model()
+
+def default_vector():
+    return np.zeros(484, dtype=np.float32).tolist()
 
 class UserPreferenceProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preferences')
     # 3개 메인 카테고리별 484차원 벡터 (pgvector)
-    experience = VectorField(dimensions=484, null=True, blank=True)        # 체험관광+역사+레저+자연+쇼핑+문화
-    food = VectorField(dimensions=484, null=True, blank=True)              # 음식
+    experience = VectorField(dimensions=484, default=default_vector, blank=True)        # 체험관광+역사+레저+자연+쇼핑+문화
+    food = VectorField(dimensions=484, default=default_vector, blank=True)              # 음식
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -62,3 +67,17 @@ class UserBookmark(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.content_id}"
+
+class UserRating(models.Model):
+    RATING_CHOICES = [
+        ('like', 'Like'),
+        ('dislike', 'Dislike'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.ForeignKey(ContentDetailCommon, on_delete=models.CASCADE)
+    rating_type = models.CharField(max_length=10, choices=RATING_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_rating'
+        unique_together = ('user', 'content')

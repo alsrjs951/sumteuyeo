@@ -45,10 +45,10 @@ class ContentInteraction(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.ForeignKey(
-        'items.ContentDetailCommon', 
-        on_delete=models.CASCADE, 
-        db_column='content_id',  # 기존 DB 컬럼명 유지
-        default=1,
+        'items.ContentDetailCommon',
+        on_delete=models.CASCADE,
+        db_column='content_id',
+        to_field='contentid'  # 핵심 수정 부분
     )
 
     action_type = models.CharField(max_length=20, choices=ACTION_CHOICES)

@@ -11,6 +11,7 @@ from apps.users.models import UserBookmark
 from apps.items.models import ContentDetailCommon
 from .models import ContentInteraction
 import time
+from apps.users.models import UserRating
 
 
 class ContentClick(APIView):
@@ -19,7 +20,7 @@ class ContentClick(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
 
         # 캐시 기반 중복 클릭 방지 (30분 유효)
         cache_key = f'click_{user.id}_{content.contentid}'
@@ -40,7 +41,7 @@ class BookmarkToggle(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
 
         with transaction.atomic():
             # Select for update로 동시성 문제 해결
@@ -78,7 +79,7 @@ class ContentRating(APIView):
         user = request.user
         content_id = request.data.get('content_id')
         rating_type = request.data.get('type')
-        content = get_object_or_404(ContentDetailCommon, pk=content_id)
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
 
         if rating_type not in self.VALID_RATINGS:
             return Response(
@@ -94,6 +95,20 @@ class ContentRating(APIView):
                 action_type__in=self.VALID_RATINGS
             ).delete()
 
+<<<<<<< HEAD
+=======
+            # UserRating 기존 평가 삭제 및 새로 생성
+            UserRating.objects.filter(
+                user=user,
+                content=content
+            ).delete()
+            UserRating.objects.create(
+                user=user,
+                content=content,
+                rating_type=rating_type
+            )
+
+>>>>>>> develop
             # 새 평가 생성
             ContentInteraction.objects.create(
                 user=user,
@@ -110,8 +125,13 @@ class ContentDuration(APIView):
     def post(self, request):
         user = request.user
         content_id = request.data.get('content_id')
+<<<<<<< HEAD
         content = get_object_or_404(ContentDetailCommon, pk=content_id)
 
+=======
+        content = get_object_or_404(ContentDetailCommon, contentid=content_id)
+        
+>>>>>>> develop
         # 세션 기반 체류 시간 계산
         session_key = f'content_{content.contentid}_duration'
         start_time = request.session.get(session_key)
