@@ -15,18 +15,13 @@ class Command(BaseCommand):
     help = "CLI에서 다양한 콘텐츠 상호작용 기록을 처리하는 명령어"
     
     def add_arguments(self, parser):
-        parser.add_argument('--user', type=int, required=True, 
-                         help='사용자 ID (필수)')
-        parser.add_argument('--content', type=int, required=True,
-                         help='콘텐츠 ID (필수)')
+        parser.add_argument('--user', type=int, required=True, help='사용자 ID (필수)')
+        parser.add_argument('--content', type=int, required=True, help='콘텐츠 ID (필수)')
         parser.add_argument('--action', type=str, required=True,
-                         choices=['click', 'bookmark', 'like', 'dislike', 'duration'],
-                         help='액션 타입: click|bookmark|like|dislike|duration')
-        parser.add_argument('--duration', type=float,
-                         help='체류 시간(초), duration 액션에서 필수')
-        parser.add_argument('--toggle', action='store_true',
-                         help='북마크 토글 모드 활성화')
-        parser.add_argument('--duration', required=('action' == 'duration'))
+                        choices=['click', 'bookmark', 'like', 'dislike', 'duration'],
+                        help='액션 타입: click|bookmark|like|dislike|duration')
+        parser.add_argument('--duration', type=float, help='체류 시간(초), duration 액션에서 필수')
+        parser.add_argument('--toggle', action='store_true', help='북마크 토글 모드 활성화')
 
 
     def handle(self, *args, **options):

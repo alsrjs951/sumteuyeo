@@ -64,6 +64,27 @@ class ThemeRecommender:
 
         nearby_ids = get_nearby_content_ids(user_lat, user_lng)
 
+        def get_db_results(blend_vec: np.ndarray, filters: Dict) -> List[int]:
+            blend_vec_list = blend_vec.tolist()  # NumPy 배열을 리스트로 변환
+
+            return (
+                ContentDetailCommon.objects
+                .select_related('feature')  # ContentFeature와 JOIN
+                .annotate(
+                    similarity=1 - CosineDistance(
+                        'feature__feature_vector',  # 역방향 관계 접근
+                        blend_vec_list
+                    )
+                )
+                .filter(
+                    contentid__in=nearby_ids,
+                    **filters  # ContentDetailCommon 필드 직접 사용
+                )
+                .order_by('-similarity')  # 내림차순 정렬
+                [:30]
+            )
+
+
         # FAISS 검색 공통 함수
         def get_faiss_results(blend_vec: np.ndarray, filters: Dict) -> List[int]:
             faiss_manager = FaissManager(
@@ -102,7 +123,7 @@ class ThemeRecommender:
         
         blended_vec = ThemeRecommender.l2_normalize(user_weight*ThemeRecommender.l2_normalize(user_exp) + global_weight*ThemeRecommender.l2_normalize(global_exp_vec))
         
-        rows['personalized']['items'] = get_faiss_results(
+        rows['personalized']['items'] = get_db_results(
             blended_vec,
             {'lclssystm1__in': TOURIST_CATEGORIES}
         )
@@ -148,7 +169,7 @@ class ThemeRecommender:
                     global_weight*ThemeRecommender.l2_normalize(global_exp_vec)
                 )
                 
-                rows[row_key]['items'] = get_faiss_results(
+                rows[row_key]['items'] = get_db_results(
                     subcat_blend,
                     {'lclssystm2': subcat}
                 )
