@@ -5,7 +5,8 @@ import numpy as np
 import threading
 
 class ContentDetailCommon(models.Model):
-    contentid = models.PositiveIntegerField(unique=True)  # INTEGER, PK
+    id = models.AutoField(primary_key=True)  # INTEGER, PK
+    contentid = models.PositiveIntegerField(unique=True)
     contenttypeid = models.PositiveSmallIntegerField()
     title = models.TextField()
     createdtime = models.DateTimeField()
