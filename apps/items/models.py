@@ -40,7 +40,8 @@ class ContentDetailCommon(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='summarize'
+        related_name='summarize',
+        to_field='contentid'
     )
 
     class Meta:
