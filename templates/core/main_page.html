@@ -1142,6 +1142,8 @@
             return headers;
         };
 
+
+
         const fetchRecommendations = async (lat, lng) => {
             try {
                 const response = await axios.get(`${RECOMMENDATIONS_API_BASE}`, {
@@ -1690,6 +1692,7 @@
 
         // 콘텐츠 평가 (POST)
         async function rateContent(contentId, type) {
+            console.log('Current token:', localStorage.getItem('access_token'));
             if (!localStorage.getItem('access_token')) {
                 alert("로그인이 필요한 기능입니다.");
                 return;
@@ -1697,8 +1700,8 @@
             try {
                 const res = await fetch(`${INTERACTIONS_API_BASE}rating/`, {
                     method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ content_id: contentId, type: type })
+                    body: JSON.stringify({ content_id: contentId, type: type }),
+                    headers: getAuthHeaders()
                 });
 
                 if (res.status === 201 || res.status === 200) {

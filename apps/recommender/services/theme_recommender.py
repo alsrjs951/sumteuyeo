@@ -31,6 +31,7 @@ FOOD_CATEGORY = "FD"  # 음식점 카테고리
 
 class ThemeRecommender:
 
+
     # 벡터 정규화 함수
     @staticmethod
     def l2_normalize(vec: np.ndarray) -> np.ndarray:
@@ -55,6 +56,15 @@ class ThemeRecommender:
             'seasonal': {'title': f'{season_map.get(month, "특별")}에 가기 좋은 곳', 'items': []},
             'restaurants': {'title': '당신의 입맛을 저격할 맛집', 'items': []}
         }
+
+        def shuffle_in_blocks(items, block_size=10):
+            """items를 block_size 단위로 나눠 각 블록별로 셔플 후 합침"""
+            shuffled = []
+            for i in range(0, len(items), block_size):
+                block = items[i:i+block_size]
+                random.shuffle(block)
+                shuffled.extend(block)
+            return shuffled
 
         nearby_ids = get_nearby_content_ids(user_lat, user_lng)
 
@@ -236,4 +246,7 @@ class ThemeRecommender:
             {'lclssystm1': FOOD_CATEGORY, 'contentid__in': nearby_ids}
         )
 
+        for row in rows.values():
+            if len(row['items']) == 30:
+                row['items'] = shuffle_in_blocks(row['items'], block_size=10)
         return rows
