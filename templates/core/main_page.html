@@ -1129,7 +1129,7 @@
                 console.error('fetchPlaceDetail 에러:', error);
                 return null;
             }
-        }       
+        }
 
         function updateDetailModalUIElementsVisibility(listData, detailData) {
             const overviewEl = document.getElementById('itemDetailOverview');
@@ -1579,6 +1579,7 @@
         }
         // 콘텐츠 클릭 기록 (POST, 중복 방지 로직은 서버가 처리)
         async function sendContentClick(contentId) {
+            console.log(localStorage.getItem('access_token'), "현재 상태");
             if (!localStorage.getItem('access_token')) return; // 비로그인 시 기록 안함
             try {
                 const res = await fetch(`${INTERACTIONS_API_BASE}click/`, {
@@ -2319,6 +2320,7 @@
                 if (res.ok && data.status === 'success') {
                     currentLoggedInUsername = data.username;
                     loadWishlist();
+                    localStorage.setItem('access_token', data.access_token);
                     alert(data.message || '로그인 성공!'); closeModal(loginModal); updateAuthUI(true, data.username);
                     window.location.reload();
                 } else {
