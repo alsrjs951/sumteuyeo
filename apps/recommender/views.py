@@ -39,6 +39,14 @@ class MainRecommendationAPI(APIView):
                 {"status": "error", "message": "유효한 위경도 값이 필요합니다 (lat, lng 파라미터 필수)"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        def shuffle_in_blocks(items, block_size=10):
+            """items를 block_size 단위로 나눠 각 블록별로 셔플 후 합침"""
+            shuffled = []
+            for i in range(0, len(items), block_size):
+                block = items[i:i+block_size]
+                random.shuffle(block)
+                shuffled.extend(block)
+            return shuffled
 
         # 사용자 및 시간 정보
         user = request.user
@@ -49,6 +57,9 @@ class MainRecommendationAPI(APIView):
         cached_data = cache.get(cache_key)
         if cached_data:
             logger.info(f"캐시 히트: {cache_key}")
+            # 캐시 데이터도 구간별 셔플 적용
+            for section in cached_data.get("sections", []):
+                section["items"] = shuffle_in_blocks(section["items"][:30], block_size=10)
             return Response(cached_data, status=status.HTTP_200_OK)
 
         try:
@@ -87,6 +98,7 @@ class MainRecommendationAPI(APIView):
 
     def _serialize_recommendations(self, recommendation_rows):
         """섹션 구조 유지하며 직렬화"""
+        
         seen_ids = set()  # 중복 콘텐츠 방지
         serialized = []
 
@@ -97,10 +109,6 @@ class MainRecommendationAPI(APIView):
                 if content_id not in seen_ids:
                     seen_ids.add(content_id)
                     items.append(self._serialize_content(item))
-            
-            # 무작위 순서 (시간 기반 시드)
-            random.seed(int(time.time()) // 3600)  # 1시간마다 변경
-            random.shuffle(items)
 
             serialized.append({
                 "section_type": section_key,
@@ -128,3 +136,4 @@ class MainRecommendationAPI(APIView):
         if detail.addr2 and detail.addr2.strip():
             parts.append(detail.addr2.strip())
         return " ".join(parts)
+
