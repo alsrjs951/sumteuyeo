@@ -1574,6 +1574,7 @@
         }
         // 콘텐츠 클릭 기록 (POST, 중복 방지 로직은 서버가 처리)
         async function sendContentClick(contentId) {
+            console.log(localStorage.getItem('access_token'), "현재 상태");
             if (!localStorage.getItem('access_token')) return; // 비로그인 시 기록 안함
             try {
                 const res = await fetch(`${INTERACTIONS_API_BASE}click/`, {
@@ -2213,7 +2214,7 @@
 
             if(logoutButton) logoutButton.classList.add('hidden');
             if (isLoggedIn) {
-                loginUserDisplayEl.textContent = username; // 로그인된 사용자 이름 표시
+                loginUserDisplayEl.textContent = username; // 로그인된 사용자 이름 표시 
             } else {
                 loginUserDisplayEl.textContent = ''; // 로그아웃 시 초기화
             }
@@ -2308,15 +2309,8 @@
                 if (res.ok && data.status === 'success') {
                     currentLoggedInUsername = data.username;
                     loadWishlist();
-                    if (data.access_token) { // 서버 응답에 access_token이 있는지 확인
-                        localStorage.setItem('access_token', data.access_token);
-                        console.log('Access token stored:', data.access_token); // 저장된 토큰 확인 로그
-                    } else {
-                        console.warn("로그인 응답에 access_token이 없습니다. 백엔드 응답을 확인하세요.", data);
-                    }
-                    alert(data.message || '로그인 성공!');
-                    closeModal(loginModal);
-                    updateAuthUI(true, data.username);
+                    localStorage.setItem('access_token', data.access_token);
+                    alert(data.message || '로그인 성공!'); closeModal(loginModal); updateAuthUI(true, data.username);
                     window.location.reload();
                 } else {
                     showError(loginPasswordErrorEl, data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.');
