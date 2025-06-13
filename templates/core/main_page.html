@@ -635,7 +635,7 @@
             gap: 10px; /* 버튼과 챗봇 사이 간격 */ /* [cite: 127] */
             background-color: #ffffff; /* [cite: 128] */
             top: 30px; /* 헤더 높이에 맞춰 조정 (기존 70px에서 60px로 변경하여 위로 올림) */
-            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */
+            z-index: 990; /* 헤더(1000)보다 낮게 설정 */ /* [cite: 129, 131] */          
             max-width: 1000px; /* 원하는 최대 너비로 설정 (예: 800px) */
             margin: 0 auto; /* 전체 바를 중앙으로 정렬 */
         }
@@ -760,17 +760,32 @@
         }
                 /* 추천 카드들을 감싸는 bot 메시지 스타일 조정 */
         .chat-message.bot.recommendations-wrapper {
-            background-color: transparent; /* 카드 자체 디자인을 보여주기 위해 말풍선 배경은 투명하게 */
+            background-color: transparent; /* 이 줄 제거 또는 다른 색상으로 변경 */
             padding: 5px 0;
-            box-shadow: none;
+            box-shadow: none; /* 이 줄 제거 또는 다른 그림자 효과로 변경 */
+        }
+
+        /* 변경 후 (이 선택자를 제거하거나, 또는 새롭게 정의): */
+        /* .chat-message.bot.recommendations-wrapper { display: none; } */
+        /* 또는 이전에 사용했던 스타일을 완전히 제거 */
+
+        /* 새롭게 추가된 카드 컨테이너의 스타일 (필요하다면) */
+        .chatbot-recommendations-display {
+            /* 이 부분은 챗봇 메시지 말풍선과 독립적으로 보이도록 스타일링합니다. */
+            /* 예: */
+            margin-top: 10px; /* 위쪽 메시지와의 간격 */
+            margin-bottom: 10px; /* 아래쪽 요소와의 간격 */
+            /* background-color: #f0f0f0;  배경색을 줄 수도 있습니다. */
+            /* border-radius: 8px; */
+            /* box-shadow: 0 1px 3px rgba(0,0,0,0.05); */
         }
 
         /* 챗봇 카드들을 가로로 배치하고 스크롤 가능하게 만드는 컨테이너 */
         .chatbot-card-container {
             display: flex; /* 이 줄이 카드를 가로로 배치합니다. */
             overflow-x: auto; /* 카드가 많으면 가로로 스크롤합니다. */
-            padding: 10px 5px 15px 5px;
-            gap: 15px;
+            padding: 10px 5px 15px 5px; 
+            gap: 15px; 
         }
 
         /* 가로 스크롤바 디자인 (선택 사항) */
@@ -817,7 +832,7 @@
             font-weight: 600; /* 폰트 두께를 조금 더 굵게 */
             color: #212529; /* 제목 색상을 더 선명하게 */
             margin-bottom: 6px; /* 제목과 주소 사이 간격 조정 */
-
+            
             /* 제목이 길어질 경우 2줄까지 표시하고 나머지는 ... 처리 */
             overflow: hidden;
             text-overflow: ellipsis;
@@ -846,6 +861,27 @@
             right: 8px; /* 위치 미세 조정 */
         }
 
+        .chatbot-suggestion-buttons-area {
+            display: flex;
+            flex-wrap: wrap; /* 버튼들이 넘치면 다음 줄로 */
+            gap: 8px; /* 버튼 사이 간격 */
+            padding: 10px 15px; /* 챗봇 메시지 영역과 동일한 패딩 */
+            justify-content: flex-start; /* 왼쪽 정렬 */
+        }
+        .suggestion-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px; /* 캡슐 모양 */
+            padding: 8px 15px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .suggestion-button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
@@ -861,11 +897,12 @@
                 <ul id="profileDropdown" class="profile-dropdown-menu">
                     <li><a href="my-info.html" id="myInfoLink"><i class="fas fa-user-cog"></i> 내 정보</a></li>
                     <li><a href="#" id="wishlistFromDropdownLink"><i class="fas fa-heart"></i> 찜 목록</a></li>
+                    <li><a href="survey.html" id="surveyLink" class="hidden"><i class="fas fa-poll"></i> 설문조사 하러가기</a></li>
                     <li class="dropdown-divider"></li>
                     <li><a href="#" id="logoutFromDropdownLink"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
                 </ul>
             </div>
-
+            
             <button id="logoutButton" class="auth-button hidden">로그아웃</button>
         </div>
     </header>
@@ -919,9 +956,9 @@
     </div>
 
     {% csrf_token %}
-
+    
     <div class="ai-chatbot-enhanced-search-bar">
-
+        
         <div class="location-control-buttons">
             <img src="{% static 'sum.png' %}" alt="Sum 이미지" width="100" height=auto id="sumImage">
             <button id="placeSearchOpenButton" class="placebtn" aria-label="장소 검색으로 기준 설정"><i class="fas fa-map"></i></button>
@@ -934,6 +971,7 @@
             </div>
             <div id="aiChatbotDisplayArea" class="ai-chatbot-display-area">
                 <div class="chat-message bot">안녕하세요! 부산 여행에 대해 무엇이든 물어보세요. 예: "해운대 근처 맛집 추천해줘"</div>
+                <div id="aiChatbotSuggestionButtonsArea" class="chatbot-suggestion-buttons-area"></div>
             </div>
         </div>
     </div>
@@ -942,17 +980,17 @@
     <div class="modal_body">
         <div class="modal_scroll_content">
             <i class="fas fa-heart heart-icon" id="modalHeartIcon" title="찜하기"></i>
-
+            
             <img id="itemDetailImage" src="" alt="상세 이미지">
             <h2 id="itemDetailTitle">상세 정보</h2>
             <p id="itemDetailOverview"></p>
             <p id="itemDetailPeriod"></p>
             <div id="itemDetailMapContainer" style="width:100%;height:250px;margin-bottom:15px;border-radius:4px;border: 1px solid #eee;"></div>
             <p id="itemDetailLocation"></p>
-
+            
             <div id="itemDetailIntroAttributesContainer" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px;">
             </div>
-            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p>
+            <p id="itemDetailTel" style="text-align: left; margin-bottom: 1rem; padding-left: 10px; padding-right: 10px; margin-top: -15px;"></p> 
         </div>
         <div class="modal_actions_footer">
             <div id="itemDetailHomepage" class="homepage-link detail-buttons-container">
@@ -1024,6 +1062,7 @@
             </div>
         </div>
     </div>
+ 
 
     <div id="wishlistModal" class="modal">
         <div class="modal_body">
@@ -1037,7 +1076,7 @@
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2aca5b757235d007ade29477cbf36527&libraries=services"></script>
     <script>
         let ps = null, targetLat = null, targetLon = null, targetPlaceName = "알 수 없음";
-        let isInitialLoadGpsAttempt = true;
+        let isInitialLoadGpsAttempt = true; 
         let isGpsButtonClicked = false; // GPS 버튼 클릭에 의한 요청인지 식별하는 플래그
 
         const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
@@ -1063,25 +1102,15 @@
         let closePlaceModalAfterGeo = false;
         let modalOpenTime = null;
         let contentIdForDurationLog = null;
+        let surveyLinkEl;
+        // ⭐️ 대화의 맥락(context)을 저장할 변수
+        let conversationContext = null;
+        // ⭐️ 제안 버튼 영역 (기존 HTML에는 없으므로 동적으로 생성하거나, 해당 HTML 요소를 추가해야 합니다.)
+        // aiChatbotDisplayAreaEl 아래에 둘 새로운 컨테이너를 만듭니다.
+        let aiChatbotSuggestionButtonsAreaEl; // 이 변수 선언 추가
         const API_BASE_URL = 'http://127.0.0.1:8000';
         const INTERACTIONS_API_BASE = `${API_BASE_URL}/api/interactions/`;
         const RECOMMENDATIONS_API_BASE = `${API_BASE_URL}/api/recommender/recommendations/main/`;
-        const OTHER_API_BASE = `${API_BASE_URL}/api/chatbot/chat`;
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
 
         const getAuthHeaders = () => {
             const headers = {
@@ -1127,7 +1156,7 @@
             try {
                 // 로딩 상태 표시 (옵션) - 모달 내부에 로딩 스피너나 메시지를 표시할 수 있습니다.
                 // 예: document.getElementById('itemDetailOverview').textContent = "상세 정보를 불러오는 중...";
-
+                
                 const response = await fetch(`${API_BASE_URL}/api/items/place-detail/${contentId}/`); // CSRF 토큰은 GET 요청이므로 필수는 아님 (백엔드 설정에 따라 다름)
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ message: `상세 정보 로딩 실패 (HTTP ${response.status})` }));
@@ -1210,6 +1239,21 @@
             if (key) {
                 localStorage.setItem(key, JSON.stringify(wishlist)); // [cite: 257]
             }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
         function setupSlider(sliderId, prevBtnId, nextBtnId) {
@@ -1311,9 +1355,9 @@
 
             document.getElementById('itemDetailImage').src = itemDataFromList.firstimage ||
                 itemDataFromList.image ||
-                "https://via.placeholder.com/400x200?text=No+Image";
+                "https://via.placeholder.com/400x200?text=No+Image"; 
             document.getElementById('itemDetailTitle').textContent = itemDataFromList.title ||
-                "상세 정보";
+                "상세 정보"; 
 
             const overviewEl = document.getElementById('itemDetailOverview');
             const periodEl = document.getElementById('itemDetailPeriod');
@@ -1353,8 +1397,8 @@
             if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
 
             openModal(itemDetailModal);
-            if (telEl) {
-                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") {
+            if (telEl) { 
+                if (itemDataFromList.tel && itemDataFromList.tel.trim() !== "") { 
                     const telLink = document.createElement('a');
                     telLink.href = `tel:${itemDataFromList.tel.replace(/-/g, "")}`;
                     telLink.textContent = itemDataFromList.tel;
@@ -1365,12 +1409,12 @@
                 }
             }
 
-            if (!currentDetailItemContentId) {
+            if (!currentDetailItemContentId) { 
                 overviewEl.textContent = "상세 정보를 불러올 수 없습니다. (ID 없음)";
                 console.error("openItemDetailModal: itemDataFromList에 contentid가 없습니다.");
                 if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
                 updateDetailModalUIElementsVisibility(itemDataFromList, null);
-                return;
+                return; 
             }
 
             const detailedData = await fetchPlaceDetail(currentDetailItemContentId);
@@ -1378,33 +1422,33 @@
 
             if (detailedData) {
                 overviewEl.textContent = detailedData.overview ||
-                    "자세한 설명이 없습니다.";
+                    "자세한 설명이 없습니다."; 
 
-                if (detailedData.addr && detailedData.addr.trim() !== "") {
-                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`;
+                if (detailedData.addr && detailedData.addr.trim() !== "") { 
+                    locationEl.innerHTML = `<strong>위치:</strong> ${detailedData.addr}`; 
                 }
 
-                if (telEl) {
-                    if (detailedData.tel && detailedData.tel.trim() !== "") {
+                if (telEl) { 
+                    if (detailedData.tel && detailedData.tel.trim() !== "") { 
                         const telLink = document.createElement('a');
                         telLink.href = `tel:${detailedData.tel.replace(/-/g, "")}`;
                         telLink.textContent = detailedData.tel;
                         telEl.innerHTML = `<strong>연락처:</strong> `;
                         telEl.appendChild(telLink);
                     } else {
-                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`;
+                        telEl.innerHTML = `<strong>연락처:</strong> 번호 없음`; 
                     }
                 }
 
-                if (detailedData.homepage) {
+                if (detailedData.homepage) { 
                     const homepageUrl = detailedData.homepage;
-                    if (homepageUrl) {
-                        const link = Object.assign(document.createElement('a'), {
-                            href: homepageUrl,
-                            textContent: "홈페이지 방문",
-                            target: "_blank",
-                            rel: "noopener noreferrer"
-                        });
+                    if (homepageUrl) { 
+                        const link = Object.assign(document.createElement('a'), { 
+                            href: homepageUrl, 
+                            textContent: "홈페이지 방문", 
+                            target: "_blank", 
+                            rel: "noopener noreferrer" 
+                        }); 
                         homepageDiv.insertBefore(link, homepageDiv.firstChild); // 좋아요/싫어요 버튼들 앞에 추가
                     }
                 }
@@ -1425,24 +1469,24 @@
 
                 if (introAttributesContainerEl && detailedData.intro_details && Object.keys(detailedData.intro_details).length > 0) {
                     let introHtml = '<h4><i class="fas fa-info-circle"></i> 추가 정보</h4><ul style="list-style-type: none; padding-left: 0; margin-top: 10px;">';
-
+                    
                     // intro_details 객체를 순회하며 리스트 아이템(li)을 생성합니다.
                     for (const [label, value] of Object.entries(detailedData.intro_details)) {
                         introHtml += `<li style="margin-bottom: 8px;"><strong>${label}:</strong> ${value}</li>`;
                     }
                     introHtml += '</ul>';
-
+                    
                     // 생성된 HTML을 컨테이너에 삽입하고 보이게 합니다.
                     introAttributesContainerEl.innerHTML = introHtml;
                     introAttributesContainerEl.style.display = 'block';
                 }
 
-                const locationAddressForMap = detailedData.addr || itemDataFromList.addr || itemDataFromList.addr1 || itemDataFromList.address || "";
-                if (locationAddressForMap && geocoder) {
+                const locationAddressForMap = detailedData.addr || itemDataFromList.addr1 || itemDataFromList.address || "";
+                if (locationAddressForMap && geocoder) { 
                     if (itemDetailMapMarker) itemDetailMapMarker.setMap(null);
                     mapContainer.style.display = 'none';
-                    geocoder.addressSearch(locationAddressForMap, function(result, status) {
-                        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+                    geocoder.addressSearch(locationAddressForMap, function(result, status) { 
+                        if (status === kakao.maps.services.Status.OK && result.length > 0) { 
                             const coords = result[0];
                             displayItemMapOnDetailModal(mapContainer, parseFloat(coords.y), parseFloat(coords.x));
                         } else {
@@ -1463,15 +1507,15 @@
                 if (introAttributesContainerEl) introAttributesContainerEl.style.display = 'none';
             }
 
-            const editButton = Object.assign(document.createElement('button'), {
-                type: 'button',
-                id: 'editInfoRequestButton',
-                className: 'detail-modal-button',
-                textContent: '관광정보 수정요청'
-            });
-            editButton.onclick = () => {
-                window.open(`mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`, '_blank');
-            };
+            const editButton = Object.assign(document.createElement('button'), { 
+                type: 'button', 
+                id: 'editInfoRequestButton', 
+                className: 'detail-modal-button', 
+                textContent: '관광정보 수정요청' 
+            }); 
+            editButton.onclick = () => { 
+                window.location.href = `mod-request.html?itemName=${encodeURIComponent(itemDataFromList.title || currentDetailItemId)}`; 
+            }; 
             // 좋아요 버튼이 HTML에 이미 존재한다고 가정하고 그 앞에 수정요청 버튼을 삽입합니다.
             const likeBtnRefForEdit = homepageDiv.querySelector('#likeButton');
             if (likeBtnRefForEdit) {
@@ -1497,18 +1541,18 @@
                 }
             }
 
-            const likeBtn = document.getElementById('likeButton');
-            const dislikeBtn = document.getElementById('dislikeButton');
+            const likeBtn = document.getElementById('likeButton'); 
+            const dislikeBtn = document.getElementById('dislikeButton'); 
 
             if (likeBtn) {
-                likeBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
-                likeBtn.disabled = false;
-                likeBtn.style.borderColor = '';
+                likeBtn.style.display = isLoggedIn ? 'inline-block' : 'none'; 
+                likeBtn.disabled = false; 
+                likeBtn.style.borderColor = ''; 
             }
             if (dislikeBtn) {
-                dislikeBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
-                dislikeBtn.disabled = false;
-                dislikeBtn.style.borderColor = '';
+                dislikeBtn.style.display = isLoggedIn ? 'inline-block' : 'none'; 
+                dislikeBtn.disabled = false; 
+                dislikeBtn.style.borderColor = ''; 
             }
         }
         function isWished(itemId) {
@@ -1519,7 +1563,7 @@
 
         function addToWishlist(itemData) {
             // ▼▼▼ 1번 로그: 원본 데이터 확인 ▼▼▼
-            console.log("찜하기 직전 원본 데이터:", itemData);
+            console.log("찜하기 직전 원본 데이터:", itemData); 
 
             if (!itemData || !itemData.title) {
                 console.warn("addToWishlist: itemData 또는 itemData.title이 없습니다.", itemData);
@@ -1528,8 +1572,8 @@
             const itemId = itemData.title;
             if (isWished(itemId)) return;
             const wishlistItem = {
-                id: itemId,
-                data: {
+                id: itemId, 
+                data: { 
                     contentid: itemData.contentid,
                     title: itemData.title,
                     firstimage: itemData.firstimage,
@@ -1538,10 +1582,10 @@
                     address: itemData.address,
                     location: itemData.location,
                     tel: itemData.tel,
-                    period: itemData.period
+                    period: itemData.period 
                 }
             };
-
+            
             // ▼▼▼ 2번 로그: 저장될 객체 확인 ▼▼▼
             console.log("찜 목록에 저장될 객체:", wishlistItem);
 
@@ -1550,20 +1594,26 @@
             updateAllHeartIcons(itemId, true);
         }
         function removeFromWishlist(itemId) {
-            if (!itemId) return; // [cite: 372]
-            // wishlist 배열에서 id 속성으로 해당 아이템을 찾습니다.
-            const index = wishlist.findIndex(item => item.id === itemId); // [cite: 372]
-            if (index > -1) {
-                wishlist.splice(index, 1); // [cite: 373]
-                saveWishlist(); // [cite: 373]
+            console.log("removeFromWishlist 호출됨. 제거할 아이템 ID:", itemId);
+            if (!itemId) {
+                console.warn("removeFromWishlist: itemId가 없습니다. 찜 제거 실패.", itemId);
+                return;
             }
-            updateAllHeartIcons(itemId, false); // [cite: 373]
+            const initialLength = wishlist.length;
+            wishlist = wishlist.filter(item => item.id !== itemId);
+            if (wishlist.length < initialLength) {
+                saveWishlist();
+                console.log(`${itemId}가 찜 목록에서 제거되었습니다.`);
+            } else {
+                console.log(`${itemId}는 찜 목록에 없었습니다.`);
+            }
+            updateAllHeartIcons(itemId, false);
         }
-        function updateModalHeartIcon(itemId) {
-            if (modalHeartIconEl) {
+        function updateModalHeartIcon(itemId) { 
+            if (modalHeartIconEl) { 
                 modalHeartIconEl.classList.toggle('active', isWished(itemId)); // [cite: 375]
                 modalHeartIconEl.title = isWished(itemId) ? '찜 해제' : '찜하기'; // [cite: 375]
-            }
+            } 
         }
         function updateAllHeartIcons(itemId, isActive) {
             document.querySelectorAll(`.card[data-item-id="${CSS.escape(itemId)}"] .card-heart-icon`).forEach(heart => { // [cite: 376]
@@ -1571,9 +1621,9 @@
                 heart.title = isActive ? '찜 해제' : '찜하기'; // [cite: 376]
             });
             if (itemDetailModal.classList.contains('open') && currentDetailItemId === itemId) { // [cite: 377]
-                if (profileAreaEl && !profileAreaEl.classList.contains('hidden')) {
+                if (profileAreaEl && !profileAreaEl.classList.contains('hidden')) { 
                     updateModalHeartIcon(itemId); // [cite: 377]
-                }
+                } 
             }
         }
         // 콘텐츠 클릭 기록 (POST, 중복 방지 로직은 서버가 처리)
@@ -1708,59 +1758,40 @@
                  console.error('endContentDuration fetch error:', error);
             }
         }
-        async function toggleWishlistItem() { // async 키워드 추가
-            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { // [cite: 1, 428]
+        async function toggleWishlistItem() { // async 키워드 추가 (비동기 작업이 없을 예정이므로 제거해도 무방하지만, 일관성을 위해 유지)
+            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { // 
                 alert("로그인이 필요한 기능입니다.");
-                return; // [cite: 1, 429]
+                return; // 
             }
-            // currentDetailItemId (title)와 currentDetailModalItemData (전체 객체)를 사용합니다. [cite: 1, 430]
-            if (!currentDetailItemId || !currentDetailModalItemData) { // [cite: 1, 431]
+            // currentDetailItemId (title)와 currentDetailModalItemData (전체 객체)를 사용합니다. 
+            if (!currentDetailItemId || !currentDetailModalItemData) { // 
                 console.warn("찜하기/해제할 아이템 ID(title) 또는 전체 데이터가 없습니다.");
-                return; // [cite: 1, 432]
+                alert("찜 처리 중 오류가 발생했습니다 (필수 정보 누락)."); // 사용자에게 알림 추가
+                return; // 
             }
 
-            const contentIdForAPI = currentDetailModalItemData.contentid; // API 호출용 content_id
-            const titleForFrontendWishlist = currentDetailItemId;       // 프론트엔드 wishlist용 title (기존 ID)
-            const itemDataForFrontend = currentDetailModalItemData;     // 프론트엔드 wishlist에 저장할 전체 데이터
+            const titleForFrontendWishlist = currentDetailItemId;    // 프론트엔드 wishlist용 title (기존 ID)
+            const itemDataForFrontend = currentDetailModalItemData;   // 프론트엔드 wishlist에 저장할 전체 데이터
 
-            if (!contentIdForAPI) {
-                console.error("찜하기 오류: contentid가 없습니다.", itemDataForFrontend);
-                alert("찜 처리 중 오류가 발생했습니다 (contentid 누락).");
-                return;
+            // LocalStorage 기반으로 찜 상태 토글 로직 구현
+            if (isWished(titleForFrontendWishlist)) {
+                // 이미 찜 되어 있다면, 목록에서 제거합니다.
+                removeFromWishlist(titleForFrontendWishlist);
+                console.log('Bookmark removed from localStorage for item:', titleForFrontendWishlist);
+                // UI 업데이트는 removeFromWishlist 내부에서 이미 처리됩니다.
+            } else {
+                // 찜 되어 있지 않다면, 목록에 추가합니다.
+                addToWishlist(itemDataForFrontend);
+                console.log('Bookmark added to localStorage for item:', titleForFrontendWishlist);
+                // UI 업데이트는 addToWishlist 내부에서 이미 처리됩니다.
             }
-
-            try {
-                const response = await axios.post('/api/interactions/bookmark/', {
-                    headers: getAuthHeaders(),
-                    content_id: contentIdForAPI
-                });
-
-                if (response.data.status === 'added') {
-                    if (!isWished(titleForFrontendWishlist)) { // isWished는 title 기반 [cite: 1, 409]
-                        // addToWishlist 내부에서 isWished를 다시 호출하므로,
-                        // 여기서 isWished 체크 후 직접 wishlist 배열 조작 및 saveWishlist 호출도 가능
-                        addToWishlist(itemDataForFrontend); // itemDataForFrontend 전달 [cite: 1, 434]
-                    }
-                    console.log('Bookmark added via API for content_id:', contentIdForAPI);
-                } else if (response.data.status === 'removed') { // API가 'removed' 상태를 반환한다고 가정
-                    // removeFromWishlist는 title 기반 [cite: 1, 418]
-                    removeFromWishlist(titleForFrontendWishlist); // [cite: 1, 433]
-                    console.log('Bookmark removed via API for content_id:', contentIdForAPI);
-                } else {
-                    console.warn('Unknown status from bookmark API for content_id:', contentIdForAPI, response.data);
-                }
-                // API 호출 성공 여부와 관계없이 UI는 항상 최신 상태로 업데이트 (addToWishlist/removeFromWishlist가 updateAllHeartIcons 호출)
-                // 또는 API 응답에 따라 updateAllHeartIcons 명시적 호출
-                updateAllHeartIcons(titleForFrontendWishlist, response.data.status === 'added'); //
-
-            } catch (error) {
-                console.error('Error toggling bookmark via API for content_id:', contentIdForAPI, error);
-                alert('찜 상태 변경 중 오류가 발생했습니다.');
-            }
+            
+            // API 호출 없이 localStorage에 직접 반영하므로, 별도의 try-catch로 네트워크 오류 처리할 필요 없음
+            // UI 업데이트는 addToWishlist/removeFromWishlist 내부에서 updateAllHeartIcons를 호출하여 처리됩니다.
         }
 
         function openWishlistModal() {
-            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) {
+            if (!(profileAreaEl && !profileAreaEl.classList.contains('hidden'))) { 
                 alert("로그인이 필요한 기능입니다.");
                 return;
             }
@@ -1770,27 +1801,27 @@
             console.log("모달을 열 때의 전체 찜 목록:", wishlist);
 
             wishlistItemsContainerEl.innerHTML = '';
-
+            
             if (wishlist.length === 0) {
                 wishlistItemsContainerEl.innerHTML = '<p class="empty-wishlist-message">찜한 관광지가 없습니다.</p>';
             } else {
                 wishlist.forEach(wishlistItem => {
                     const item = wishlistItem.data;
-
+                    
                     // ▼▼▼ 4번 로그: 개별 아이템 확인 ▼▼▼
                     console.log("찜 목록에서 처리 중인 아이템:", item);
 
-                    const displayTitle = item.title || wishlistItem.id;
+                    const displayTitle = item.title || wishlistItem.id; 
                     const displayAddr = item.addr1 || item.address || item.location || '주소 정보 없음';
                     const displayImage = item.firstimage || item.image || 'https://via.placeholder.com/100x75?text=No+Image';
-
+                    
                     // ... (이하 동일)
                     const itemEl = Object.assign(document.createElement('div'), { className: 'wishlist-item' });
                     itemEl.setAttribute('data-item-id', wishlistItem.id);
                     itemEl.innerHTML = `<img src="${displayImage}" alt="${displayTitle}"><div class="wishlist-item-info"><h4>${displayTitle}</h4><p>${displayAddr}</p></div>`;
                     itemEl.onclick = () => {
                         openedDetailFromWishlist = true;
-                        closeModal(wishlistModal);
+                        closeModal(wishlistModal); 
                         openItemDetailModal(item);
                     };
                     wishlistItemsContainerEl.appendChild(itemEl);
@@ -1845,7 +1876,7 @@
         function requestCurrentLocation(isUserClick = false) {
             console.log(`requestCurrentLocation 호출됨. isUserClick: ${isUserClick}, isInitialLoadGpsAttempt: ${isInitialLoadGpsAttempt}`);
             isGpsButtonClicked = isUserClick; // GPS 버튼 클릭 여부 플래그 설정
-
+            
             currentLocationTextEl.textContent = "위치 정보 불러오는 중...";
 
             if (navigator.geolocation) {
@@ -1853,11 +1884,11 @@
             } else {
                 console.log("GPS 미지원 환경");
                 currentLocationTextEl.textContent = "GPS 미지원 환경";
-                if (isInitialLoadGpsAttempt) {
+                if (isInitialLoadGpsAttempt) { 
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME);
                 }
-                isInitialLoadGpsAttempt = false;
+                isInitialLoadGpsAttempt = false; 
                 if (isGpsButtonClicked) { // 사용자가 버튼을 눌렀는데 GPS 미지원이면 alert
                      alert("현재 브라우저 또는 기기에서 GPS를 지원하지 않습니다.");
                 }
@@ -1871,8 +1902,8 @@
 
             setTargetLocation(pos.coords.latitude, pos.coords.longitude, "현재 내 위치", true);
             updateLocationDisplay(pos.coords.latitude, pos.coords.longitude, "현재 내 위치");
-            isInitialLoadGpsAttempt = false;
-            isGpsButtonClicked = false;
+            isInitialLoadGpsAttempt = false; 
+            isGpsButtonClicked = false; 
 
             if (closePlaceModalAfterGeo && placeSearchModal) { // placeSearchModal 변수는 모달 DOM 요소를 가리켜야 합니다.
                 closeModal(placeSearchModal);
@@ -1882,27 +1913,27 @@
 
         function onGeoError(err) {
             console.warn("onGeoError 호출됨", err);
-
+            
             if (err.code === 1) { // PERMISSION_DENIED
                 currentLocationTextEl.textContent = "GPS 권한 거부됨";
-                if (isGpsButtonClicked) {
+                if (isGpsButtonClicked) { 
                     retryGpsPermission();
-                } else if (isInitialLoadGpsAttempt) {
+                } else if (isInitialLoadGpsAttempt) { 
                     console.log("첫 GPS 시도 시 권한 거부, 기본 위치로 설정합니다.");
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 권한 거부됨 (기본 위치: ${DEFAULT_PLACE_NAME})`);
                 }
-            } else {
+            } else { 
                 currentLocationTextEl.textContent = "GPS 오류 발생";
-                 if (isGpsButtonClicked) {
+                 if (isGpsButtonClicked) { 
                     alert(`위치 정보를 가져오는 데 실패했습니다. (오류 코드: ${err.code})\n네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.`);
-                } else if (isInitialLoadGpsAttempt) {
+                } else if (isInitialLoadGpsAttempt) { 
                     console.log("첫 GPS 시도 시 오류, 기본 위치로 설정합니다.");
                     setTargetLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_PLACE_NAME, true);
                     updateLocationDisplay(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, `GPS 오류 (기본 위치: ${DEFAULT_PLACE_NAME})`);
                 }
             }
-            isInitialLoadGpsAttempt = false;
+            isInitialLoadGpsAttempt = false; 
             isGpsButtonClicked = false;
             if (closePlaceModalAfterGeo && placeSearchModal) { // placeSearchModal 변수는 모달 객체여야 함
                 closeModal(placeSearchModal);
@@ -1918,8 +1949,8 @@
             console.log(`setTargetLocation 호출: lat=${lat}, lon=${lon}, name='${name}', sendToBackend=${sendToBackend}`);
             targetLat = parseFloat(lat);
             targetLon = parseFloat(lon);
-            targetPlaceName = name;
-
+            targetPlaceName = name; 
+            
             if (sendToBackend && targetLat != null && targetLon != null){
                 fetchNearbyPlacesData(targetLat, targetLon);
             }
@@ -1951,9 +1982,9 @@
                 placeInput.value = '';
                 modalClickedLatLng = null;
                 isInitialLoadGpsAttempt = false; // 장소 검색 모달 열면 더 이상 초기 GPS 시도 아님
-                currentLocationTextEl.textContent = targetPlaceName || DEFAULT_PLACE_NAME;
+                currentLocationTextEl.textContent = targetPlaceName || DEFAULT_PLACE_NAME; 
 
-                openModal(placeSearchModal);
+                openModal(placeSearchModal); 
                 setTimeout(loadModalMap, 50);
             }
         }
@@ -1966,13 +1997,13 @@
             const keyword = placeInput.value.trim();
             if (keyword && !keyword.startsWith("위도:")) {
                 if (!ps) { alert("장소 검색 서비스가 준비되지 않았습니다."); return; }
-                ps.keywordSearch(keyword, (data, status, pagination) => {
+                ps.keywordSearch(keyword, (data, status, pagination) => { 
                     if (status === kakao.maps.services.Status.OK && data.length > 0) {
                         const newLat = parseFloat(data[0].y);
                         const newLng = parseFloat(data[0].x);
                         const placeNameFromApi = data[0].place_name;
-
-                        isInitialLoadGpsAttempt = false;
+                        
+                        isInitialLoadGpsAttempt = false; 
                         setTargetLocation(newLat, newLng, placeNameFromApi, true);
                         updateLocationDisplay(newLat, newLng, placeNameFromApi);
                     } else { alert("검색 결과가 없습니다."); }
@@ -1982,7 +2013,7 @@
                  const newLng = modalClickedLatLng.getLng();
                  const placeNameFromMap = `지도 선택 지점 (${newLat.toFixed(4)}, ${newLng.toFixed(4)})`;
 
-                 isInitialLoadGpsAttempt = false;
+                 isInitialLoadGpsAttempt = false; 
                  setTargetLocation(newLat, newLng, placeNameFromMap, true);
                  updateLocationDisplay(newLat, newLng, placeNameFromMap);
             } else {
@@ -2018,7 +2049,7 @@
                 renderPlaces([]); // 에러 발생 시에도 빈 배열로 렌더링
             }
         }
-
+        
         function renderPlaces(sections = []) {
             // 각 슬라이더와 제목 요소를 배열에 순서대로 담습니다.
             // 이 순서가 HTML의 순서와 정확히 일치해야 합니다.
@@ -2100,12 +2131,20 @@
                             if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
                                 e.stopPropagation(); // 모달 열림 방지
 
-                                toggleBookmark(item.contentid); // item.contentid를 사용하여 API 호출
-
+                                // 찜하기/해제하기 로직을 여기에 추가합니다.
+                                // 현재 찜 목록에 있는지 확인합니다.
+                                if (isWished(item.title)) {
+                                    // 이미 찜 되어 있다면, 목록에서 제거합니다.
+                                    removeFromWishlist(item.title);
+                                } else {
+                                    // 찜 되어 있지 않다면, 목록에 추가합니다.
+                                    addToWishlist(item);
+                                }
+                                
                                 // 상세 정보 모달이 열리지 않도록 여기서 실행을 마칩니다.
-                                return;
+                                return; 
                             }
-
+                            
                             // 하트 아이콘이 아닌 카드의 다른 부분을 클릭했을 경우
                             openedDetailFromWishlist = false;
                             openItemDetailModal(item);
@@ -2145,17 +2184,18 @@
                 return;
             }
 
+            // 이제 recommendationsWrapper는 단순한 컨테이너 역할을 하며,
+            // 별도의 챗 메시지 말풍선 클래스를 가지지 않습니다.
             const recommendationsWrapper = document.createElement('div');
-            recommendationsWrapper.className = 'chat-message bot recommendations-wrapper';
+            recommendationsWrapper.className = 'chatbot-recommendations-display'; // 새로운 클래스 이름
+            // CSS에서 이 클래스에 대한 배경색, 그림자 등의 '말풍선' 스타일을 제거해야 합니다.
 
             const cardContainer = document.createElement('div');
-            cardContainer.className = 'chatbot-card-container';
+            cardContainer.className = 'chatbot-card-container'; // 카드를 가로로 배치하고 스크롤 가능하게 하는 컨테이너
 
             const isLoggedIn = profileAreaEl && !profileAreaEl.classList.contains('hidden');
             recommendations.forEach(item => {
                 const itemIdForWishlist = item.title;
-                // API 호출에 사용할 content_id
-                const contentIdForApi = item.contentid; // ★ 추가: contentid 변수 선언
                 let heartIconHTML = '';
 
                 if (isLoggedIn) {
@@ -2165,10 +2205,8 @@
 
                 const cardEl = document.createElement('div');
                 cardEl.className = 'card';
-                cardEl.setAttribute('data-item-id', itemIdForWishlist); // UI 업데이트용 ID
-                cardEl.setAttribute('data-content-id', contentIdForApi); // ★ 추가: API 호출용 contentid 저장
+                cardEl.setAttribute('data-item-id', itemIdForWishlist);
 
-                // ▼▼▼ 이 부분이 수정되었습니다 ▼▼▼
                 cardEl.innerHTML = `
                     ${heartIconHTML}
                     <img src="${item.firstimage || item.image || 'https://via.placeholder.com/300x180?text=N/A'}" alt="${item.title || ''}">
@@ -2177,20 +2215,15 @@
                         <p>${item.addr || item.addr1 || item.address || '주소 정보 없음'}</p>
                     </div>
                 `;
-                // ▲▲▲ 수정 완료 ▲▲▲
 
                 cardEl.onclick = (e) => {
                     if (isLoggedIn && e.target.classList.contains('card-heart-icon')) {
-                        e.stopPropagation(); // 모달 열림 방지
-
-                        // ★ 이 부분을 contentIdForApi로 변경
-                        if (!contentIdForApi) { // contentid가 없을 경우 처리
-                            console.error("챗봇 카드 찜하기 오류: contentid가 없습니다.", item);
-                            alert("찜 처리 중 오류가 발생했습니다 (ID 누락).");
-                            return;
+                        e.stopPropagation();
+                        if (isWished(item.title)) {
+                            removeFromWishlist(item.title);
+                        } else {
+                            addToWishlist(item);
                         }
-                        toggleBookmark(contentIdForApi); // ★ toggleBookmark 호출 시 contentIdForApi 전달
-
                         return;
                     }
                     openedDetailFromWishlist = false;
@@ -2202,6 +2235,7 @@
 
             recommendationsWrapper.appendChild(cardContainer);
             containerEl.appendChild(recommendationsWrapper);
+            // 스크롤은 handleBotResponse에서 일괄 처리
         }
 
 
@@ -2216,6 +2250,18 @@
             signupButton.classList.toggle('hidden', isLoggedIn);
             loginButton.classList.toggle('hidden', isLoggedIn);
             profileAreaEl.classList.toggle('hidden', !isLoggedIn);
+            if (isLoggedIn) {
+                loginUserDisplayEl.textContent = username;
+                const surveyStatus = localStorage.getItem(`surveyStatus_${username}`);
+                        if (surveyStatus !== 'completed') {
+                            surveyLinkEl.classList.remove('hidden');
+                        } else {
+                            surveyLinkEl.classList.add('hidden');
+                        }
+            } else {
+                if(profileDropdownEl) profileDropdownEl.classList.remove('active');
+                surveyLinkEl.classList.add('hidden');
+            }
 
             if(logoutButton) logoutButton.classList.add('hidden');
             if (isLoggedIn) {
@@ -2223,7 +2269,7 @@
             } else {
                 loginUserDisplayEl.textContent = ''; // 로그아웃 시 초기화
             }
-            renderPlaces();
+            renderPlaces(); 
         }
 
         async function handleSignup(event) {
@@ -2237,14 +2283,15 @@
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
                     const username = signupIdEl.value.trim(); // 모달을 닫기 전에 아이디 값을 먼저 가져옵니다.
-
+                    
                     alert(data.message || '회원가입 성공! 자동으로 로그인됩니다.');
                     closeModal(signupModal); // 그 다음에 모달을 닫습니다.
 
-                    currentLoggedInUsername = username;
-                    loadWishlist();
+                    currentLoggedInUsername = username; 
+                    loadWishlist(); 
                     updateAuthUI(true, username); // UI를 로그인 상태로 업데이트
-                    window.location.reload();
+
+                    window.location.href = 'survey.html'; // 설문조사 페이지로 이동
                 } else {
                     if (data.errors) {
                         // username 오류 처리
@@ -2295,22 +2342,10 @@
             event.preventDefault();
             clearAuthErrors();
             const username = loginIdInputEl.value.trim(), password = loginPasswordInputEl.value;
-            const csrf = getCookie('csrftoken');
-            if (!csrf) {
-                alert('CSRF 토큰 오류');
-                return;
-            }
+            const csrf = getCookie('csrftoken'); if (!csrf) { alert('CSRF 토큰 오류'); return; }
             try {
-                const res = await fetch(`${API_BASE_URL}/api/auth/login/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrf // 직접 CSRF 토큰을 여기에 포함
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json(); // 응답 본문을 JSON으로 파싱하여 data 변수에 저장
-
+                const res = await fetch(`${API_BASE_URL}/api/auth/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify({ username, password }) });
+                const data = await res.json();
                 if (res.ok && data.status === 'success') {
                     currentLoggedInUsername = data.username;
                     loadWishlist();
@@ -2320,10 +2355,7 @@
                 } else {
                     showError(loginPasswordErrorEl, data.message || data.detail || '아이디 또는 비밀번호가 올바르지 않습니다.');
                 }
-            } catch (e) {
-                console.error("로그인 중 오류 발생:", e); // 더 자세한 에러 로그
-                showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다.');
-            }
+            } catch (e) { showError(loginPasswordErrorEl, '로그인 중 오류가 발생했습니다.'); }
         }
 
         async function handleLogout() {
@@ -2361,6 +2393,169 @@
                 currentLoggedInUsername = null; loadWishlist(); updateAuthUI(false);
             }
         }
+
+         // 챗봇 관련 유틸리티 함수들
+        function displayMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', type);
+            messageDiv.textContent = text;
+            aiChatbotDisplayAreaEl.appendChild(messageDiv); // aiChatbotDisplayAreaEl 사용
+            aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+            return messageDiv;
+        }
+
+        function showTypingIndicator(show) {
+            let indicator = aiChatbotDisplayAreaEl.querySelector('.typing-indicator');
+            if (show) {
+                if (!indicator) {
+                    indicator = displayMessage('AI가 답변을 생각하고 있어요...', 'bot-typing');
+                    indicator.classList.add('typing-indicator');
+                }
+            } else {
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+
+        // 챗봇 응답 데이터 처리 함수
+        function handleBotResponse(data) {
+            // 1. 챗봇의 기본 텍스트 메시지 표시
+            if (data.response && String(data.response).trim()) {
+                displayMessage(data.response, 'bot');
+            }
+
+            // 2. 추천 결과(results)가 있다면 화면에 표시
+            if (data.results && data.results.length > 0) {
+                renderChatbotRecommendationCards(data.results, aiChatbotDisplayAreaEl);
+            }
+
+            // ⭐️ [핵심 수정 1] '추가 제안 질문(follow_up_question)'이 있다면, 별도의 메시지로 표시합니다.
+            if (data.follow_up_question && String(data.follow_up_question).trim()) {
+                // 약간의 딜레이(0.8초)를 주어, 추천 카드가 먼저 나오고 질문이 나오는 것처럼 보이게 하면 더 자연스럽습니다.
+                setTimeout(() => {
+                    displayMessage(data.follow_up_question, 'bot');
+                }, 800);
+            }
+
+            // ⭐️ [핵심 수정 2] 버그 수정: context 객체를 화면에 그리던 코드를 삭제하고, 변수에 저장만 합니다.
+            conversationContext = data.context;
+
+
+            // 5. 제안 버튼(suggested_replies)이 있다면 화면에 표시
+            // 제안 버튼이 있다면 입력창을 숨기고 제안 버튼을 보여줍니다.
+            if (data.suggested_replies && data.suggested_replies.length > 0) {
+                displaySuggestionButtons(data.suggested_replies);
+                // 입력창과 전송 버튼 숨김
+                aiChatbotInputEl.style.display = 'none';
+                aiChatbotSendButtonEl.style.display = 'none';
+            } else {
+                // 제안 버튼이 없으면 기존 입력창 다시 활성화
+                aiChatbotSuggestionButtonsAreaEl.innerHTML = ''; // 기존 제안 버튼 비우기
+                aiChatbotSuggestionButtonsAreaEl.style.display = 'none'; // 제안 버튼 영역 숨기기
+                aiChatbotInputEl.style.display = 'block'; // 입력창 다시 보이게
+                aiChatbotSendButtonEl.style.display = 'block'; // 전송 버튼 다시 보이게
+                aiChatbotInputEl.focus(); // 입력창에 포커스
+            }
+
+            // 스크롤을 항상 최하단으로 유지
+            aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+        }
+
+        // 제안 버튼들을 화면에 렌더링하고 이벤트 처리하는 함수
+        function displaySuggestionButtons(replies) {
+            // 제안 버튼 영역이 없으면 생성
+
+            aiChatbotSuggestionButtonsAreaEl.innerHTML = ''; // 기존 버튼 비우기
+            aiChatbotSuggestionButtonsAreaEl.style.display = 'flex'; // 버튼 컨테이너 보이기 (CSS로 Flexbox 설정 필요)
+
+            // 사용자가 직접 입력할 수 없도록 입력창과 전송 버튼 숨김
+            aiChatbotInputEl.style.display = 'none';
+            aiChatbotSendButtonEl.style.display = 'none';
+
+            replies.forEach(text => {
+                const button = document.createElement('button');
+                button.className = 'suggestion-button'; // CSS 클래스 추가
+                button.textContent = text;
+
+                button.addEventListener('click', () => {
+                    event.stopPropagation();
+                    // 버튼 클릭 시, 해당 텍스트를 메시지로 간주하여 전송
+                    sendMessageToChatbotAPI(text); // 통합된 전송 함수 사용
+
+                    // 버튼 사용 후 비우고, 다시 입력창 보이기
+                    aiChatbotSuggestionButtonsAreaEl.innerHTML = '';
+                    aiChatbotSuggestionButtonsAreaEl.style.display = 'none';
+                    aiChatbotInputEl.style.display = 'block';
+                    aiChatbotSendButtonEl.style.display = 'block';
+                    aiChatbotInputEl.focus();
+                });
+                aiChatbotSuggestionButtonsAreaEl.appendChild(button);
+            });
+        }
+
+        // 챗봇 API로 메시지를 전송하는 통합 함수
+        async function sendMessageToChatbotAPI(messageText) {
+            if (!messageText) return;
+            displayMessage(messageText, 'user');
+            aiChatbotInputEl.value = ''; // 입력 필드 비우기
+            showTypingIndicator(true);
+            const csrf = getCookie('csrftoken');
+            if (!csrf) {
+                displayMessage('죄송합니다. 요청에 필요한 인증 정보가 부족합니다.', 'bot-error');
+                console.error("CSRF 토큰을 찾을 수 없어 챗봇 요청을 보낼 수 없습니다.");
+                showTypingIndicator(false);
+                return;
+            }
+
+            // 백엔드로 보낼 데이터 객체 정의
+            const requestBody = {
+                message: messageText,
+                user_id: currentLoggedInUsername ||
+                "anonymous", // 로그인 ID 사용 또는 익명
+                context: conversationContext, // <--- Here you are including the context 
+            };
+            // targetLat과 targetLon이 유효한 값이라면 location 객체를 추가
+            if (targetLat !== null && targetLon !== null) {
+                requestBody.location = {
+                    latitude: targetLat,
+                    longitude: targetLon
+                };
+            } else {
+                console.warn("위치 정보(targetLat, targetLon)가 null이어서 챗봇에 전송하지 않습니다.");
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chatbot/chat/`, { // 올바른 API 엔드포인트
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrf,
+                        // axios.defaults.headers.common 에 Authorization이 설정되어 있다면 여기서는 불필요
+                        // 직접 fetch를 사용한다면 getAuthHeaders()를 통해 Authorization 헤더도 추가해야 함.
+                        // const authHeaders = getAuthHeaders();
+                        // ...authHeaders // authHeaders에 있는 모든 헤더를 포함
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                if (!response.ok) {
+                    // 서버 응답 오류인 경우 상세 오류 메시지 파싱 시도
+                    const errorData = await response.json().catch(() => ({ message: `서버 응답 오류 (상태: ${response.status})` }));
+                    throw new Error(errorData.message || `챗봇 서버 응답 오류 (상태: ${response.status})`);
+                }
+
+                const data = await response.json();
+                handleBotResponse(data); // 챗봇 응답 처리
+
+            } catch (error) {
+                displayMessage(`죄송합니다. 챗봇과 대화 중 문제가 발생했습니다. (${error.message})`, 'bot-error');
+                console.error("챗봇 API 호출 오류:", error);
+            } finally {
+                showTypingIndicator(false);
+                aiChatbotInputEl.focus(); // 입력 필드에 다시 포커스
+            }
+        }
+
 
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -2413,7 +2608,10 @@
             aiChatbotInputEl = document.getElementById('aiChatbotInput');
             aiChatbotSendButtonEl = document.getElementById('aiChatbotSendButton');
             aiChatbotDisplayAreaEl = document.getElementById('aiChatbotDisplayArea');
+            aiChatbotSuggestionButtonsAreaEl = document.getElementById('aiChatbotSuggestionButtonsArea');
 
+
+            surveyLinkEl = document.getElementById('surveyLink'); // 새로 추가한 버튼 선택
 
             if (placeSearchModal) { // placeSearchModal이 정상적으로 찾아졌는지 확인
                 const modalInternalGpsButton = placeSearchModal.querySelector('#modal_map_container #gpsButton');
@@ -2430,13 +2628,13 @@
                         // 모달은 onGeoSuccess 또는 onGeoError에서 닫힙니다.
                     });
                 }
-            }
+            }    
 
+            
             // --- DOMContentLoaded 이벤트 리스너 내부에 AI 챗봇 기능 로직 추가 ---
 
             if (aiChatbotInputWrapperEl) {
                 aiChatbotInputWrapperEl.addEventListener('click', (event) => {
-                    // 입력 필드나 전송 버튼을 클릭한 경우가 아니면 (즉, wrapper의 빈 공간을 클릭) 확장/축소
                     if (event.target === aiChatbotInputWrapperEl) {
                         if (!aiChatbotContainerEl.classList.contains('active')) {
                             aiChatbotContainerEl.classList.add('active');
@@ -2447,21 +2645,22 @@
             }
 
             if (aiChatbotInputEl) {
-                aiChatbotInputEl.addEventListener('focus', () => { // 입력 필드에 포커스될 때도 확장
+                aiChatbotInputEl.addEventListener('focus', () => {
                     if (!aiChatbotContainerEl.classList.contains('active')) {
                         aiChatbotContainerEl.classList.add('active');
                     }
                 });
-                aiChatbotInputEl.addEventListener('click', (event) => { // 입력 필드 클릭 시 이벤트 전파 중단
+                aiChatbotInputEl.addEventListener('click', (event) => {
                     event.stopPropagation();
                     if (!aiChatbotContainerEl.classList.contains('active')) {
                         aiChatbotContainerEl.classList.add('active');
                     }
                 });
+                // ⭐️ 핵심: Enter 키 입력 시 sendMessageToChatbotAPI 호출
                 aiChatbotInputEl.addEventListener('keypress', (event) => {
                     if (event.key === 'Enter') {
                         event.preventDefault(); // 기본 Enter 동작(줄바꿈 등) 방지
-                        if (aiChatbotSendButtonEl) aiChatbotSendButtonEl.click();
+                        sendMessageToChatbotAPI(aiChatbotInputEl.value.trim());
                     }
                 });
             }
@@ -2470,7 +2669,7 @@
                 aiChatbotSendButtonEl.addEventListener('click', async (event) => {
                     event.stopPropagation();
                     const messageText = aiChatbotInputEl.value.trim();
-
+                    sendMessageToChatbotAPI(messageText); // 통합된 전송 함수 호출
                     if (messageText) {
                         const userMessageDiv = document.createElement('div');
                         userMessageDiv.classList.add('chat-message', 'user');
@@ -2481,44 +2680,25 @@
                         const originalUserInput = messageText;
                         aiChatbotInputEl.value = '';
 
-                        const typingIndicatorDiv = document.createElement('div');
-                        typingIndicatorDiv.classList.add('chat-message', 'bot', 'typing-indicator');
-                        typingIndicatorDiv.textContent = "AI가 답변을 생각하고 있어요...";
-                        aiChatbotDisplayAreaEl.appendChild(typingIndicatorDiv);
-                        aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
-
-                        const csrf = getCookie('csrftoken');
-                        if (!csrf) {
-                            throw new Error("요청에 필요한 인증 정보가 부족합니다.");
-                        }
-
-                        // 백엔드로 보낼 데이터 객체를 정의합니다.
-                        const requestBody = {
-                            message: originalUserInput // 사용자 메시지
-                        };
-
-                        // user_id가 있다면 추가 (currentLoggedInUsername 변수를 사용)
-                        if (currentLoggedInUsername) {
-                            requestBody.user_id = currentLoggedInUsername;
-                        }
-
-                        // targetLat과 targetLon이 유효한 값이라면 location 객체를 추가
-                        // 이들은 이미 전역 변수로 선언되어 있고 requestCurrentLocation에 의해 업데이트됩니다.
-                        if (targetLat !== null && targetLon !== null) {
-                            requestBody.location = {
-                                lat: targetLat,
-                                lng: targetLon
-                            };
-                        }
-
                         try {
-                            const response = await fetch(`${API_BASE_URL}/api/chatbot/chat/`, {
+                            const typingIndicatorDiv = document.createElement('div');
+                            typingIndicatorDiv.classList.add('chat-message', 'bot', 'typing-indicator');
+                            typingIndicatorDiv.textContent = "AI가 답변을 생각하고 있어요...";
+                            aiChatbotDisplayAreaEl.appendChild(typingIndicatorDiv);
+                            aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
+
+                            const csrf = getCookie('csrftoken');
+                            if (!csrf) {
+                                throw new Error("요청에 필요한 인증 정보가 부족합니다.");
+                            }
+                            
+                            const response = await fetch(`${API_BASE_URL}/api/chatbot/chat/`, { 
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-CSRFToken': csrf
                                 },
-                                body: JSON.stringify(requestBody) // 수정된 requestBody 객체를 JSON 문자열로 변환하여 전송
+                                body: JSON.stringify({ message: originalUserInput }) 
                             });
                             typingIndicatorDiv.remove();
 
@@ -2574,7 +2754,7 @@
                                 contentDisplayed = true;
                             }
 
-                            if (scheduleData) {
+                            if (scheduleData) { 
                                 const scheduleDiv = document.createElement('div');
                                 scheduleDiv.classList.add('chat-message', 'bot', 'schedule-details');
                                 let scheduleHtml = '<strong><i class="fas fa-calendar-alt"></i> 추천 일정:</strong>';
@@ -2600,7 +2780,7 @@
                                 aiChatbotDisplayAreaEl.appendChild(scheduleDiv);
                                 contentDisplayed = true;
                             }
-
+                            
                             if (!contentDisplayed) {
                                 throw new Error("챗봇으로부터 유효한 표시 가능 콘텐츠를 받지 못했습니다.");
                             }
@@ -2612,31 +2792,32 @@
                             errorMessageDiv.textContent = `죄송합니다. 챗봇과 대화 중 문제가 발생했습니다. (${error.message})`;
                             aiChatbotDisplayAreaEl.appendChild(errorMessageDiv);
                         }
-
+                        
                         aiChatbotDisplayAreaEl.scrollTop = aiChatbotDisplayAreaEl.scrollHeight;
                     }
                     aiChatbotInputEl.focus();
                 });
             }
-
+            
+            
             const gpsButton = document.getElementById('gpsButton');
             if(gpsButton) {
                 gpsButton.onclick = () => requestCurrentLocation(true); // isUserClick = true
             }
 
-            csrfToken = getCookie('csrftoken');
+            csrfToken = getCookie('csrftoken'); 
             if (!csrfToken){ console.warn("CSRF 토큰을 찾을 수 없습니다."); }
 
             await checkInitialAuthStatus();
             if (typeof kakao !== 'undefined' && kakao.maps && typeof kakao.maps.load === 'function') {
-                kakao.maps.load(() => {
-                    initializeKakaoMaps();
+                kakao.maps.load(() => { 
+                    initializeKakaoMaps(); 
                     requestCurrentLocation(false); // isUserClick = false (페이지 첫 로드)
                 });
             } else {
                 console.error("Kakao Maps SDK load error.");
                 currentLocationTextEl.textContent = "지도 SDK 로드 실패";
-                requestCurrentLocation(false);
+                requestCurrentLocation(false); 
             }
 
             if (profileAreaEl) {
@@ -2664,7 +2845,7 @@
             }
 
             document.querySelectorAll('#profileDropdown a').forEach(link => {
-                if (link.id === 'myInfoLink') {
+                if (link.id === 'myInfoLink' || link.id === 'surveyLink') {
                     // 이 링크들은 HTML에서 href를 설정했습니다.
                     // 드롭다운만 닫히도록 합니다.
                     link.addEventListener('click', (e) => {
@@ -2699,19 +2880,18 @@
                     const isClickInsideChatbot = aiChatbotContainerEl.contains(event.target);
                     const locationButtonsContainer = document.querySelector('.location-control-buttons');
                     const isClickInsideLocationButtons = locationButtonsContainer ? locationButtonsContainer.contains(event.target) : false;
-
-                    // 챗봇 영역도 아니고, 위치 버튼 영역도 아니라면 닫기
+                    // 챗봇 영역도 아니고, 위치 버튼 영역도 아니라면 닫기 
                     if (!isClickInsideChatbot && !isClickInsideLocationButtons) {
-                        // 모달이 열려있거나, 모달을 여는 버튼 클릭 시에는 챗봇을 닫지 않도록 예외처리 (옵션)
+                        // 모달이 열려있거나, 모달을 여는 버튼 클릭 시에는 챗봇을 닫지 않도록 예외처리 (옵션) 
                         let clickedOnModalRelated = false;
                         let targetElement = event.target;
                         while (targetElement != null) {
                             if (targetElement.classList && (
-                                targetElement.classList.contains('modal') || // [cite: 69]
-                                targetElement.classList.contains('modal_body') || // [cite: 72]
-                                targetElement.id === 'signupButton' || // [cite: 128] (예시)
-                                targetElement.id === 'loginButton' || // [cite: 128] (예시)
-                                targetElement.id === 'placeSearchOpenButton' // [cite: 135] (예시)
+                                targetElement.classList.contains('modal') ||
+                                targetElement.classList.contains('modal_body') ||
+                                targetElement.id === 'signupButton' ||
+                                targetElement.id === 'loginButton' ||
+                                targetElement.id === 'placeSearchOpenButton'
                             )) {
                                 clickedOnModalRelated = true;
                                 break;
