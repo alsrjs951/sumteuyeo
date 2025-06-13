@@ -1062,17 +1062,7 @@
             </div>
         </div>
     </div>
-
-     <div class="category-section">
-        <div class="slider-container">
-            <h2 class="category-title">여름에 가기 좋은 곳</h2>
-            <div class="slider" id="ddSlider"></div>
-            <div class="slider-controls">
-                <button id="ddPrevBtn" aria-label="이전 관광지 보기"><i class="fas fa-chevron-left"></i></button>
-                <button id="ddNextBtn" aria-label="다음 관광지 보기"><i class="fas fa-chevron-right"></i></button>
-            </div>
-        </div>
-    </div>   
+ 
 
     <div id="wishlistModal" class="modal">
         <div class="modal_body">
@@ -1090,7 +1080,7 @@
         let isGpsButtonClicked = false; // GPS 버튼 클릭에 의한 요청인지 식별하는 플래그
 
         const DEFAULT_LATITUDE = 35.1795543, DEFAULT_LONGITUDE = 129.0756416, DEFAULT_PLACE_NAME = "부산 시청 (기본값)";
-        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null; aaSliderControls = null; bbSliderControls = null; ccSliderControls = null; ddSliderControls = null;
+        let allPlaces = [], festivalSliderControls = null, touristSliderControls = null; aaSliderControls = null; bbSliderControls = null; ccSliderControls = null;
         let modalMap = null, modalMapMarker = null, modalClickedLatLng = null;
         //let placeInput, userSearchInput, mainSearchButton;
         let aiChatbotContainerEl, aiChatbotInputWrapperEl, aiChatbotInputEl, aiChatbotSendButtonEl, aiChatbotDisplayAreaEl;
@@ -2050,7 +2040,6 @@
             document.getElementById('aaSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
             document.getElementById('bbSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
             document.getElementById('ccSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
-            document.getElementById('ddSlider').innerHTML = '<p style="text-align:center; color:#777; padding:20px 0;">주변 정보를 불러오는 중입니다...</p>';
 
             try {
                 const sections = await fetchRecommendations(lat, lon); // 추천 API 호출
@@ -2070,7 +2059,6 @@
                 document.getElementById('aaSlider'),
                 document.getElementById('bbSlider'),
                 document.getElementById('ccSlider'),
-                document.getElementById('ddSlider')
             ];
             const titles = sliders.map(slider => slider ? slider.previousElementSibling : null);
 
@@ -2182,8 +2170,6 @@
             if (ccSliderControls) ccSliderControls.reinit();
             else ccSliderControls = setupSlider('ccSlider', 'ccPrevBtn', 'ccNextBtn');
 
-            if (ddSliderControls) ddSliderControls.reinit();
-            else ddSliderControls = setupSlider('ddSlider', 'ddPrevBtn', 'ddNextBtn');
         }
 
         // ===== ▼▼▼ 1. 여기에 새 함수 추가 ▼▼▼ =====
