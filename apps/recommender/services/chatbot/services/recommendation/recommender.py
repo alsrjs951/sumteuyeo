@@ -1,12 +1,15 @@
+import json
+import os
+import geopy.distance  # 거리 계산을 위한 라이브러리 (pip install geopy)
+import re
 from asgiref.sync import sync_to_async
 from .score import core_item_score, calculate_hidden_trendy_score
 from django.conf import settings
-from ...constants import cat_dict, INTENT_TO_CATEGORY_MAP
-import json
-import os
+from ...constants import cat_dict, INTENT_TO_CATEGORY_MAP, Intent
+from ...utils.filtering import INTENT_PATTERNS
 from .cross_reranking import KCrossEncoderReranker
 from django.http import JsonResponse
-import geopy.distance  # 거리 계산을 위한 라이브러리 (pip install geopy)
+
 
 # --- 데이터 및 모델 로딩 ---
 DATA_DIR = os.path.join(settings.BASE_DIR, 'apps', 'recommender', 'services', 'chatbot', 'data')
@@ -32,95 +35,110 @@ reranker = KCrossEncoderReranker(
 )
 
 @sync_to_async
-def get_recommendations(user_input, user_profile, intent=None, keywords=None, extracted_locations=None, top_n=5):
-    """
-    [최종] 3단계 필터링/랭킹(선필터링 -> 점수정렬 -> 리랭킹) 전략을 모두 구현한 완전체 버전입니다.
-    """
+def get_recommendations(user_input, user_profile, intent=None, keywords=None, extracted_locations=None,
+                        user_location=None, top_n=5):
+    # 1순위: '주변 추천' 로직
+    if intent.value == "recommend_nearby" and user_location:
+        print(f"📍 '주변 추천' 로직 실행... 사용자 위치: {user_location}")
 
-    # '한적한 곳' 추천 로직은 그대로 유지
-    # ⭐️ [변경점] '한적한 곳' 추천 로직을 새로운 점수 모델로 전면 교체
-    if intent.value == "recommend_quite":  # Enum 객체 비교를 위해 .value 사용
-        print("🤫 '숨은 트렌디 여행지' 추천 로직 실행...")
+        # ⭐️ [핵심 수정] 키워드를 바탕으로 목표 카테고리를 동적으로 추론
+        target_category_id = None
+        # 사용자의 키워드 (예: '햄버거집')가 어떤 의도 패턴에 속하는지 확인
+        for keyword in keywords:
+            for intent_enum, patterns in INTENT_PATTERNS.items():
+                # '음식' 관련 의도에 '햄버거집' 키워드가 매칭되는지 검사
+                if intent_enum.value.startswith("recommend_") and intent_enum != Intent.RECOMMEND_NEARBY:
+                    for pattern in patterns:
+                        if re.search(pattern, keyword):
+                            # 매칭되는 의도를 찾으면, 해당 의도의 카테고리 ID를 가져옴
+                            target_category_id = INTENT_TO_CATEGORY_MAP.get(intent_enum.value)
+                            break
+            if target_category_id:
+                break
 
-        # 1. 전체 metadata를 순회하며 각 아이템의 '숨은 트렌디 점수' 계산
-        scored_results = []
+        # 만약 '근처 가볼만한 곳'처럼 키워드가 없다면, 관광지(12)를 기본값으로 설정
+        if not target_category_id:
+            target_category_id = '12'  # 기본값: 관광지
+
+        print(f"  - 주변 탐색 타겟 카테고리: {target_category_id}")
+
+        nearby_places = []
+        user_point = (user_location['lat'], user_location['lng'])
+        search_radius_km = 3
+
         for contentid, item in metadata.items():
-            # 사용자가 방문한 곳은 제외
-            if item.get("title") in user_profile.get("visited", []):
+            # 카테고리 필터링
+            if str(item.get("contenttypeid")) != target_category_id:
                 continue
 
-            # 지역 필터링 (사용자가 특정 지역을 언급한 경우)
+            # 거리 계산 및 반경 필터링
+            if item.get("mapy") and item.get("mapx"):
+                item_point = (float(item["mapy"]), float(item["mapx"]))
+                distance = geopy.distance.geodesic(user_point, item_point).km
+
+                if distance <= search_radius_km:
+                    item_with_dist = item.copy()
+                    item_with_dist['distance_km'] = round(distance, 2)
+                    nearby_places.append(item_with_dist)
+
+        sorted_places = sorted(nearby_places, key=lambda x: x['distance_km'])
+        print(f"📍 총 {len(sorted_places)}개의 주변 장소 발견. 가까운 순서대로 {top_n}개 반환.")
+        return sorted_places[:top_n]
+
+    # ⭐️ [변경점 2] 기존 '한적한 곳' 로직을 'elif'로 변경
+    elif intent.value == "recommend_quite":
+        print("🤫 '숨은 트렌디 여행지' 추천 로직 실행...")
+        # ... (기존 'recommend_quiet' 로직은 여기에 그대로 붙여넣으세요) ...
+        scored_results = []
+        for contentid, item in metadata.items():
+            if item.get("title") in user_profile.get("visited", []): continue
             if extracted_locations:
                 item_addr = item.get("addr1", "") + item.get("addr2", "")
-                if not any(loc in item_addr for loc in extracted_locations):
-                    continue
-
+                if not any(loc in item_addr for loc in extracted_locations): continue
             score = calculate_hidden_trendy_score(item, cat_dict)
             scored_results.append((item, score))
-
-        # 2. 점수가 높은 순으로 정렬
         ranked_by_score = sorted(scored_results, key=lambda x: -x[1])
-
-        # 3. 상위 후보들을 Reranker로 최종 순위 결정
-        # 사용자의 '조용한', '숨은' 같은 뉘앙스를 마지막에 한 번 더 반영
         candidates = [item for item, score in ranked_by_score[:top_n * 10]]
-
         print(f"🤫 총 {len(candidates)}개의 '숨은 명소' 후보를 최종 리랭킹합니다.")
         return reranker.rerank(user_input, candidates, top_n) if candidates else []
-    # --- 일반 추천 로직 ---
+
+    # ⭐️ [변경점 3] 기존 '일반 추천' 로직은 'else'로 처리 (변경 없음)
     else:
-        # 1. 1차 필터링: 지역과 카테고리로 후보군 선별
+        # ... (기존 '선필터링, 후랭킹' 일반 추천 로직은 여기에 그대로 붙여넣으세요) ...
         extracted_locations_set = set(extracted_locations) if extracted_locations else set()
         required_category = INTENT_TO_CATEGORY_MAP.get(intent.value)
-
         print(f"✅ Recommender 시작 | 지역: {extracted_locations_set} | 카테고리: {required_category}")
 
         def _filter_first(loc_filter, cat_filter):
+            # ... _filter_first 함수 내용 ...
             pre_filtered_items = []
             for contentid, item in metadata.items():
                 if loc_filter:
                     item_addr = item.get("addr1", "") + item.get("addr2", "")
-                    if not any(loc in item_addr for loc in loc_filter):
-                        continue
+                    if not any(loc in item_addr for loc in loc_filter): continue
                 if cat_filter:
-                    if str(item.get("contenttypeid")) != cat_filter:
-                        continue
+                    if str(item.get("contenttypeid")) != cat_filter: continue
                 pre_filtered_items.append(item)
             return pre_filtered_items
 
         candidates = _filter_first(extracted_locations_set, required_category)
         print(f"1️⃣  [1차 필터링] 후 후보 수: {len(candidates)}개")
-
         if not candidates and extracted_locations_set:
             candidates = _filter_first(extracted_locations_set, None)
             print(f"2️⃣  [1차 필터링-완화] 후 후보 수: {len(candidates)}개")
-
         if not candidates and required_category:
             candidates = _filter_first(None, required_category)
             print(f"3️⃣  [1차 필터링-완화] 후 후보 수: {len(candidates)}개")
-
-        if not candidates:
-            return []
-
-        # --- 2. [복원] 2차 랭킹: 점수 계산 및 정렬 로직 ---
+        if not candidates: return []
         print(f"🏆 {len(candidates)}개 후보 대상, core_item_score로 2차 랭킹 시작...")
         scored_results = []
         for item in candidates:
-            # 리팩토링된 core_item_score 함수로 점수 계산
             score = core_item_score(item, user_profile, intent=intent, keywords=keywords, cat_dict=cat_dict)
             scored_results.append((item, score))
-
-        # 점수가 높은 순으로 정렬
         ranked_by_score = sorted(scored_results, key=lambda x: -x[1])
-
-        # 점수 순 상위 후보들만 추출
         final_candidates = [item for item, score in ranked_by_score]
         print(f"📊 [2차 랭킹] 완료. 상위 후보: '{final_candidates[0]['title']}' (점수: {ranked_by_score[0][1]:.4f})")
-
-        # --- 3. 3차 리랭킹: 최종 순위 결정 ---
-        print(f"🏅 상위 {min(len(final_candidates), top_n * 40)}개 후보를 Reranker로 최종 리랭킹합니다.")
-
-        # 점수 상위 후보들을 대상으로, 가장 의미가 맞는 순서로 재정렬
+        print(f"🏅 상위 {min(len(final_candidates), top_n * 20)}개 후보를 Reranker로 최종 리랭킹합니다.")
         return reranker.rerank(user_input, final_candidates[:top_n * 20], top_n)
 
 

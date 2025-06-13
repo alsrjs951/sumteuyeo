@@ -36,8 +36,11 @@ INTENT_PATTERNS = {
         r"(조용한|한적한|사람\s*없는|숨은\s*명소|한산한|힐링\s*여행|숨트여)",
     ],
     Intent.RECOMMEND_DATE_SPOT: [
-        r"(데이트|소개팅|기념일|커플|여자친구|남자친구|함께\s*가기\s*좋은)"
+        r"(데이트|소개팅|기념일|커플|여자친구|남자친구|함께\s*가기\s*좋은)",
     ],
+    Intent.RECOMMEND_NEARBY: [
+            r"(근처|주변|가까운|여기|이 근처|내 위치)"
+        ]
 }
 
 
@@ -92,8 +95,7 @@ def classify_intent(text: str) -> Tuple[Intent, Dict[Intent, List[str]]]:
     keyword_hits = extract_intent_keywords(text)
 
     if not keyword_hits:
-        # ml_intent_str = predict_intent_transformer(text)
-        ml_intent_str = "unknown"  # ML 모델 임시 비활성화
+        ml_intent_str = predict_intent_transformer(text)
         intent = Intent(ml_intent_str) if ml_intent_str in Intent.__members__ else Intent.UNKNOWN
         return intent, {}
 
@@ -105,8 +107,7 @@ def classify_intent(text: str) -> Tuple[Intent, Dict[Intent, List[str]]]:
     if len(sorted_hits) == 1 or (len(sorted_hits) > 1 and len(top_matches) > len(sorted_hits[1][1])):
         return top_intent, keyword_hits
 
-    # ml_intent_str = predict_intent_transformer(text)
-    ml_intent_str = "unknown"  # ML 모델 임시 비활성화
+    ml_intent_str = predict_intent_transformer(text)
     if ml_intent_str in Intent.__members__:
         ml_intent = Intent(ml_intent_str)
         if ml_intent in keyword_hits:
