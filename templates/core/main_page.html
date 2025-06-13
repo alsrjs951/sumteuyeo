@@ -2319,6 +2319,7 @@
                 if (res.ok && data.status === 'success') {
                     currentLoggedInUsername = data.username;
                     loadWishlist();
+                    localStorage.setItem('access_token', res.data.access_token);
                     alert(data.message || '로그인 성공!'); closeModal(loginModal); updateAuthUI(true, data.username);
                     window.location.reload();
                 } else {
