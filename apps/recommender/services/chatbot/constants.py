@@ -60,6 +60,7 @@ class Intent(str, Enum):
     RECOMMEND_LEISURE = "recommend_leisure"
     RECOMMEND_QUITE = "recommend_quite"
     RECOMMEND_DATE_SPOT = "recommend_date_spot"
+    RECOMMEND_NEARBY = "recommend_nearby"
     MALICIOUS = "malicious"
     UNKNOWN = "unknown"
 
