@@ -138,8 +138,8 @@ def get_recommendations(user_input, user_profile, intent=None, keywords=None, ex
         ranked_by_score = sorted(scored_results, key=lambda x: -x[1])
         final_candidates = [item for item, score in ranked_by_score]
         print(f"📊 [2차 랭킹] 완료. 상위 후보: '{final_candidates[0]['title']}' (점수: {ranked_by_score[0][1]:.4f})")
-        print(f"🏅 상위 {min(len(final_candidates), top_n * 20)}개 후보를 Reranker로 최종 리랭킹합니다.")
-        return reranker.rerank(user_input, final_candidates[:top_n * 20], top_n)
+        print(f"🏅 상위 {min(len(final_candidates), top_n * 15)}개 후보를 Reranker로 최종 리랭킹합니다.")
+        return reranker.rerank(user_input, final_candidates[:top_n * 15], top_n)
 
 
 #거리 기반 추천 함수(유도질문에 사용)

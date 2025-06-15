@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 weight_config = {
     "base": 0.1,  # 모든 후보가 받는 기본 점수
     "title_keyword": 0.8,  # 키워드가 '제목'에 포함될 때의 강력한 가중치
-    "category_keyword": 0.5,  # 키워드가 '카테고리명'에 포함될 때
+    "category_keyword": 0.4,  # 키워드가 '카테고리명'에 포함될 때
     "overview_keyword": 0.3,  # 키워드가 '개요'에 포함될 때
     "freshness_bonus": 0.2,  # 정보가 최신일 때
 }
